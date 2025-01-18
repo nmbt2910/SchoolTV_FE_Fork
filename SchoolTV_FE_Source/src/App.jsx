@@ -17,7 +17,7 @@ function App() {
         <>
           <Header /> {/* Include the Header component */}
           <Home />   {/* Include the Home component */}
-          <Footer /> {/* Include the Footer component */}
+          <Footer /> {/* Include the Footer component alo alo 1234 test etstte */}
         </>
       ),
     },
