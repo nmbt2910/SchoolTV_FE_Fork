@@ -1,17 +1,37 @@
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, message } from "antd";
 import { GoogleOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from "axios";
 
 import "./login.scss";
+const API_URL = "https://localhost:44316/api/Account/login";
 
 function Login() {
+  const navigate = useNavigate();
 
-  const onFinish = (values) => {
-    console.log('Success:', values);
+  const onFinish = async (values) => {
+    try {
+      const response = await axios.post(API_URL, values, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200) {
+        message.success("Đăng nhập thành công!");
+        localStorage.setItem("authToken", response.data.token);
+        navigate("/home");
+      }
+    } catch (error) {
+      message.error(
+        error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại!"
+      );
+    }
   };
 
   const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+    console.log("Failed:", errorInfo);
+    message.error("Vui lòng kiểm tra lại thông tin đăng nhập!");
   };
 
   return (
@@ -77,7 +97,12 @@ function Login() {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" className="login_submit" block>
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                className="login_submit" 
+                block
+              >
                 Đăng Nhập
               </Button>
             </Form.Item> 

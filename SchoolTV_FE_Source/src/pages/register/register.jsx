@@ -1,15 +1,34 @@
-import { Button, Checkbox, Form, Input, message, Select } from 'antd';
+import { Button, Checkbox, Form, Input, message } from 'antd';
 import './register.scss';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import axios from 'axios';
+
+const API_URL = 'https://localhost:44316/api/Account/signup';
 
 function Register() {
   const [form] = Form.useForm();
-  const { Option } = Select;
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const handleFinish = (values) => {
-    console.log('Form Data:', values);
+  const handleFinish = async (values) => {
+    console.log('Data sent to API:', values); // Debug để kiểm tra dữ liệu gửi đi
+    try {
+      const response = await axios.post(API_URL, values, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.status === 200 || response.status === 201) {
+        message.success('Đăng ký thành công!');
+        form.resetFields();
+      }
+    } catch (error) {
+      // Debug lỗi trả về từ API
+      console.error('API Error:', error.response?.data || error.message);
+      message.error(
+        error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại!'
+      );
+    }
   };  
 
   const handleButtonClick = () => {
@@ -60,7 +79,9 @@ function Register() {
                 { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
               ]}
             >
-              <Input.Password placeholder="Hãy tạo một mật khẩu mạnh" />
+              <Input.Password 
+                placeholder="Hãy tạo một mật khẩu mạnh" 
+                />
             </Form.Item>
 
             <Form.Item
@@ -79,13 +100,15 @@ function Register() {
                 }),
               ]}
             >
-              <Input.Password placeholder="Xác nhận lại mật khẩu của bạn" />
+              <Input.Password 
+                placeholder="Xác nhận lại mật khẩu của bạn"  
+              />
             </Form.Item>
           </div>
 
           <div className="register_right">
             <Form.Item
-              name="fullName"
+              name="fullname"
               label="Họ và Tên"
               rules={[{ required: true, message: 'Vui lòng nhập Họ và Tên!' }]}
             >
@@ -93,7 +116,7 @@ function Register() {
             </Form.Item>
 
             <Form.Item
-              name="phone"
+              name="phoneNumber"
               label="Số điện thoại"
               rules={[
                 { required: true, message: 'Vui lòng nhập số điện thoại!' },
@@ -101,17 +124,6 @@ function Register() {
               ]}
             >
               <Input placeholder="Nhập số điện thoại liên hệ của bạn" />
-            </Form.Item>
-
-            <Form.Item
-              name="role"
-              label="Vai trò"
-              rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
-            >
-              <Select placeholder="Chọn vai trò mà bạn muốn đăng ký">
-                <Option value="student">Sinh viên</Option>
-                <Option value="teacher">Giáo viên</Option>
-              </Select>
             </Form.Item>
 
             <Form.Item
