@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 
-const API_URL = "https://localhost:44316/api/Account/signup";
+const API_URL = "https://localhost:44316/api/accounts/register";
 
 function Register() {
   const [form] = Form.useForm();
@@ -19,15 +19,36 @@ function Register() {
           "Content-Type": "application/json",
         },
       });
+
       if (response.status === 200 || response.status === 201) {
         message.success("Đăng ký thành công!");
         form.resetFields();
       }
     } catch (error) {
       console.error("API Error:", error.response?.data || error.message);
-      message.error(
-        error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại!"
-      );
+
+      if (error.response) {
+        const errorMessage =
+          error.response.data.message || "Đăng ký thất bại. Vui lòng thử lại!";
+
+        if (error.response.status === 409) {
+          if (errorMessage.includes("Username")) {
+            message.error("Tên người dùng đã tồn tại. Vui lòng chọn tên khác!");
+          } else if (errorMessage.includes("Email")) {
+            message.error(
+              "Email này đã được sử dụng. Vui lòng chọn email khác!"
+            );
+          } else {
+            message.error(
+              "Tài khoản đã tồn tại. Vui lòng sử dụng thông tin khác!"
+            );
+          }
+        } else {
+          message.error(errorMessage);
+        }
+      } else {
+        message.error("Đăng ký thất bại. Vui lòng kiểm tra lại kết nối!");
+      }
     }
   };
 
