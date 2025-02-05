@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 import "./login.scss";
-const API_URL = "https://localhost:44316/api/Account/login";
+const API_URL = "https://localhost:44316/api/accounts/login";
 
 function Login() {
   const navigate = useNavigate();
