@@ -63,7 +63,7 @@ function Login() {
 
         <Form.Item
           wrapperCol={{
-            offset: 4,
+            offset: 2,
             span: 16,
           }}
         >
@@ -81,7 +81,7 @@ function Login() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "10px",
-                  width: "100%",
+                  width: "125%",
                 }}
                 icon={
                   <img
