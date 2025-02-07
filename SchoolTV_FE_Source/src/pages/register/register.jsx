@@ -20,23 +20,20 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const openNotification = () => {
-    notification.error({
-      message: "Chưa đồng ý điều khoản",
-      description: "Bạn cần đồng ý với điều khoản trước khi đăng ký tài khoản.",
-      placement: "topRight",
-    });
-  };
-
   const handleSubmit = async (values) => {
     if (!agreeTerms) {
-      openNotification();
+      notification.error({
+        message: "Chưa đồng ý điều khoản",
+        description:
+          "Bạn cần đồng ý với điều khoản trước khi đăng ký tài khoản.",
+        placement: "topRight",
+        duration: 5,
+      });
       return;
     }
 
     setLoading(true);
 
-    // Tạo object dữ liệu để gửi lên API
     const userData = {
       username: values.username,
       email: values.email,
@@ -58,33 +55,59 @@ function Register() {
         }
       );
 
-      // Kiểm tra nếu đăng ký thành công
       if (response.status === 200 || response.status === 201) {
         notification.success({
           message: "Đăng ký thành công!",
           description: "Bạn có thể đăng nhập ngay bây giờ.",
           placement: "topRight",
+          duration: 5,
         });
 
-        // Chuyển hướng đến trang đăng nhập sau 2 giây
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Lỗi đăng ký:", error);
-      notification.error({
-        message: "Đăng ký thất bại!",
-        description:
-          error.response?.data?.message ||
-          "Có lỗi xảy ra, vui lòng thử lại sau.",
-        placement: "topRight",
-      });
+
+      if (error.response) {
+        console.log("Lỗi từ API:", error.response.data);
+
+        let errorMessage = "Có lỗi xảy ra, vui lòng thử lại sau.";
+
+        if (error.response.status === 409) {
+          errorMessage = "❌ Username hoặc Email đã tồn tại, vui lòng thử lại!";
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+
+        notification.error({
+          message: "Đăng ký thất bại!",
+          description: errorMessage,
+          placement: "topRight",
+          duration: 5,
+        });
+      } else if (error.request) {
+        notification.error({
+          message: "Lỗi kết nối!",
+          description:
+            "Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng của bạn.",
+          placement: "topRight",
+          duration: 5,
+        });
+      } else {
+        notification.error({
+          message: "Lỗi không xác định!",
+          description: "Có lỗi xảy ra, vui lòng thử lại.",
+          placement: "topRight",
+          duration: 5,
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
-
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -110,14 +133,13 @@ function Register() {
             của bạn một cách hoàn hảo nhất!
           </p>
           <Row gutter={16}>
-            {/* Cột 1 */}
             <Col xs={24} sm={12}>
               <Form.Item
                 label="Username"
                 name="username"
                 rules={[{ required: true, message: "Vui lòng nhập Username!" }]}
               >
-                <Input placeholder="Nhập tên đăng nhập của bạn!" />
+                <Input placeholder="Nhập tên đăng nhập của bạn" />
               </Form.Item>
               <Form.Item
                 label="Email"
@@ -127,7 +149,7 @@ function Register() {
                   { type: "email", message: "Email không hợp lệ!" },
                 ]}
               >
-                <Input placeholder="Nhập email của bạn!" />
+                <Input placeholder="Nhập email của bạn" />
               </Form.Item>
 
               <Form.Item
@@ -147,7 +169,6 @@ function Register() {
               </Form.Item>
             </Col>
 
-            {/* Cột 2 */}
             <Col xs={24} sm={12}>
               <Form.Item
                 label="Số điện thoại"
@@ -220,7 +241,6 @@ function Register() {
             </Checkbox>
           </Form.Item>
 
-          {/* Nút Submit */}
           <Row justify="center">
             <Col>
               <Form.Item>
@@ -249,7 +269,6 @@ function Register() {
         </Form>
       </div>
 
-      {/* Modal Điều khoản */}
       <Modal
         title="ĐIỀU KHOẢN VÀ ĐIỀU KIỆN SỬ DỤNG"
         open={isModalVisible}

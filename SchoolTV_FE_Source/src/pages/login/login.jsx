@@ -8,15 +8,17 @@ import {
   Form,
   Input,
   message,
+  notification,
 } from "antd";
 import { useResponsive } from "antd-style";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 const API_URL = "https://localhost:44316/api/accounts/login";
 
 function Login() {
   const { xxl } = useResponsive();
   const navigate = useNavigate();
+
   const onFinish = async (values) => {
     try {
       const response = await axios.post(API_URL, values, {
@@ -26,20 +28,45 @@ function Login() {
       });
 
       if (response.status === 200) {
-        message.success("Đăng nhập thành công!");
+        notification.success({
+          message: "Đăng nhập thành công!",
+          description: "Chào mừng bạn quay trở lại!",
+          placement: "topRight",
+          duration: 3,
+        });
+
         localStorage.setItem("authToken", response.data.token);
         navigate("/home");
       }
     } catch (error) {
-      message.error(
-        error.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại!"
-      );
+      console.error("Lỗi đăng nhập:", error);
+
+      if (error.response && error.response.status === 401) {
+        notification.error({
+          message: "Đăng nhập thất bại!",
+          description: "Email hoặc mật khẩu của bạn đã sai! Hãy kiểm tra lại.",
+          placement: "topRight",
+          duration: 5,
+        });
+      } else {
+        notification.error({
+          message: "Lỗi hệ thống!",
+          description: "Không thể kết nối đến máy chủ, vui lòng thử lại sau.",
+          placement: "topRight",
+          duration: 5,
+        });
+      }
     }
   };
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
-    message.error("Vui lòng kiểm tra lại thông tin đăng nhập!");
+    notification.warning({
+      message: "Vui lòng kiểm tra lại thông tin đăng nhập!",
+      description: "Bạn cần nhập đầy đủ thông tin trước khi đăng nhập.",
+      placement: "topRight",
+      duration: 5,
+    });
   };
 
   return (
@@ -49,7 +76,7 @@ function Login() {
         className="login_form"
         name="login"
         style={{
-          width: "23%"
+          width: "23%",
         }}
         initialValues={{
           remember: true,
@@ -120,8 +147,9 @@ function Login() {
           rules={[
             {
               required: true,
-              message: "Please input your Email!",
+              message: "Nhập email của bạn!",
             },
+            { type: "email", message: "Email không hợp lệ!" },
           ]}
         >
           <Input />
@@ -137,7 +165,7 @@ function Login() {
           rules={[
             {
               required: true,
-              message: "Please input your password!",
+              message: "Hãy nhập mật khẩu của bạn!",
             },
           ]}
         >
@@ -153,9 +181,9 @@ function Login() {
 
         <Form.Item>
           <div className="login_btn">
-          <Button type="primary" htmlType="submit" className="login_btn_ant" >
-            Đăng nhập
-          </Button>
+            <Button type="primary" htmlType="submit" className="login_btn_ant">
+              Đăng nhập
+            </Button>
           </div>
         </Form.Item>
 
