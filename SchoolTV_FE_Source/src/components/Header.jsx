@@ -2,8 +2,6 @@ import React, { useEffect } from 'react';
 import './Header.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import { Link } from 'react-router-dom';
-
 
 const Header = () => {
   useEffect(() => {
@@ -28,19 +26,19 @@ const Header = () => {
 
   return (
     <header className="header">
-      <a href="#" className="logo">
+      <a href="watchHome" className="logo">
         <i className="fas fa-tv"></i> SchoolTV
       </a>
       <nav className="nav-links">
-        <a href="#">Trang Chủ</a>
-        <a href="#">Khám Phá</a>
-        <a href="#">Trường Học</a>
+        <a href="businessHome">Trang Chủ</a>
+        <a href="liveList">Trực Tiếp</a>
+        <a href="channelList">Trường Học</a>
         <button id="theme-toggle" className="theme-toggle">
           <i className="fas fa-moon"></i>
         </button>
-        <Link to="/login" className="cta-button primary-button">
+        <a href="login" className="cta-button primary-button">
           Đăng Nhập
-        </Link>
+        </a>
       </nav>
     </header>
   );
