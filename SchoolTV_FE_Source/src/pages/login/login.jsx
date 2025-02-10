@@ -133,7 +133,7 @@ function Login() {
             { type: "email", message: "Email không hợp lệ!" },
           ]}
         >
-          <Input />
+          <Input style={{ paddingLeft: '15px' }} /> {/* Added consistent padding */}
         </Form.Item>
 
         <Form.Item
@@ -147,18 +147,19 @@ function Login() {
             },
           ]}
         >
-          <Input.Password style={{ 
-            height: 'auto',
-            '& .ant-input': {
-              height: '100%',
-              padding: '12px 15px'
-            }
-          }} />
+          <Input.Password 
+            style={{ 
+              paddingLeft: '0' // Remove extra padding from container
+            }}
+            inputProps={{
+              style: { paddingLeft: '15px' } // Add padding to inner input
+            }}
+          />
         </Form.Item>
 
         <div className="remember-password-container">
           <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox>Remember me</Checkbox>
+            <Checkbox>Ghi nhớ mình nhé</Checkbox>
           </Form.Item>
           <a href="/forgot-password">Quên mật khẩu?</a>
         </div>
@@ -170,7 +171,7 @@ function Login() {
         </div>
 
         <div className="login_register">
-          <span>Chưa có tài khoản?</span>
+          <span>Chưa có tài khoản? </span>
           <a href="/register">Đăng ký ngay</a>
         </div>
       </Form>
