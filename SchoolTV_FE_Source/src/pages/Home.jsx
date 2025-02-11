@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export default function Home() {
+  const navigate = useNavigate();
 
   return (
     <>
@@ -26,8 +28,8 @@ export default function Home() {
         nền tảng phát sóng trực tuyến chuyên nghiệp.
       </p>
       <div className="cta-buttons">
-        <button className="cta-button primary-button">Dùng Thử Miễn Phí</button>
-        <button className="cta-button secondary-button">Tìm Hiểu Thêm</button>
+        <button onClick={() => navigate("watchHome")} className="cta-button primary-button">Dùng Thử Miễn Phí</button>
+        <button onClick={() => navigate("watchHome")} className="cta-button secondary-button">Tìm Hiểu Thêm</button>
       </div>
     </div>
     <div className="hero-image" data-aos="fade-left">

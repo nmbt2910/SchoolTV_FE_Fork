@@ -1,10 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import "./PlayFeaturedVideo.scss"
 import { Col, Row } from 'antd'
 import MainFeaturedVideo from '../../components/featuredVideoCard/MainFeaturedVideo'
 import SmallFeaturedVideo from '../../components/featuredVideoCard/SmallFeaturedVideo'
 
 function PlayFeaturedVideo() {
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   return (
     <div className='play-featured-video-container'>
       <Row gutter={[24, 24]}>

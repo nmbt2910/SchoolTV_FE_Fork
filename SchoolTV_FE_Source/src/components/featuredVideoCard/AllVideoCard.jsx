@@ -1,10 +1,13 @@
 import React from "react";
 import { Flex, Image } from "antd";
 import "./AllVideoCard.scss";
+import { useNavigate } from "react-router-dom";
 
 function AllVideoCard() {
+  const navigate = useNavigate();
+
   return (
-    <div className="allVideo-card-container">
+    <div onClick={() => navigate("/play-featured-video")} className="allVideo-card-container">
       <Image
         width={"100%"}
         height={200}

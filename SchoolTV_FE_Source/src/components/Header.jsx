@@ -41,7 +41,7 @@ const Header = () => {
       </button>
 
       <nav className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
-        <a href="businessHome" onClick={() => setIsMenuOpen(false)}>Trang Chủ</a>
+        <a href="/" onClick={() => setIsMenuOpen(false)}>Trang Chủ</a>
         <a href="liveList" onClick={() => setIsMenuOpen(false)}>Trực Tiếp</a>
         <a href="channelList" onClick={() => setIsMenuOpen(false)}>Trường Học</a>
         <button id="theme-toggle" className="theme-toggle">
