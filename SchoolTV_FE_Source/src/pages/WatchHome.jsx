@@ -222,10 +222,11 @@ export default function WatchHome() {
       <section className="section">
         <div className="section-header">
           <h2 className="section-title">Video Nổi Bật</h2>
-          <a href="#" className="see-all">
+          <a href="featured-video" className="see-all">
             Xem tất cả <i className="fas fa-arrow-right" />
           </a>
         </div>
+        
         <div className="videos-grid">
           <div className="video-card" data-aos="fade-up">
             <div className="video-thumbnail">

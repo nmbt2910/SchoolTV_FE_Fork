@@ -8,6 +8,9 @@ import WatchHome from './pages/WatchHome';
 import LiveList from './pages/LiveList';
 import ChannelList from './pages/ChannelList';
 import WatchLive from './pages/WatchLive';
+import AllFeaturedVideo from "./pages/featuredVideo/AllFeaturedVideo";
+import PlayFeaturedVideo from "./pages/featuredVideo/PlayFeaturedVideo";
+import PageLayout from "./components/layout/PageLayout";
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Login from './pages/login/login';
@@ -91,6 +94,21 @@ function App() {
           <Register />
         </>
       ),
+    },
+    {
+      path: "",
+      element: <PageLayout />,
+      children: [
+        {
+          path: "featured-video",
+          element: <AllFeaturedVideo />,
+        },
+
+        {
+          path: "play-featured-video",
+          element: <PlayFeaturedVideo />,
+        },
+      ],
     },
   ]);
 
