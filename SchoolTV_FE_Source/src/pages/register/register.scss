@@ -1,53 +1,243 @@
-.register_background {
-    background: linear-gradient(to bottom right, #ffffff, #a0c4ff);
-    background-size: cover;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.register_form {
-    background-color: white; 
-    padding: 30px; 
-    border-radius: 10px; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
-    width: 50%; 
-    max-width: 600px;
-    max-height: 100%;
-  }
-
-.register_form h1 {
-    text-align: center;
-    font-size: 40px;
-    margin-top: 10px;
-}
-
-.register_form p {
-    text-align: center;
-    margin-top: -20px;
-    font-size: 17px;
-    color: #666666;
-}
-
-.ant-form-item-label > label {
-    font-weight: 480;
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #f0f4f8;
+    --text-color: #2c3e50;
+    --error-color: #e74c3c;
+    --success-color: #2ecc71;
+    --shadow-color: rgba(0, 0, 0, 0.1);
   }
   
-.register_foot {
+  .register_background {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;    
+    background: linear-gradient(to bottom right, #ffffff, #a0c4ff);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  
+    .moving-bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: float 20s infinite linear;
+    }
+  
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) translateX(0);
+      }
+      100% {
+        transform: translateY(-100vh) translateX(50px);
+      }
+    }
+  }
+  
+  .register_form {
+    width: 100%;
+    max-width: 800px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 
+      20px 20px 60px rgba(0, 0, 0, 0.1),
+      -20px -20px 60px rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    animation: container-appear 0.6s ease-out;
+  
+    @keyframes container-appear {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  
+    h1 {
+      color: var(--text-color);
+      font-size: 2.5em;
+      text-align: center;
+      margin-bottom: 10px;
+      animation: fade-in 0.8s ease-out;
+    }
+  
+    p {
+      color: #666;
+      font-size: 1.1em;
+      text-align: center;
+      margin-bottom: 30px;
+      animation: fade-in 0.8s ease-out 0.2s backwards;
+    }
+  
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+  
+  .ant-form-item {
+    margin-bottom: 20px;
+  
+    .ant-form-item-label > label {
+      color: var(--text-color);
+      font-weight: 500;
+      font-size: 0.95em;
+    }
+  
+    .ant-input:not(.ant-input-password .ant-input) {
+      width: 100%;
+      height: 48px !important;
+      padding: 0 15px; // Simplified padding
+      border: 2px solid transparent;
+      border-radius: 10px;
+      background: var(--secondary-color);
+      color: var(--text-color);
+      font-size: 1em;
+      transition: all 0.3s ease;
+      box-shadow: inset 3px 3px 5px var(--shadow-color),
+                  inset -3px -3px 5px rgba(255, 255, 255, 0.5);
+  
+      &:hover,
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+      }
+    }
+    .ant-input-password {
+      width: 100%;
+      height: 48px !important;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      background: var(--secondary-color);
+      color: var(--text-color);
+      font-size: 1em;
+      transition: all 0.3s ease;
+      box-shadow: inset 3px 3px 5px var(--shadow-color),
+                  inset -3px -3px 5px rgba(255, 255, 255, 0.5);
+      padding: 0; // Remove container padding
+  
+      &:hover,
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+      }
+  
+      // Inner input
+      .ant-input {
+        height: 100% !important;
+        padding: 0 15px !important; // Match email input padding
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+  
+      // Icon container
+      .ant-input-suffix {
+        margin: 0;
+        padding-right: 15px; // Consistent padding with left side
+      }
+    }
+  
+    &.ant-form-item-has-error .ant-input,
+    &.ant-form-item-has-error .ant-input-password {
+      border-color: var(--error-color);
+    }
+  }
+  
+  .ant-btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 
+      5px 5px 10px var(--shadow-color),
+      -5px -5px 10px rgba(255, 255, 255, 0.8);
+  
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        7px 7px 15px var(--shadow-color),
+        -7px -7px 15px rgba(255, 255, 255, 0.8);
+    }
+  
+    &:active {
+      transform: translateY(0);
+      box-shadow: 
+        3px 3px 5px var(--shadow-color),
+        -3px -3px 5px rgba(255, 255, 255, 0.8);
+    }
+  }
+  
+  .register_foot {
     text-align: center;
-    font-size: 15px;
-    margin-top: -25px;
-}
-
-.register_signin {
-    text-decoration: underline;
-}
-
-.register_clause {
-    text-decoration: underline;
-}
-
-.ant-modal-title {
-    text-align: center;
-}
+    margin-top: 20px;
+    font-size: 0.95em;
+  
+    .register_signin {
+      color: var(--primary-color);
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+  
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  
+  .ant-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 30px 0;
+    
+    .ant-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--primary-color);
+      border-radius: 5px;
+      transition: all 0.3s ease;
+  
+      &.ant-checkbox-checked {
+        background-color: var(--primary-color);
+      }
+    }
+  }
+  
+  .register_clause {
+    color: var(--primary-color);
+    cursor: pointer;
+    font-weight: 500;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .register_form {
+      padding: 20px;
+      
+      h1 {
+        font-size: 2em;
+      }
+    }
+  }

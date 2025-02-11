@@ -9,8 +9,9 @@ import {
   Modal,
   notification,
   Row,
+  Select,
 } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import axios from "axios";
 
@@ -19,6 +20,38 @@ function Register() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Create background bubbles
+    const createBackgroundBubbles = () => {
+      const background = document.createElement('div');
+      background.className = 'background-animation';
+      const bubbleCount = 15;
+
+      for (let i = 0; i < bubbleCount; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'moving-bubble';
+
+        const size = Math.random() * 100 + 50;
+        const left = Math.random() * 100;
+        const delay = Math.random() * 20;
+        const duration = Math.random() * 10 + 15;
+
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${left}%`;
+        bubble.style.animationDelay = `-${delay}s`;
+        bubble.style.animationDuration = `${duration}s`;
+
+        background.appendChild(bubble);
+      }
+
+      const container = document.querySelector('.register_background');
+      container.insertBefore(background, container.firstChild);
+    };
+
+    createBackgroundBubbles();
+  }, []);
 
   const handleSubmit = async (values) => {
     if (!agreeTerms) {
@@ -42,6 +75,7 @@ function Register() {
       phoneNumber: values.phoneNumber,
       fullName: values.fullname,
       address: values.address,
+      role: values.role,
     };
 
     try {
@@ -72,8 +106,6 @@ function Register() {
       console.error("Lỗi đăng ký:", error);
 
       if (error.response) {
-        console.log("Lỗi từ API:", error.response.data);
-
         let errorMessage = "Có lỗi xảy ra, vui lòng thử lại sau.";
 
         if (error.response.status === 409) {
@@ -88,33 +120,10 @@ function Register() {
           placement: "topRight",
           duration: 5,
         });
-      } else if (error.request) {
-        notification.error({
-          message: "Lỗi kết nối!",
-          description:
-            "Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng của bạn.",
-          placement: "topRight",
-          duration: 5,
-        });
-      } else {
-        notification.error({
-          message: "Lỗi không xác định!",
-          description: "Có lỗi xảy ra, vui lòng thử lại.",
-          placement: "topRight",
-          duration: 5,
-        });
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
   };
 
   return (
@@ -123,30 +132,26 @@ function Register() {
         <Form
           layout="vertical"
           onFinish={handleSubmit}
-          style={{
-            height: "600px",
-          }}
         >
-          <h1>Hãy bắt đầu với tài khoản mới</h1>
-          <p>
-            Tham gia SchoolTV ngay hôm nay để bắt đầu một hành trình tại đại học
-            của bạn một cách hoàn hảo nhất!
-          </p>
-          <Row gutter={16}>
+          <h1>Hãy bắt đầu với Một tài khoản mới</h1>
+          <p>Tham gia SchoolTV ngay hôm nay để bắt đầu một hành trình tại đại học của bạn một cách hoàn hảo nhất!</p>
+
+          <Row gutter={24}>
             <Col xs={24} sm={12}>
               <Form.Item
-                label="Username"
+                label="Tên đăng nhập"
                 name="username"
-                rules={[{ required: true, message: "Vui lòng nhập Username!" }]}
+                rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}
               >
-                <Input placeholder="Nhập tên đăng nhập của bạn" />
+                <Input placeholder="Chọn tên đăng nhập" />
               </Form.Item>
+
               <Form.Item
                 label="Email"
                 name="email"
                 rules={[
-                  { required: true, message: "Vui lòng nhập email!" },
-                  { type: "email", message: "Email không hợp lệ!" },
+                  { required: true, message: "Vui lòng nhập email" },
+                  { type: "email", message: "Email không hợp lệ" }
                 ]}
               >
                 <Input placeholder="Nhập email của bạn" />
@@ -154,44 +159,39 @@ function Register() {
 
               <Form.Item
                 label="Mật khẩu"
-                tooltip={{
-                  title:
-                    "Mật khẩu cần 1 ký tự viết hoa, 1 ký tự đặc biệt, 1 số",
-                  icon: <InfoCircleOutlined />,
-                }}
                 name="password"
                 rules={[
-                  { required: true, message: "Vui lòng nhập mật khẩu!" },
-                  { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
+                  { required: true, message: "Vui lòng nhập mật khẩu" },
+                  { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự" }
                 ]}
               >
-                <Input.Password placeholder="Nhập mật khẩu" />
+                <Input.Password
+                  placeholder="Tạo mật khẩu"
+                  className="custom-password-input"
+                />
               </Form.Item>
             </Col>
 
             <Col xs={24} sm={12}>
               <Form.Item
-                label="Số điện thoại"
-                name="phoneNumber"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số điện thoại!" },
-                  {
-                    pattern: /^[0-9]{10}$/,
-                    message: "Số điện thoại không hợp lệ!",
-                  },
-                ]}
-              >
-                <Input placeholder="Nhập số điện thoại" />
-              </Form.Item>
-              <Form.Item
                 label="Họ và tên"
                 name="fullname"
-                rules={[
-                  { required: true, message: "Vui lòng nhập họ và tên!" },
-                ]}
+                rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}
               >
                 <Input placeholder="Nhập họ và tên của bạn" />
               </Form.Item>
+
+              <Form.Item
+                label="Số điện thoại"
+                name="phoneNumber"
+                rules={[
+                  { required: true, message: "Vui lòng nhập số điện thoại" },
+                  { pattern: /^\d{10}$/, message: "Số điện thoại không hợp lệ" }
+                ]}
+              >
+                <Input placeholder="Nhập số điện thoại của bạn" />
+              </Form.Item>
+
               <Form.Item
                 label="Xác nhận mật khẩu"
                 name="confirmPassword"
@@ -207,73 +207,65 @@ function Register() {
                     },
                   }),
                 ]}
+                hasFeedback
               >
-                <Input.Password placeholder="Nhập lại mật khẩu" />
+                <Input.Password
+                  placeholder="Nhập lại mật khẩu"
+                  className="custom-password-input"
+                />
               </Form.Item>
             </Col>
           </Row>
 
-          <Row justify="center">
-            <Col span={24}>
-              <Form.Item
-                label="Địa chỉ"
-                name="address"
-                rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
-              >
-                <Input placeholder="Nhập địa chỉ của bạn" />
-              </Form.Item>
-            </Col>
-          </Row>
+          <Form.Item
+            label="Địa chỉ"
+            name="address"
+            rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}
+          >
+            <Input placeholder="Nhập địa chỉ của bạn" />
+          </Form.Item>
 
           <Form.Item>
             <Checkbox
               checked={agreeTerms}
               onChange={(e) => setAgreeTerms(e.target.checked)}
             >
-              <span>Tôi đồng ý với những </span>
+              <span>Tôi đồng ý với </span>
               <span
-                style={{ color: "blue", cursor: "pointer" }}
                 className="register_clause"
-                onClick={showModal}
+                onClick={() => setIsModalVisible(true)}
               >
-                Điều khoản
+                Điều khoản và Điều kiện
               </span>
             </Checkbox>
           </Form.Item>
 
-          <Row justify="center">
-            <Col>
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  style={{
-                    width: "600px",
-                    marginTop: "-5px",
-                  }}
-                >
-                  Tạo tài khoản
-                </Button>
-              </Form.Item>
-            </Col>
-          </Row>
-
           <Form.Item>
-            <div className="register_foot">
-              <span>Bạn đã có tài khoản rồi sao ? </span>
-              <Link to="/login" className="register_signin">
-                Đăng nhập tại đây
-              </Link>
-            </div>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+            >
+              Tạo Tài Khoản
+            </Button>
           </Form.Item>
+
+          <div className="register_foot">
+            <span>Bạn đã có tài khoản? </span>
+            <Link to="/login" className="register_signin">
+              Đăng nhập
+            </Link>
+          </div>
         </Form>
       </div>
 
       <Modal
-        title="ĐIỀU KHOẢN VÀ ĐIỀU KIỆN SỬ DỤNG"
+        title="Điều khoản và Điều kiện"
         open={isModalVisible}
+        onOk={() => setIsModalVisible(false)}
+        onCancel={() => setIsModalVisible(false)}
         footer={[
-          <Button key="ok" type="primary" onClick={handleCloseModal}>
+          <Button key="ok" type="primary" onClick={() => setIsModalVisible(false)}>
             Tôi đã hiểu
           </Button>,
         ]}

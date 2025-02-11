@@ -4,15 +4,14 @@ import {
   Checkbox,
   ConfigProvider,
   Divider,
-  Flex,
   Form,
   Input,
-  message,
   notification,
 } from "antd";
 import { useResponsive } from "antd-style";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
 const API_URL = "https://localhost:44316/api/accounts/login";
 
 function Login() {
@@ -36,12 +35,12 @@ function Login() {
         });
 
         localStorage.setItem("authToken", response.data.token);
-        navigate("/home");
+        navigate("/watchHome");
       }
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
 
-      if (error.response && error.response.status === 401) {
+      if (error.response?.status === 401) {
         notification.error({
           message: "Đăng nhập thất bại!",
           description: "Email hoặc mật khẩu của bạn đã sai! Hãy kiểm tra lại.",
@@ -59,8 +58,7 @@ function Login() {
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+  const onFinishFailed = () => {
     notification.warning({
       message: "Vui lòng kiểm tra lại thông tin đăng nhập!",
       description: "Bạn cần nhập đầy đủ thông tin trước khi đăng nhập.",
@@ -75,12 +73,7 @@ function Login() {
         layout="vertical"
         className="login_form"
         name="login"
-        style={{
-          width: "23%",
-        }}
-        initialValues={{
-          remember: true,
-        }}
+        initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
@@ -88,62 +81,48 @@ function Login() {
         <h1>Chào mừng trở lại</h1>
         <p>Đăng nhập để tiếp tục hành trình của bạn</p>
 
-        <Form.Item
-          wrapperCol={{
-            offset: 2,
-            span: 16,
-          }}
-        >
+        <Form.Item style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginBottom: '20px'
+        }}>
           <ConfigProvider componentSize={xxl ? "middle" : "small"}>
-            <Flex vertical gap="small">
-              <Button
-                type="default"
-                style={{
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  height: "40px",
-                  fontWeight: "bold",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  width: "125%",
-                }}
-                icon={
-                  <img
-                    src="https://img.icons8.com/color/24/000000/google-logo.png"
-                    alt="Google Icon"
-                    style={{ height: "20px", width: "20px" }}
-                  />
-                }
-                onClick={() => {
-                  window.location.href = "https://www.google.com";
-                }}
-              >
-                Tiếp tục với Google
-              </Button>
-            </Flex>
+            <Button
+              type="default"
+              style={{
+                width: '100%',
+                maxWidth: '320px',
+                height: '45px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                borderRadius: '10px',
+                fontSize: '1em',
+                fontWeight: '500'
+              }}
+              icon={
+                <img
+                  src="https://img.icons8.com/color/24/000000/google-logo.png"
+                  alt="Google Icon"
+                  style={{ width: '20px', height: '20px' }}
+                />
+              }
+              onClick={() => window.location.href = "https://www.google.com"}
+            >
+              Tiếp tục với Google
+            </Button>
           </ConfigProvider>
         </Form.Item>
 
         <div className="login_divider">
-          <Divider
-            style={{
-              borderColor: "#D0D0D0",
-            }}
-          >
-            Hoặc
-          </Divider>
+          <Divider>Hoặc</Divider>
         </div>
 
         <Form.Item
           label="Địa chỉ Email"
           name="email"
           className="login_input"
-          wrapperCol={{
-            span: 22,
-          }}
           rules={[
             {
               required: true,
@@ -152,16 +131,13 @@ function Login() {
             { type: "email", message: "Email không hợp lệ!" },
           ]}
         >
-          <Input />
+          <Input className="custom-input" />
         </Form.Item>
 
         <Form.Item
           label="Mật khẩu"
           name="password"
           className="login_input"
-          wrapperCol={{
-            span: 22,
-          }}
           rules={[
             {
               required: true,
@@ -169,12 +145,14 @@ function Login() {
             },
           ]}
         >
-          <Input.Password />
+          <Input.Password className="custom-input" />
         </Form.Item>
 
-        <Form.Item label={null} className="remember-password">
+        <Form.Item>
           <div className="remember-password-container">
-            <Checkbox>Remember me</Checkbox>
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox>Ghi nhớ mình nhé</Checkbox>
+            </Form.Item>
             <a href="/forgot-password">Quên mật khẩu?</a>
           </div>
         </Form.Item>
@@ -187,12 +165,10 @@ function Login() {
           </div>
         </Form.Item>
 
-        <Form.Item>
-          <div className="login_register">
-            <span> Chưa có tài khoản ? </span>
-            <a href="/register">Đăng ký ngay</a>
-          </div>
-        </Form.Item>
+        <div className="login_register">
+          <span>Chưa có tài khoản? </span>
+          <a href="/register">Đăng ký ngay</a>
+        </div>
       </Form>
     </div>
   );
