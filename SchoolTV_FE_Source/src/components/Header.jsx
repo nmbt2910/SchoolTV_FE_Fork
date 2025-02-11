@@ -32,7 +32,7 @@ const Header = () => {
 
   return (
     <header className="header">
-      <a href="watchHome" className="logo">
+      <a href="/" className="logo">
         <i className="fas fa-tv"></i> SchoolTV
       </a>
       

@@ -53,7 +53,7 @@ function App() {
 
         {
           path: "/",
-          element: <Home />,
+          element: <WatchHome />,
         },
         {
           path: "/watchHome",
