@@ -17,7 +17,7 @@ import axios from "axios";
 
 function Register() {
   const [agreeTerms, setAgreeTerms] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false); 
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -165,7 +165,10 @@ function Register() {
                   { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự" }
                 ]}
               >
-                <Input.Password placeholder="Tạo mật khẩu" />
+                <Input.Password
+                  placeholder="Tạo mật khẩu"
+                  className="custom-password-input"
+                />
               </Form.Item>
             </Col>
 
@@ -206,7 +209,10 @@ function Register() {
                 ]}
                 hasFeedback
               >
-                <Input.Password placeholder="Nhập lại mật khẩu" />
+                <Input.Password
+                  placeholder="Nhập lại mật khẩu"
+                  className="custom-password-input"
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -264,7 +270,7 @@ function Register() {
           </Button>,
         ]}
       >
-<div style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <div style={{ maxHeight: "400px", overflowY: "auto" }}>
           <p>
             <strong>
               Chào mừng bạn đến với ứng dụng SchoolTV! Trước khi sử dụng dịch vụ

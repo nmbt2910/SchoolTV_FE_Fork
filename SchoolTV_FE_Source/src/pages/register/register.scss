@@ -94,26 +94,59 @@
       font-size: 0.95em;
     }
   
-    .ant-input,
-    .ant-input-password {
+    .ant-input:not(.ant-input-password .ant-input) {
       width: 100%;
-      padding: 12px 15px;
+      height: 48px !important;
+      padding: 0 15px; // Simplified padding
       border: 2px solid transparent;
       border-radius: 10px;
       background: var(--secondary-color);
       color: var(--text-color);
       font-size: 1em;
+      transition: all 0.3s ease;
       box-shadow: inset 3px 3px 5px var(--shadow-color),
                   inset -3px -3px 5px rgba(255, 255, 255, 0.5);
-      transition: all 0.3s ease;
   
+      &:hover,
       &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+      }
+    }
+    .ant-input-password {
+      width: 100%;
+      height: 48px !important;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      background: var(--secondary-color);
+      color: var(--text-color);
+      font-size: 1em;
+      transition: all 0.3s ease;
+      box-shadow: inset 3px 3px 5px var(--shadow-color),
+                  inset -3px -3px 5px rgba(255, 255, 255, 0.5);
+      padding: 0; // Remove container padding
+  
+      &:hover,
+      &:focus {
+        outline: none;
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
       }
   
-      &::placeholder {
-        color: #999;
+      // Inner input
+      .ant-input {
+        height: 100% !important;
+        padding: 0 15px !important; // Match email input padding
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+      }
+  
+      // Icon container
+      .ant-input-suffix {
+        margin: 0;
+        padding-right: 15px; // Consistent padding with left side
       }
     }
   
