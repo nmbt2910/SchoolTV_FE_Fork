@@ -81,13 +81,11 @@ function Login() {
         <h1>Chào mừng trở lại</h1>
         <p>Đăng nhập để tiếp tục hành trình của bạn</p>
 
-        <Form.Item
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginBottom: '20px'
-          }}
-        >
+        <Form.Item style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginBottom: '20px'
+        }}>
           <ConfigProvider componentSize={xxl ? "middle" : "small"}>
             <Button
               type="default"
@@ -133,7 +131,7 @@ function Login() {
             { type: "email", message: "Email không hợp lệ!" },
           ]}
         >
-          <Input style={{ paddingLeft: '15px' }} /> {/* Added consistent padding */}
+          <Input className="custom-input" />
         </Form.Item>
 
         <Form.Item
@@ -147,28 +145,25 @@ function Login() {
             },
           ]}
         >
-          <Input.Password 
-            style={{ 
-              paddingLeft: '0' // Remove extra padding from container
-            }}
-            inputProps={{
-              style: { paddingLeft: '15px' } // Add padding to inner input
-            }}
-          />
+          <Input.Password className="custom-input" />
         </Form.Item>
 
-        <div className="remember-password-container">
-          <Form.Item name="remember" valuePropName="checked" noStyle>
-            <Checkbox>Ghi nhớ mình nhé</Checkbox>
-          </Form.Item>
-          <a href="/forgot-password">Quên mật khẩu?</a>
-        </div>
+        <Form.Item>
+          <div className="remember-password-container">
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox>Ghi nhớ mình nhé</Checkbox>
+            </Form.Item>
+            <a href="/forgot-password">Quên mật khẩu?</a>
+          </div>
+        </Form.Item>
 
-        <div className="login_btn">
-          <Button type="primary" htmlType="submit" className="login_btn_ant">
-            Đăng nhập
-          </Button>
-        </div>
+        <Form.Item>
+          <div className="login_btn">
+            <Button type="primary" htmlType="submit" className="login_btn_ant">
+              Đăng nhập
+            </Button>
+          </div>
+        </Form.Item>
 
         <div className="login_register">
           <span>Chưa có tài khoản? </span>
