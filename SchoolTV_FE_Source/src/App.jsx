@@ -67,6 +67,10 @@ function App() {
           path: "/channelList",
           element: <ChannelList />,
         },
+        {
+          path: "/businessHome",
+          element: <Home />,
+        },
       ],
     },
   ]);
