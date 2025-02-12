@@ -3,51 +3,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 // Global Styles
 export const GlobalStyle = createGlobalStyle`
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    :root {
-        --primary-color: #4a90e2;
-        --secondary-color: #f0f4f8;
-        --text-color: #2c3e50;
-        --bg-color: #ffffff;
-        --card-bg: rgba(255, 255, 255, 0.95);
-        --shadow-color: rgba(0, 0, 0, 0.1);
-        --hover-color: #357abd;
-        --border-color: #e1e8ed;
-        --live-color: #ff4757;
-        --gradient-bg: linear-gradient(135deg, #f6f8fa 0%, #f0f4f8 100%);
-        --card-hover: rgba(255, 255, 255, 0.98);
-        --filter-bg: rgba(255, 255, 255, 0.8);
-        --filter-border: rgba(74, 144, 226, 0.2);
-        --tab-active: #4a90e2;
-        --tab-hover: #f8fafc;
-        --skeleton-bg: #eef2f7;
-        --skeleton-shine: rgba(255, 255, 255, 0.2);
-    }
-
-    [data-theme="dark"] {
-        --primary-color: #4a90e2;
-        --secondary-color: #1a2634;
-        --text-color: #e1e8ed;
-        --bg-color: #0f172a;
-        --card-bg: rgba(26, 38, 52, 0.95);
-        --shadow-color: rgba(0, 0, 0, 0.3);
-        --hover-color: #5a9de2;
-        --border-color: #2a3f52;
-        --gradient-bg: linear-gradient(135deg, #1a2634 0%, #0f172a 100%);
-        --card-hover: rgba(26, 38, 52, 0.98);
-        --filter-bg: rgba(26, 38, 52, 0.8);
-        --filter-border: rgba(74, 144, 226, 0.3);
-        --tab-hover: #1e293b;
-        --skeleton-bg: #2a3f52;
-        --skeleton-shine: rgba(255, 255, 255, 0.05);
-    }
-
     body {
         background: var(--gradient-bg);
         color: var(--text-color);
