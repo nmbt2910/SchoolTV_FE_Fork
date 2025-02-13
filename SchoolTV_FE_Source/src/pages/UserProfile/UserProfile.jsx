@@ -430,7 +430,7 @@ const UserProfile = () => {
                     <Row gutter={24}>
                         <Col span={24}>
                             <Form.Item
-                                name="password_current"
+                                name="currentPassword"
                                 label="Mật khẩu hiện tại"
                                 rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
                             >
@@ -443,7 +443,7 @@ const UserProfile = () => {
 
                         <Col xs={24} sm={12}>
                             <Form.Item
-                                name="password_new"
+                                name="newPassword"
                                 label="Mật khẩu mới"
                                 rules={[
                                     { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
@@ -459,13 +459,13 @@ const UserProfile = () => {
 
                         <Col xs={24} sm={12}>
                             <Form.Item
-                                name="password_confirm"
+                                name="confirmNewPassword"
                                 label="Xác nhận mật khẩu mới"
                                 rules={[
                                     { required: true, message: 'Vui lòng xác nhận mật khẩu mới!' },
                                     ({ getFieldValue }) => ({
                                         validator(_, value) {
-                                            if (!value || getFieldValue('password_new') === value) {
+                                            if (!value || getFieldValue('newPassword') === value) {
                                                 return Promise.resolve();
                                             }
                                             return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
