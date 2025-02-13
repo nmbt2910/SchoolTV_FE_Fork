@@ -221,7 +221,7 @@ export default function WatchHome() {
             Xem tất cả <i className="fas fa-arrow-right" />
           </a>
         </div>
-        
+
         <div className="videos-grid">
           <div className="video-card" data-aos="fade-up">
             <div className="video-thumbnail">

@@ -15,7 +15,7 @@ const WatchLive = () => {
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
-  
+
   const playerRef = useRef(null);
   const chatMessagesRef = useRef(null);
 
@@ -152,20 +152,19 @@ const WatchLive = () => {
               <button className="control-button" onClick={togglePlay}>
                 <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`} />
               </button>
-              
+
               <div className="progress-bar">
                 <div className="progress" style={{ width: `${progress}%` }} />
               </div>
-              
+
               <div className="volume-control">
                 <button className="control-button" onClick={toggleMute}>
-                  <i className={`fas ${
-                    isMuted || volume === 0 
-                      ? 'fa-volume-mute' 
-                      : volume < 50 
-                      ? 'fa-volume-down' 
-                      : 'fa-volume-up'
-                  }`} />
+                  <i className={`fas ${isMuted || volume === 0
+                      ? 'fa-volume-mute'
+                      : volume < 50
+                        ? 'fa-volume-down'
+                        : 'fa-volume-up'
+                    }`} />
                 </button>
                 <input
                   type="range"
@@ -179,8 +178,8 @@ const WatchLive = () => {
                   }}
                 />
               </div>
-              
-              <button 
+
+              <button
                 className="control-button"
                 onClick={() => {
                   const iframe = document.querySelector('.youtube-player');
@@ -205,14 +204,14 @@ const WatchLive = () => {
               </h1>
               <div className="live-badge">LIVE</div>
             </div>
-            
+
             <div className="stream-meta">
               <span><i className="fas fa-users" /> 1,234 người xem</span>
               <span><i className="fas fa-clock" /> Bắt đầu 2 giờ trước</span>
               <span><i className="fas fa-university" /> ĐH Bách Khoa Hà Nội</span>
               <span><i className="fas fa-heart" /> 2.5K lượt thích</span>
             </div>
-            
+
             <div className="stream-actions">
               <button className="action-button primary-action">
                 <i className="fas fa-heart" /> Thích
@@ -224,7 +223,7 @@ const WatchLive = () => {
                 <i className="fas fa-bell" /> Theo dõi
               </button>
             </div>
-            
+
             <div className="stream-description">
               <p>Buổi lễ tốt nghiệp trang trọng dành cho các tân kỹ sư, cử nhân Đại học Bách Khoa Hà Nội. Chương trình bao gồm các phần:</p>
               <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
@@ -239,19 +238,19 @@ const WatchLive = () => {
 
         <section className="suggested-content">
           <div className="content-tabs">
-            <button 
+            <button
               className={`content-tab ${activeTab === 'live' ? 'active' : ''}`}
               onClick={() => setActiveTab('live')}
             >
               Đang Live
             </button>
-            <button 
+            <button
               className={`content-tab ${activeTab === 'videos' ? 'active' : ''}`}
               onClick={() => setActiveTab('videos')}
             >
               Video Gợi Ý
             </button>
-            <button 
+            <button
               className={`content-tab ${activeTab === 'posts' ? 'active' : ''}`}
               onClick={() => setActiveTab('posts')}
             >
@@ -390,13 +389,13 @@ const WatchLive = () => {
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
             />
-            <button 
+            <button
               className="emoji-trigger chat-option"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
             >
               <i className="far fa-smile" />
             </button>
-            
+
             {showEmojiPicker && (
               <div className="emoji-picker">
                 <div className="emoji-grid">
@@ -412,8 +411,8 @@ const WatchLive = () => {
                 </div>
               </div>
             )}
-            
-            <button 
+
+            <button
               className="send-button"
               onClick={sendMessage}
             >

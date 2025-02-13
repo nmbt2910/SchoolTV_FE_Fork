@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faBroadcastTower, 
-    faClock, 
-    faSearch, 
-    faUsers, 
-    faPlay, 
-    faChevronRight 
+import {
+    faBroadcastTower,
+    faClock,
+    faSearch,
+    faUsers,
+    faPlay,
+    faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -171,7 +171,7 @@ const LiveList = () => {
 
     const filterByUniversity = (streamArray, university) => {
         if (university === 'all') return streamArray;
-        return streamArray.filter(stream => 
+        return streamArray.filter(stream =>
             stream.university.toLowerCase().includes(university.toLowerCase())
         );
     };
@@ -196,7 +196,7 @@ const LiveList = () => {
     const searchStreams = (streamArray, searchTerm) => {
         if (!searchTerm) return streamArray;
         const normalizedSearchTerm = searchTerm.toLowerCase();
-        return streamArray.filter(stream => 
+        return streamArray.filter(stream =>
             stream.title.toLowerCase().includes(normalizedSearchTerm) ||
             stream.university.toLowerCase().includes(normalizedSearchTerm)
         );
@@ -257,7 +257,7 @@ const LiveList = () => {
                                             <FontAwesomeIcon icon={faUsers} />{' '}
                                             {type === 'live'
                                                 ? `${stream.viewers.toLocaleString('vi-VN')} đang xem`
-                                                : `${Math.floor(stream.viewers/1000)}K lượt xem`}
+                                                : `${Math.floor(stream.viewers / 1000)}K lượt xem`}
                                         </span>
                                     </StreamStats>
                                 </StreamMeta>

@@ -26,35 +26,47 @@ function Login() {
         },
       });
 
-      if (response.status === 200) {
-        notification.success({
-          message: "Đăng nhập thành công!",
-          description: "Chào mừng bạn quay trở lại!",
-          placement: "topRight",
-          duration: 3,
-        });
+      if (response.status === 200 && response.data) {
+        console.log('Login response:', response.data);
 
-        localStorage.setItem("authToken", response.data.token);
-        navigate("/watchHome");
+        // Extract token and accountID from the correct structure
+        const { token, account } = response.data;
+
+        if (token && account?.accountID) {
+          localStorage.setItem("authToken", token);
+          localStorage.setItem("accountID", account.accountID);
+
+          // Store additional user info if needed
+          localStorage.setItem("userData", JSON.stringify({
+            username: account.username,
+            email: account.email,
+            fullname: account.fullname,
+            roleName: account.roleName
+          }));
+
+          notification.success({
+            message: "Đăng nhập thành công!",
+            description: "Chào mừng bạn quay trở lại!",
+            placement: "topRight",
+            duration: 3,
+          });
+
+          navigate("/watchHome");
+        } else {
+          throw new Error('Invalid response format');
+        }
       }
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
 
-      if (error.response?.status === 401) {
-        notification.error({
-          message: "Đăng nhập thất bại!",
-          description: "Email hoặc mật khẩu của bạn đã sai! Hãy kiểm tra lại.",
-          placement: "topRight",
-          duration: 5,
-        });
-      } else {
-        notification.error({
-          message: "Lỗi hệ thống!",
-          description: "Không thể kết nối đến máy chủ, vui lòng thử lại sau.",
-          placement: "topRight",
-          duration: 5,
-        });
-      }
+      notification.error({
+        message: "Đăng nhập thất bại!",
+        description: error.response?.status === 401
+          ? "Email hoặc mật khẩu của bạn đã sai! Hãy kiểm tra lại."
+          : "Có lỗi xảy ra trong quá trình đăng nhập, vui lòng thử lại.",
+        placement: "topRight",
+        duration: 5,
+      });
     }
   };
 

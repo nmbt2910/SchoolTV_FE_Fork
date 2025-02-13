@@ -15,7 +15,7 @@ export default function Home() {
         rel="stylesheet"
       />
       <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-      
+
       <section className="hero">
         <div className="hero-content" data-aos="fade-right">
           <h1>Nền Tảng TV Show Trực Tuyến Cho Trường Học</h1>

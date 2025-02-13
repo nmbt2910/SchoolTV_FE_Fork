@@ -7,6 +7,7 @@ import ChannelList from "./pages/ChannelList/ChannelList";
 import WatchLive from "./pages/WatchLive/WatchLive";
 import AllFeaturedVideo from "./pages/featuredVideo/AllFeaturedVideo";
 import PlayFeaturedVideo from "./pages/featuredVideo/PlayFeaturedVideo";
+import UserProfile from "./pages/UserProfile/UserProfile";
 import PageLayout from "./components/layout/PageLayout";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -71,6 +72,10 @@ function App() {
           path: "/businessHome",
           element: <Home />,
         },
+        {
+          path: "/userProfile",
+          element: <UserProfile />,
+        }
       ],
     },
   ]);
