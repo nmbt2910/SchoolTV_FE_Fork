@@ -1,369 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faBroadcastTower, 
-    faClock, 
-    faSearch, 
-    faUsers, 
-    faPlay, 
-    faChevronRight 
+import {
+    faBroadcastTower,
+    faClock,
+    faSearch,
+    faUsers,
+    faPlay,
+    faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import styled, { createGlobalStyle } from 'styled-components';
 
-// Global Styles
-const GlobalStyle = createGlobalStyle`
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    :root {
-        --primary-color: #4a90e2;
-        --secondary-color: #f0f4f8;
-        --text-color: #2c3e50;
-        --bg-color: #ffffff;
-        --card-bg: rgba(255, 255, 255, 0.95);
-        --shadow-color: rgba(0, 0, 0, 0.1);
-        --hover-color: #357abd;
-        --border-color: #e1e8ed;
-        --live-color: #ff4757;
-        --gradient-bg: linear-gradient(135deg, #f6f8fa 0%, #f0f4f8 100%);
-        --card-hover: rgba(255, 255, 255, 0.98);
-        --filter-bg: rgba(255, 255, 255, 0.8);
-        --filter-border: rgba(74, 144, 226, 0.2);
-        --tab-active: #4a90e2;
-        --tab-hover: #f8fafc;
-        --skeleton-bg: #eef2f7;
-        --skeleton-shine: rgba(255, 255, 255, 0.2);
-    }
-
-    [data-theme="dark"] {
-        --primary-color: #4a90e2;
-        --secondary-color: #1a2634;
-        --text-color: #e1e8ed;
-        --bg-color: #0f172a;
-        --card-bg: rgba(26, 38, 52, 0.95);
-        --shadow-color: rgba(0, 0, 0, 0.3);
-        --hover-color: #5a9de2;
-        --border-color: #2a3f52;
-        --gradient-bg: linear-gradient(135deg, #1a2634 0%, #0f172a 100%);
-        --card-hover: rgba(26, 38, 52, 0.98);
-        --filter-bg: rgba(26, 38, 52, 0.8);
-        --filter-border: rgba(74, 144, 226, 0.3);
-        --tab-hover: #1e293b;
-        --skeleton-bg: #2a3f52;
-        --skeleton-shine: rgba(255, 255, 255, 0.05);
-    }
-
-body {
-    background: var(--gradient-bg);
-    color: var(--text-color);
-    min-height: 100vh;
-    transition: all 0.3s ease;
-    padding-top: 80px; /* Add this to account for fixed header height */
-}
-
-    @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.5; }
-        100% { opacity: 1; }
-    }
-
-    @keyframes shimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: var(--primary-color);
-        border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--hover-color);
-    }
-`;
-
-// Styled Components
-const MainContainer = styled.main`
-    padding: 2rem 5%;
-    min-height: calc(100vh - 80px - 300px); /* Adjust for header and footer heights */
-    margin-bottom: 0; /* Remove any bottom margin */
-`;
-
-const FilterSection = styled.section`
-    background: var(--filter-bg);
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--filter-border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-    z-index: 1; /* Add this to ensure proper layering */
-
-    @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: stretch;
-    }
-`;
-
-const FilterGroup = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-
-    @media (max-width: 768px) {
-        flex-wrap: wrap;
-    }
-`;
-
-const FilterLabel = styled.span`
-    font-weight: 500;
-    color: var(--text-color);
-`;
-
-const FilterSelect = styled.select`
-    padding: 0.5rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-color);
-    color: var(--text-color);
-    cursor: pointer;
-    transition: all 0.3s ease;
-
-    &:hover {
-        border-color: var(--primary-color);
-    }
-`;
-
-const SearchBox = styled.div`
-    flex: 1;
-    min-width: 200px;
-    position: relative;
-`;
-
-const SearchInput = styled.input`
-    width: 100%;
-    padding: 0.5rem 1rem 0.5rem 2.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background: var(--bg-color);
-    color: var(--text-color);
-`;
-
-const SearchIcon = styled(FontAwesomeIcon)`
-    position: absolute;
-    left: 0.8rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-color);
-    opacity: 0.5;
-`;
-
-const ContentGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-
-    @media (max-width: 768px) {
-        grid-template-columns: 1fr;
-    }
-`;
-
-const StreamCard = styled.div`
-    background: var(--card-bg);
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px var(--shadow-color);
-    transition: all 0.3s ease;
-    animation: fadeIn 0.5s ease;
-
-    &:hover {
-        transform: translateY(-5px);
-        background: var(--card-hover);
-        box-shadow: 0 8px 25px var(--shadow-color);
-    }
-`;
-
-const StreamThumbnail = styled.div`
-    position: relative;
-    padding-top: 56.25%;
-    overflow: hidden;
-
-    img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    ${StreamCard}:hover & img {
-        transform: scale(1.05);
-    }
-`;
-
-const LiveBadge = styled.div`
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    background: var(--live-color);
-    color: white;
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    &::before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background: white;
-        border-radius: 50%;
-        animation: pulse 1.5s infinite;
-    }
-`;
-
-const RecordedBadge = styled.div`
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    background: var(--primary-color);
-    color: white;
-    padding: 0.3rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-`;
-
-const StreamDuration = styled.div`
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 0.2rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-`;
-
-const StreamInfo = styled.div`
-    padding: 1.5rem;
-`;
-
-const StreamTitle = styled.h3`
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    color: var(--text-color);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-`;
-
-const StreamMeta = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--text-color);
-    opacity: 0.8;
-    font-size: 0.9rem;
-`;
-
-const StreamStats = styled.div`
-    display: flex;
-    gap: 1rem;
-`;
-
-const StreamUniversity = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-`;
-
-const UniversityAvatar = styled.img`
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    object-fit: cover;
-`;
-
-const LoadMoreButton = styled.button`
-    display: block;
-    width: 200px;
-    margin: 2rem auto;
-    padding: 1rem 2rem;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    text-decoration: none;
-    margin-bottom: 3rem; /* Add this to ensure spacing before footer */
-
-    &:hover {
-        background: var(--hover-color);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
-    }
-`;
-
-const SectionHeader = styled.div`
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid var(--border-color);
-`;
-
-const SectionTitle = styled.h2`
-    font-size: 1.8rem;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-`;
-
-const StreamCount = styled.span`
-    font-size: 1rem;
-    background: ${props => props.isLive ? 'var(--live-color)' : 'var(--primary-color)'};
-    color: white;
-    padding: 0.2rem 0.8rem;
-    border-radius: 20px;
-`;
+// Import all styled components
+import {
+    GlobalStyle,
+    MainContainer,
+    FilterSection,
+    FilterGroup,
+    FilterLabel,
+    FilterSelect,
+    SearchBox,
+    SearchInput,
+    SearchIcon,
+    ContentGrid,
+    StreamCard,
+    StreamThumbnail,
+    LiveBadge,
+    RecordedBadge,
+    StreamDuration,
+    StreamInfo,
+    StreamTitle,
+    StreamMeta,
+    StreamStats,
+    StreamUniversity,
+    UniversityAvatar,
+    LoadMoreButton,
+    SectionHeader,
+    SectionTitle,
+    StreamCount
+} from './LiveList.styles';
 
 // Constants
 const universities = [
@@ -434,6 +109,7 @@ const recordedStreamTitles = [
     "Tọa đàm: Nghề nghiệp tương lai",
     "Diễn đàn khoa học công nghệ sinh viên"
 ];
+
 // Helper functions
 const getRandomItem = (array) => array[Math.floor(Math.random() * array.length)];
 
@@ -495,7 +171,7 @@ const LiveList = () => {
 
     const filterByUniversity = (streamArray, university) => {
         if (university === 'all') return streamArray;
-        return streamArray.filter(stream => 
+        return streamArray.filter(stream =>
             stream.university.toLowerCase().includes(university.toLowerCase())
         );
     };
@@ -520,7 +196,7 @@ const LiveList = () => {
     const searchStreams = (streamArray, searchTerm) => {
         if (!searchTerm) return streamArray;
         const normalizedSearchTerm = searchTerm.toLowerCase();
-        return streamArray.filter(stream => 
+        return streamArray.filter(stream =>
             stream.title.toLowerCase().includes(normalizedSearchTerm) ||
             stream.university.toLowerCase().includes(normalizedSearchTerm)
         );
@@ -581,7 +257,7 @@ const LiveList = () => {
                                             <FontAwesomeIcon icon={faUsers} />{' '}
                                             {type === 'live'
                                                 ? `${stream.viewers.toLocaleString('vi-VN')} đang xem`
-                                                : `${Math.floor(stream.viewers/1000)}K lượt xem`}
+                                                : `${Math.floor(stream.viewers / 1000)}K lượt xem`}
                                         </span>
                                     </StreamStats>
                                 </StreamMeta>
