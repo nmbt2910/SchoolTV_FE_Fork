@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import YouTube from 'react-youtube';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './WatchLive.css';
+import { ThemeContext } from '../../context/ThemeContext';
 
 const WatchLive = () => {
+  const { theme } = useContext(ThemeContext);
   const [isPlaying, setIsPlaying] = useState(true);
   const [lastVolume, setLastVolume] = useState(100);
   const [activeTab, setActiveTab] = useState('live');
@@ -132,7 +134,7 @@ const WatchLive = () => {
   };
 
   return (
-    <div className="main-container">
+  <div className="main-container" style={{ background: 'var(--bg-color)' }}>
       <div className="content-section">
         <section className="stream-section">
           <div className="video-container">

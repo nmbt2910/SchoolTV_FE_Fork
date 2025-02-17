@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faBroadcastTower,
@@ -9,6 +9,7 @@ import {
     faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
 import AOS from 'aos';
+import { ThemeContext } from '../../context/ThemeContext';
 import 'aos/dist/aos.css';
 
 // Import all styled components
@@ -134,6 +135,7 @@ const createStreamObject = (isLive = true) => {
 };
 
 const LiveList = () => {
+    const { theme } = useContext(ThemeContext);
     const [streams, setStreams] = useState({ live: [], recorded: [] });
     const [filters, setFilters] = useState({
         sort: 'newest',
@@ -145,7 +147,9 @@ const LiveList = () => {
     useEffect(() => {
         AOS.init({ duration: 800, once: true });
         initializeStreams();
-    }, []);
+        // Apply theme to body or container element
+        document.body.setAttribute('data-theme', theme);
+    }, [theme]); // Add theme dependency
 
     const initializeStreams = () => {
         const initialStreams = {
@@ -274,8 +278,8 @@ const LiveList = () => {
 
     return (
         <>
-            <GlobalStyle />
-            <MainContainer>
+            <GlobalStyle theme={theme} />
+            <MainContainer data-theme={theme}>
                 <FilterSection>
                     <FilterGroup>
                         <FilterLabel>Sắp xếp:</FilterLabel>

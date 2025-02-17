@@ -1,0 +1,66 @@
+.studio-post-container {
+  padding-top: 50px;
+
+  .studio-post-content {
+    background-color: var(--unique-video-card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 20px 12px;
+
+
+    .studio-post-input {
+      background-color: var(--form-input-bg);
+
+      &::placeholder {
+        color: var(--form-input-placeholder);
+      }
+    }
+
+    .studio-post-dragger {
+      p {
+        color: var(--form-input-placeholder);
+      }
+    }
+
+    .studio-post-des {
+      margin: 0;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      padding: 4px 8px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .studio-post-status {
+      width: 49%;
+      border: 1px solid #e5e5e5;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+
+      p {
+        margin: 0;
+        font-size: 15px;
+        color: var(--text-color);
+      }
+    }
+
+    .studio-post-status__active {
+      background-color: rgba(74, 144, 226, 0.1);
+      border: 1px solid #4a90e2;
+    }
+
+    .studio-post-button {
+      margin-right: 10px;
+      background-color: lightgray;
+
+      &:last-child {
+        background-color: #4a90e2;
+        color: white;
+        border: none;
+      }
+    }
+  }
+}

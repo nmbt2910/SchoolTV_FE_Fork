@@ -1,8 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+import { ThemeContext } from '../../context/ThemeContext';
 import './WatchHome.css';
 
 export default function WatchHome() {
+  const { theme } = useContext(ThemeContext);
+
+  useEffect(() => {
+    // Apply theme class to body or a container element if needed
+    document.body.setAttribute('data-theme', theme);
+  }, [theme]);
 
   return (
     <>

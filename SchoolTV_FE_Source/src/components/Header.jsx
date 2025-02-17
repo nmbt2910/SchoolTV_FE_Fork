@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ThemeContext } from '../context/ThemeContext';
 import './Header.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -9,35 +10,29 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
-
-  // In Header.jsx, modify the useEffect:
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const accountID = localStorage.getItem('accountID');
 
     if (token && accountID) {
-      // Try to use stored user data first
       const storedUserData = localStorage.getItem('userData');
       if (storedUserData) {
         setUser(JSON.parse(storedUserData));
       }
 
-      // Still fetch fresh data from API
       fetch(`https://localhost:44316/api/accounts/admin/${accountID}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
         .then(res => {
-          if (!res.ok) {
-            throw new Error('Failed to fetch user data');
-          }
+          if (!res.ok) throw new Error('Failed to fetch user data');
           return res.json();
         })
         .then(data => {
           setUser(data);
-          // Update stored user data
           localStorage.setItem('userData', JSON.stringify(data));
         })
         .catch(err => {
@@ -51,20 +46,6 @@ const Header = () => {
     }
 
     AOS.init({ duration: 800, once: true });
-
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-      const themeIcon = themeToggle.querySelector('i');
-
-      const handleThemeToggle = () => {
-        const newTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', newTheme);
-        themeIcon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-      };
-
-      themeToggle.addEventListener('click', handleThemeToggle);
-      return () => themeToggle.removeEventListener('click', handleThemeToggle);
-    }
   }, []);
 
   const handleLogout = () => {
@@ -88,8 +69,12 @@ const Header = () => {
         <a href="/" onClick={() => setIsMenuOpen(false)}>Trang Chủ</a>
         <a href="liveList" onClick={() => setIsMenuOpen(false)}>Trực Tiếp</a>
         <a href="channelList" onClick={() => setIsMenuOpen(false)}>Trường Học</a>
-        <button id="theme-toggle" className="theme-toggle">
-          <i className="fas fa-moon"></i>
+        <button 
+          className="theme-toggle"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        >
+          <i className={`fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
         </button>
 
         {user ? (
