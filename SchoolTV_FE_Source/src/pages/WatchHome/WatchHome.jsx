@@ -147,6 +147,7 @@ export default function WatchHome() {
           </a>
         </div>
         <div className="events-grid">
+          <Link to ="/upComing">
           <div className="event-card" data-aos="fade-up">
             <div className="event-date">
               <i className="far fa-calendar" /> 25/12/2023 - 14:00
@@ -165,6 +166,8 @@ export default function WatchHome() {
               <i className="far fa-bell" /> Đặt Lịch Nhắc
             </button>
           </div>
+          </Link>
+          <Link to ="/upComing">
           <div className="event-card" data-aos="fade-up" data-aos-delay={100}>
             <div className="event-date">
               <i className="far fa-calendar" /> 27/12/2023 - 09:00
@@ -183,6 +186,8 @@ export default function WatchHome() {
               <i className="far fa-bell" /> Đặt Lịch Nhắc
             </button>
           </div>
+          </Link>
+          <Link to ="/upComing">
           <div className="event-card" data-aos="fade-up" data-aos-delay={200}>
             <div className="event-date">
               <i className="far fa-calendar" /> 28/12/2023 - 15:30
@@ -201,6 +206,8 @@ export default function WatchHome() {
               <i className="far fa-bell" /> Đặt Lịch Nhắc
             </button>
           </div>
+          </Link>
+          <Link to ="/upComing">
           <div className="event-card" data-aos="fade-up" data-aos-delay={300}>
             <div className="event-date">
               <i className="far fa-calendar" /> 30/12/2023 - 08:00
@@ -219,6 +226,7 @@ export default function WatchHome() {
               <i className="far fa-bell" /> Đặt Lịch Nhắc
             </button>
           </div>
+          </Link>
         </div>
       </section>
       <section className="section">

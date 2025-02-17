@@ -168,7 +168,7 @@ function Login() {
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>Ghi nhớ mình nhé</Checkbox>
             </Form.Item>
-            <a href="/forgot-password">Quên mật khẩu?</a>
+            <a href="/forgottenPassword">Quên mật khẩu?</a>
           </div>
         </Form.Item>
 

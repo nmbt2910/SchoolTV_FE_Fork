@@ -14,6 +14,8 @@ import SchoolChannelStudio from "./pages/school-channel/SchoolChannelStudio";
 import StudioPost from "./components/schooltv-studio/functions/StudioPost";
 import StudioVideo from "./components/schooltv-studio/functions/StudioVideo";
 import StudioLiveStream from "./components/schooltv-studio/functions/StudioLiveStream";
+import UpComing from "./pages/upcoming/upcoming";
+import ForgottenPassword from "./pages/forgottenPassword/forgottenPassword";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Login from "./pages/login/login";
@@ -37,7 +39,15 @@ function App() {
           <Register />
         </ThemeProvider>
       ),
-    },
+    },     
+    {
+      path: "/forgottenPassword",
+      element: (
+        <ThemeProvider>
+          <ForgottenPassword />
+        </ThemeProvider>
+      ),
+    },        
     {
       path: "school-studio",
       element: (
@@ -99,6 +109,10 @@ function App() {
         {
           path: "/businessHome",
           element: <Home />,
+        },
+        {
+          path: "/upComing",
+          element: <UpComing />,
         },
         {
           path: "/userProfile",
