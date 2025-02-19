@@ -64,7 +64,7 @@ function StudioPost() {
 
           <Form.Item
             label={<h2 className="studio-post-des">Hình ảnh</h2>}
-            name="image"
+            name="postImage"
           >
             <Dragger className="studio-post-dragger" {...props}>
               <p className="ant-upload-drag-icon">
@@ -82,7 +82,7 @@ function StudioPost() {
 
           <Form.Item
             label={<h2 className="studio-post-des">Trạng thái hiển thị</h2>}
-            name="status"
+            name="postStatus"
             rules={[
               {
                 required: true,

@@ -1,0 +1,15 @@
+:root {
+    --video-interaction-color: #606060;
+    --unique-video-card-bg: #ffffff;
+    --form-input-bg: #ffffff;
+    --form-input-placeholder: gray;
+  }
+  
+  [data-theme="dark"] {
+    --video-interaction-color: #ffffff;
+    --form-input-bg: #272727;
+    --form-input-placeholder: #ffffff;
+    --unique-video-card-bg: #2C3F55;
+    --all-video-card-bg: #374151;
+  }
+  
