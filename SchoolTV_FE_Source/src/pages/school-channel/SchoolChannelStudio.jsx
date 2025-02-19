@@ -6,13 +6,15 @@ import StudioNavbar from "../../components/schooltv-studio/StudioNavbar";
 
 function SchoolChannelStudio() {
   return (
-    <>
+    <div style={{ overflow: 'hidden', position: 'relative' }}>
       <StudioHeader />
       <div className="studio-function-container">
         <StudioNavbar />
-        <Outlet />
+        <main style={{ position: 'relative', zIndex: 1 }}>
+          <Outlet />
+        </main>
       </div>
-    </>
+    </div>
   );
 }
 
