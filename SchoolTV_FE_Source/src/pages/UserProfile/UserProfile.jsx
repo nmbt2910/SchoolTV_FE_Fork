@@ -203,7 +203,7 @@ const UserProfile = () => {
                     </div>
                     <div className="profile-main-info">
                         <h1>{user.fullname}</h1>
-                        <p className="username">@{user.username}</p>
+                        <p className="username-userprofile">@{user.username}</p>
                         <p className="bio">Học sinh lớp 12 - THPT Chu Văn An. Đam mê công nghệ và khoa học máy tính. 🚀</p>
                         <div className="profile-actions">
                             <Button
