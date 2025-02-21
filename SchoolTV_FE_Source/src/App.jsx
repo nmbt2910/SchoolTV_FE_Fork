@@ -16,6 +16,7 @@ import StudioVideo from "./components/schooltv-studio/functions/StudioVideo";
 import StudioLiveStream from "./components/schooltv-studio/functions/StudioLiveStream";
 import UpComing from "./pages/upcoming/upcoming";
 import UpComingList from "./pages/upcomingList/upcomingList";
+// import UpComingDetail from "./pages/upcomingDetail/upcomingDetail";
 import ForgottenPassword from "./pages/forgottenPassword/forgottenPassword";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -138,6 +139,11 @@ function App() {
           path: "/upcomingList",
           element: <UpComingList />,
         }
+        // },
+        // {
+        //   path: "/upcomingDetail",
+        //   element: <UpComingDetail />,
+        // }
       ],
     },
   ]);

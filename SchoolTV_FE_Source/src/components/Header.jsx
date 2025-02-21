@@ -19,7 +19,9 @@ const Header = () => {
     if (token && accountID) {
       const storedUserData = localStorage.getItem('userData');
       if (storedUserData) {
-        setUser(JSON.parse(storedUserData));
+        const parsedUserData = JSON.parse(storedUserData);
+        setUser(parsedUserData);
+        console.log("Parsed user data:", parsedUserData);
       }
 
       fetch(`https://localhost:44316/api/accounts/admin/${accountID}`, {
@@ -32,8 +34,12 @@ const Header = () => {
           return res.json();
         })
         .then(data => {
-          setUser(data);
-          localStorage.setItem('userData', JSON.stringify(data));
+          const userData = {
+            ...data,
+            roleName: data.role?.roleName
+          };
+          setUser(userData);
+          localStorage.setItem('userData', JSON.stringify(userData));
         })
         .catch(err => {
           console.error('Error fetching user:', err);
@@ -48,12 +54,18 @@ const Header = () => {
     AOS.init({ duration: 800, once: true });
   }, []);
 
+  console.log("Current user state:", user);
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('accountID');
+    localStorage.removeItem('userData');
     setUser(null);
     navigate('/login');
   };
+
+  // Check for role in both places: direct roleName and nested role.roleName
+  const isSchoolOwner = user && (user.roleName === "SchoolOwner" || user.role?.roleName === "SchoolOwner");
 
   return (
     <header className="header">
@@ -69,7 +81,7 @@ const Header = () => {
         <a href="/" onClick={() => setIsMenuOpen(false)}>Trang Chủ</a>
         <a href="liveList" onClick={() => setIsMenuOpen(false)}>Trực Tiếp</a>
         <a href="channelList" onClick={() => setIsMenuOpen(false)}>Trường Học</a>
-        <button 
+        <button
           className="theme-toggle"
           onClick={toggleTheme}
           aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
@@ -87,9 +99,24 @@ const Header = () => {
             {showDropdown && (
               <div className="profile-dropdown">
                 <div className="dropdown-header">
+                  <button
+                    className="mobile-dropdown-close"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <i className="fas fa-times"></i>
+                  </button>
                   <p className="user-name">{user.fullname}</p>
                   <p className="user-email">{user.email}</p>
                 </div>
+                <div className="dropdown-divider"></div>
+                {isSchoolOwner && (
+                  <a href="/school-studio/post" className="dropdown-item studio-link">
+                    <i className="fas fa-tv"></i> SchoolTV Studio
+                  </a>
+                )}
                 <div className="dropdown-divider"></div>
                 <a href="/userProfile" className="dropdown-item">
                   <i className="fas fa-user"></i> Hồ sơ
