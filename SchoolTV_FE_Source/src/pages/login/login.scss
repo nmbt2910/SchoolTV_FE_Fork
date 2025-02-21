@@ -1,11 +1,49 @@
 :root {
+  // Light theme variables
   --primary-color: #4a90e2;
   --secondary-color: #f0f4f8;
+  --bg-gradient: linear-gradient(to bottom right, #ffffff, #a0c4ff);
+  --form-bg: rgba(255, 255, 255, 0.95);
   --text-color: #2c3e50;
+  --text-secondary: #666;
+  --input-bg: #f0f4f8;
+  --input-border: transparent;
+  --input-text: #2c3e50;
+  --divider-color: #ddd;
+  --box-shadow: 
+    20px 20px 60px rgba(0, 0, 0, 0.1),
+    -20px -20px 60px rgba(255, 255, 255, 0.8);
+  --button-shadow:
+    5px 5px 10px rgba(0, 0, 0, 0.1),
+    -5px -5px 10px rgba(255, 255, 255, 0.8);
   --error-color: #e74c3c;
   --success-color: #2ecc71;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  --google-color: #db4437;
+  --google-btn-bg: #ffffff;
+  --google-btn-border: #ddd;
+  --google-btn-text: #2c3e50;
+}
+
+[data-theme="dark"] {
+  // Dark theme variables
+  --primary-color: #5a9de2;
+  --secondary-color: #1a2634;
+  --bg-gradient: linear-gradient(to bottom right, #0f172a, #1e293b);
+  --form-bg: rgba(26, 38, 52, 0.95);
+  --text-color: #e1e8ed;
+  --text-secondary: #a0aec0;
+  --input-bg: #2a3f52;
+  --input-border: #3a4f62;
+  --input-text: #e1e8ed;
+  --divider-color: #2d3748;
+  --box-shadow: 
+    20px 20px 60px rgba(0, 0, 0, 0.3),
+    -20px -20px 60px rgba(255, 255, 255, 0.05);
+  --button-shadow:
+    5px 5px 10px rgba(0, 0, 0, 0.3),
+    -5px -5px 10px rgba(255, 255, 255, 0.05);
+  --google-btn-bg: #2a3f52;
+  --google-btn-border: #3a4f62;
+  --google-btn-text: #e1e8ed;
 }
 
 body {
@@ -20,7 +58,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to bottom right, #ffffff, #a0c4ff);
+  background: var(--bg-gradient);
   padding: 20px;
   position: relative;
   overflow: hidden;
@@ -32,7 +70,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
     z-index: 0;
   }
@@ -41,12 +79,10 @@ body {
 .login_form {
   width: 100%;
   max-width: 450px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--form-bg);
   padding: 30px;
   border-radius: 20px;
-  box-shadow:
-    20px 20px 60px rgba(0, 0, 0, 0.1),
-    -20px -20px 60px rgba(255, 255, 255, 0.8);
+  box-shadow: var(--box-shadow);
   backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
@@ -61,7 +97,7 @@ body {
   }
 
   p {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 1.1em;
     text-align: center;
     margin-bottom: 20px;
@@ -69,74 +105,32 @@ body {
   }
 }
 
-.login_divider {
-  margin: 2px 0;
-
-  .ant-divider {
-    color: #666;
-    font-size: 1em;
-
-    &::before,
-    &::after {
-      border-top: 1px solid #ddd;
-    }
-  }
-}
-
 .login_input {
-  margin-bottom: -10px;
-
-  // Email input
-  .ant-input:not(.ant-input-password .ant-input) {
-    width: 100%;
-    height: 42px !important;
-    padding: 0 15px;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    background: var(--secondary-color);
+  .ant-form-item-label > label {
     color: var(--text-color);
-    font-size: 1em;
-    transition: all 0.3s ease;
+  }
+
+  .ant-input:not(.ant-input-password .ant-input) {
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
 
     &:hover,
     &:focus {
-      outline: none;
       border-color: var(--primary-color);
     }
   }
 
-  // Password input container
   .ant-input-password {
-    width: 100%;
-    height: 42px !important;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    background: var(--secondary-color);
-    color: var(--text-color);
-    font-size: 1em;
-    transition: all 0.3s ease;
-    padding: 0;
+    background: var(--input-bg);
+    border-color: var(--input-border);
 
-    &:hover,
-    &:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
-    }
-
-    // Inner input
     .ant-input {
-      height: 100% !important;
-      padding: 0 15px !important;
-      border: none !important;
-      box-shadow: none !important;
-      background: transparent !important;
+      color: var(--input-text);
     }
 
-    // Icon container
-    .ant-input-suffix {
-      margin: 0;
-      padding-right: 15px;
+    .anticon {
+      color: var(--text-secondary);
     }
   }
 }
@@ -145,7 +139,6 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   .ant-checkbox-wrapper {
     color: var(--text-color);
     font-size: 0.9em;
@@ -159,6 +152,19 @@ body {
 
     &:hover {
       text-decoration: underline;
+    }
+  }
+}
+
+.ant-btn {
+  &[type="default"] {
+    background: var(--google-btn-bg);
+    color: var(--google-btn-text);
+    border-color: var(--google-btn-border);
+
+    &:hover {
+      background: var(--input-bg);
+      border-color: var(--primary-color);
     }
   }
 }
@@ -196,50 +202,28 @@ body {
   }
 }
 
-.ant-btn {
-  &[type="default"] {
-    width: 100%;
-    padding: 12px;
-    background: white;
-    color: var(--text-color);
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    font-size: 1em;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.3s ease;
+.login_divider {
+  .ant-divider {
+    color: var(--text-secondary);
+    border-color: var(--divider-color);
 
-    &:hover {
-      background: #f8f8f8;
-      transform: translateY(-2px);
-    }
-
-    img {
-      width: 20px;
-      height: 20px;
+    &::before,
+    &::after {
+      border-color: var(--divider-color);
     }
   }
 }
 
 .login_register {
+  color: var(--text-secondary);
   text-align: center;
   margin-top: 15px;
-  color: #666;
 
   a {
     color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-
-    &:hover {
-      text-decoration: underline;
-    }
   }
 }
+
 
 :where(.css-dev-only-do-not-override-xu9wm8).ant-form-vertical .ant-form-item {
   margin-bottom: 12px;

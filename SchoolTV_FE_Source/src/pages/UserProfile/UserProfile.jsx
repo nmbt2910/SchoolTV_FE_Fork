@@ -165,7 +165,7 @@ const UserProfile = () => {
 
     const passwordValidationRules = {
         pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-        message: 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt'
+        message: 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Không bao gồm dấu chấm.'
     };
 
     if (loading) {
@@ -203,7 +203,7 @@ const UserProfile = () => {
                     </div>
                     <div className="profile-main-info">
                         <h1>{user.fullname}</h1>
-                        <p className="username">@{user.username}</p>
+                        <p className="username-userprofile">@{user.username}</p>
                         <p className="bio">Học sinh lớp 12 - THPT Chu Văn An. Đam mê công nghệ và khoa học máy tính. 🚀</p>
                         <div className="profile-actions">
                             <Button
@@ -488,7 +488,7 @@ const UserProfile = () => {
                     </Form.Item>
 
                     <div className="modal-footer-info">
-                        🔒 Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+                        🔒 Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Không bao gồm dấu chấm.
                     </div>
                 </Form>
             </Modal>

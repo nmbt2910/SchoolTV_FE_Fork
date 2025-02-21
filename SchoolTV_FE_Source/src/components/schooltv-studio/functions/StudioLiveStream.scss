@@ -1,0 +1,59 @@
+body {
+  transition: background-color var(--transition-speed) ease;
+}
+
+/* Add quick transitions for common text and background properties */
+*, *::before, *::after {
+  transition: color var(--transition-speed) ease,
+              background-color var(--transition-speed) ease,
+              border-color var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease;
+}
+
+.studio-live-container {
+  padding-top: 90px;
+  
+  .studio-live-content {
+    background-color: var(--unique-video-card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 20px 12px;
+    transition: all var(--transition-speed) ease;
+
+    .studio-live-input {
+      background-color: var(--form-input-bg);
+
+      &::placeholder {
+        color: var(--form-input-placeholder);
+      }
+    }
+
+    .studio-live-dragger {
+      p {
+        color: var(--form-input-placeholder) !important;
+      }
+    }
+
+    .studio-live-des {
+      margin: 0;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      padding: 4px 8px;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .studio-live-button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+    }
+
+    .analytics-container {
+        padding: 0px 20px;
+        margin-top: 20px;
+    }
+  }
+}

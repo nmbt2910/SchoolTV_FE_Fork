@@ -1,0 +1,11 @@
+.studio-function-container {
+    margin: 30px 15% 5% 15%;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 129px); // Adjust based on your header height
+
+    .studio-function-title {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+}

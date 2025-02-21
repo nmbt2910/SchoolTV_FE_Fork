@@ -96,7 +96,7 @@ margin: 0;
 font-weight: 700;
 }
 
-.username {
+.username-userprofile {
 color: var(--text-secondary);
 font-size: 1.1rem;
 margin: 0.5rem 0;
@@ -635,22 +635,42 @@ grid-template-columns: 1fr;
 }
 
 @media screen and (max-width: 768px) {
-.header-content {
-flex-direction: column;
-text-align: center;
-}
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        align-items: center; /* Add this */
+    }
 
-.profile-actions {
-justify-content: center;
-}
+    .profile-actions {
+        justify-content: center;
+    }
 
-.profile-main-info h1 {
-font-size: 2rem;
-}
+    .profile-main-info {
+        display: flex;           /* Add this */
+        flex-direction: column;  /* Add this */
+        align-items: center;     /* Add this */
+        text-align: center;      /* Add this */
+        width: 100%;            /* Add this */
+    }
 
-.school-profile-header {
-padding: 1.5rem;
-}
+    .profile-main-info h1 {
+        font-size: 2rem;
+        text-align: center;      /* Add this */
+    }
+
+    .username-userprofile {
+        text-align: center;      /* Add this */
+        width: 100%;            /* Add this */
+    }
+
+    .bio {
+        text-align: center;      /* Add this */
+        width: 100%;            /* Add this */
+    }
+
+    .school-profile-header {
+        padding: 1.5rem;
+    }
 }
 
 @media screen and (max-width: 480px) {

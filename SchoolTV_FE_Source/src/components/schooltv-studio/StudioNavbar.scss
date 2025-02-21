@@ -1,0 +1,49 @@
+body {
+  transition: background-color var(--transition-speed) ease;
+}
+
+/* Add quick transitions for common text and background properties */
+*, *::before, *::after {
+  transition: color var(--transition-speed) ease,
+              background-color var(--transition-speed) ease,
+              border-color var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease;
+}
+
+.studio-navbar-container {
+  padding: 10px;
+  margin-bottom: 30px;
+  border-radius: 7px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: var(--unique-video-card-bg);
+  position: sticky;
+  top: 129px;
+  z-index: 100;
+  width: 100%;
+  transition: all var(--transition-speed) ease;
+
+  .studio-navbar-button {
+      padding: 8px 20px;
+      border-radius: 7px;
+      cursor: pointer;
+      margin-right: 5px;
+      background-color: transparent;
+      border: none;
+      transition: background-color 0.3s ease;
+
+      p {
+          padding: 0;
+          margin: 0;
+      }
+
+      &:hover {
+          background-color: #f0f0f0;
+      }
+  }
+
+  .studio-navbar-button__active {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+  }
+}

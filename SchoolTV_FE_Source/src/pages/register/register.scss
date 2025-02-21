@@ -1,10 +1,43 @@
 :root {
+  // Light theme variables
   --primary-color: #4a90e2;
   --secondary-color: #f0f4f8;
+  --bg-gradient: linear-gradient(to bottom right, #ffffff, #a0c4ff);
+  --form-bg: rgba(255, 255, 255, 0.95);
   --text-color: #2c3e50;
+  --text-secondary: #666;
+  --input-bg: #f0f4f8;
+  --input-border: transparent;
+  --input-text: #2c3e50;
+  --divider-color: #ddd;
+  --box-shadow: 
+    20px 20px 60px rgba(0, 0, 0, 0.1),
+    -20px -20px 60px rgba(255, 255, 255, 0.8);
+  --button-shadow:
+    5px 5px 10px rgba(0, 0, 0, 0.1),
+    -5px -5px 10px rgba(255, 255, 255, 0.8);
   --error-color: #e74c3c;
   --success-color: #2ecc71;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  // Dark theme variables
+  --primary-color: #5a9de2;
+  --secondary-color: #1a2634;
+  --bg-gradient: linear-gradient(to bottom right, #0f172a, #1e293b);
+  --form-bg: rgba(26, 38, 52, 0.95);
+  --text-color: #e1e8ed;
+  --text-secondary: #a0aec0;
+  --input-bg: #2a3f52;
+  --input-border: #3a4f62;
+  --input-text: #e1e8ed;
+  --divider-color: #2d3748;
+  --box-shadow: 
+    20px 20px 60px rgba(0, 0, 0, 0.3),
+    -20px -20px 60px rgba(255, 255, 255, 0.05);
+  --button-shadow:
+    5px 5px 10px rgba(0, 0, 0, 0.3),
+    -5px -5px 10px rgba(255, 255, 255, 0.05);
 }
 
 .register_background {
@@ -12,189 +45,121 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(to bottom right, #ffffff, #a0c4ff);
+  background: var(--bg-gradient);
   padding: 20px;
   position: relative;
   overflow: hidden;
 
-  .moving-bubble {
+  &::before {
+    content: '';
     position: absolute;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    animation: float 20s infinite linear;
-  }
-
-  @keyframes float {
-    0% {
-      transform: translateY(100vh) translateX(0);
-    }
-
-    100% {
-      transform: translateY(-100vh) translateX(50px);
-    }
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    z-index: 0;
   }
 }
 
 .register_form {
   width: 100%;
   max-width: 800px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--form-bg);
   padding: 40px;
   border-radius: 20px;
+  box-shadow: var(--box-shadow);
   backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
   animation: container-appear 0.6s ease-out;
-
-  @keyframes container-appear {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
   h1 {
     color: var(--text-color);
     font-size: 2.5em;
+    margin-bottom: 5px;
     text-align: center;
-    margin-bottom: 10px;
     animation: fade-in 0.8s ease-out;
   }
 
   p {
-    color: #666;
+    color: var(--text-secondary);
     font-size: 1.1em;
     text-align: center;
     margin-bottom: 30px;
     animation: fade-in 0.8s ease-out 0.2s backwards;
   }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 }
 
-.ant-form-item {
-  margin-bottom: 20px;
-
-  .ant-form-item-label>label {
+.register_input {
+  .ant-form-item-label > label {
     color: var(--text-color);
-    font-weight: 500;
-    font-size: 0.95em;
   }
 
   .ant-input:not(.ant-input-password .ant-input) {
-    width: 100%;
-    height: 48px !important;
-    padding: 0 15px; // Simplified padding
-    border: 2px solid transparent;
-    border-radius: 10px;
-    background: var(--secondary-color);
-    color: var(--text-color);
-    font-size: 1em;
-    transition: all 0.3s ease;
-
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
 
     &:hover,
     &:focus {
-      outline: none;
       border-color: var(--primary-color);
-
     }
   }
 
   .ant-input-password {
-    width: 100%;
-    height: 48px !important;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    background: var(--secondary-color);
-    color: var(--text-color);
-    font-size: 1em;
-    transition: all 0.3s ease;
+    background: var(--input-bg);
+    border-color: var(--input-border);
 
-    padding: 0; // Remove container padding
-
-    &:hover,
-    &:focus {
-      outline: none;
-      border-color: var(--primary-color);
-
-    }
-
-    // Inner input
     .ant-input {
-      height: 100% !important;
-      padding: 0 15px !important; // Match email input padding
-      border: none !important;
-      box-shadow: none !important;
-      background: transparent !important;
+      color: var(--input-text);
     }
 
-    // Icon container
-    .ant-input-suffix {
-      margin: 0;
-      padding-right: 15px; // Consistent padding with left side
+    .anticon {
+      color: var(--text-secondary);
     }
-  }
-
-  &.ant-form-item-has-error .ant-input,
-  &.ant-form-item-has-error .ant-input-password {
-    border-color: var(--error-color);
   }
 }
 
-.ant-btn-primary {
+.terms_checkbox {
+  .ant-checkbox-wrapper {
+    color: var(--text-color);
+  }
+}
+
+.register_clause {
+  color: var(--primary-color);
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.register_btn {
   width: 100%;
-  padding: 15px;
+  height: 45px;
   background: var(--primary-color);
-  color: white;
   border: none;
   border-radius: 10px;
-  font-size: 1.1em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow:
-    5px 5px 10px var(--shadow-color),
-    -5px -5px 10px rgba(255, 255, 255, 0.8);
-
+  box-shadow: var(--button-shadow);
+  
   &:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      7px 7px 15px var(--shadow-color),
-      -7px -7px 15px rgba(255, 255, 255, 0.8);
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow:
-      3px 3px 5px var(--shadow-color),
-      -3px -3px 5px rgba(255, 255, 255, 0.8);
+    background: var(--primary-color);
+    opacity: 0.9;
   }
 }
 
 .register_foot {
   text-align: center;
   margin-top: 20px;
-  font-size: 0.95em;
+  color: var(--text-secondary);
 
   .register_signin {
     color: var(--primary-color);
-    font-weight: 500;
     text-decoration: none;
-    transition: all 0.3s ease;
+    margin-left: 5px;
 
     &:hover {
       text-decoration: underline;
@@ -202,39 +167,30 @@
   }
 }
 
-.ant-checkbox-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 30px 0;
-
-  .ant-checkbox {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--primary-color);
-    border-radius: 5px;
-    transition: all 0.3s ease;
-
-    &.ant-checkbox-checked {
-      background-color: var(--primary-color);
-    }
+@keyframes container-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.register_clause {
-  color: var(--primary-color);
-  cursor: pointer;
-  font-weight: 500;
-
-  &:hover {
-    text-decoration: underline;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
 @media (max-width: 768px) {
   .register_form {
     padding: 20px;
-
+    
     h1 {
       font-size: 2em;
     }

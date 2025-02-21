@@ -1,4 +1,5 @@
 import "./login.scss";
+import { useContext } from 'react';
 import {
   Button,
   Checkbox,
@@ -10,11 +11,13 @@ import {
 } from "antd";
 import { useResponsive } from "antd-style";
 import { useNavigate } from "react-router-dom";
+import { ThemeContext } from "../../context/ThemeContext"; 
 import axios from "axios";
 
 const API_URL = "https://localhost:44316/api/accounts/login";
 
 function Login() {
+  const { theme } = useContext(ThemeContext);
   const { xxl } = useResponsive();
   const navigate = useNavigate();
 
@@ -80,7 +83,7 @@ function Login() {
   };
 
   return (
-    <div className="login_background">
+    <div className="login_background" data-theme={theme}>
       <Form
         layout="vertical"
         className="login_form"
@@ -165,7 +168,7 @@ function Login() {
             <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>Ghi nhớ mình nhé</Checkbox>
             </Form.Item>
-            <a href="/forgot-password">Quên mật khẩu?</a>
+            <a href="/forgottenPassword">Quên mật khẩu?</a>
           </div>
         </Form.Item>
 

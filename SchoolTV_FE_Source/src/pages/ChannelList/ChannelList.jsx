@@ -1,29 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import styles from './ChannelList.module.scss';
+import { ThemeContext } from '../../context/ThemeContext'; 
 
 const ChannelList = () => {
+    const { theme, toggleTheme } = useContext(ThemeContext);
 
     useEffect(() => {
         document.body.style.paddingTop = '80px';
         document.body.style.minHeight = '100vh';
         document.body.style.background = 'var(--channel-background)';
-        document.body.style.color = 'var(--channel-text)';
         document.body.style.overflowX = 'hidden';
 
         return () => {
             document.body.style.paddingTop = '';
             document.body.style.minHeight = '';
             document.body.style.background = '';
-            document.body.style.color = '';
             document.body.style.overflowX = '';
         };
-    }, []);
+    }, [theme]);
     // State management
     const [activeTab, setActiveTab] = useState('explore');
     const [searchTerm, setSearchTerm] = useState('');
-    const [theme, setTheme] = useState('light');
     const [universities, setUniversities] = useState([
         {
             name: "Đại học Bách Khoa Hà Nội",
@@ -329,13 +328,6 @@ const ChannelList = () => {
 
     ]);
 
-    const toggleTheme = () => {
-        setTheme((prevTheme) => {
-            const newTheme = prevTheme === "light" ? "dark" : "light";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            return newTheme;
-        });
-    };
 
     const handleSubscription = (schoolName) => {
         setUniversities(prevUniversities =>

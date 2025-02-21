@@ -9,49 +9,18 @@ import {
   Modal,
   notification,
   Row,
-  Select,
+  ConfigProvider,
 } from "antd";
-import { useState, useEffect } from "react";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import { useState, useEffect, useContext } from "react";
+import { ThemeContext } from "../../context/ThemeContext";
 import axios from "axios";
 
 function Register() {
+  const { theme } = useContext(ThemeContext);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Create background bubbles
-    const createBackgroundBubbles = () => {
-      const background = document.createElement('div');
-      background.className = 'background-animation';
-      const bubbleCount = 15;
-
-      for (let i = 0; i < bubbleCount; i++) {
-        const bubble = document.createElement('div');
-        bubble.className = 'moving-bubble';
-
-        const size = Math.random() * 100 + 50;
-        const left = Math.random() * 100;
-        const delay = Math.random() * 20;
-        const duration = Math.random() * 10 + 15;
-
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
-        bubble.style.left = `${left}%`;
-        bubble.style.animationDelay = `-${delay}s`;
-        bubble.style.animationDuration = `${duration}s`;
-
-        background.appendChild(bubble);
-      }
-
-      const container = document.querySelector('.register_background');
-      container.insertBefore(background, container.firstChild);
-    };
-
-    createBackgroundBubbles();
-  }, []);
 
   const handleSubmit = async (values) => {
     if (!agreeTerms) {
@@ -127,7 +96,7 @@ function Register() {
   };
 
   return (
-    <div className="register_background">
+    <div className="register_background" data-theme={theme}>
       <div className="register_form">
         <Form
           layout="vertical"
@@ -141,6 +110,7 @@ function Register() {
               <Form.Item
                 label="Tên đăng nhập"
                 name="username"
+                className="register_input"
                 rules={[{ required: true, message: "Vui lòng nhập tên đăng nhập" }]}
               >
                 <Input placeholder="Chọn tên đăng nhập" />
@@ -149,6 +119,7 @@ function Register() {
               <Form.Item
                 label="Email"
                 name="email"
+                className="register_input"
                 rules={[
                   { required: true, message: "Vui lòng nhập email" },
                   { type: "email", message: "Email không hợp lệ" }
@@ -160,15 +131,13 @@ function Register() {
               <Form.Item
                 label="Mật khẩu"
                 name="password"
+                className="register_input"
                 rules={[
                   { required: true, message: "Vui lòng nhập mật khẩu" },
                   { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự" }
                 ]}
               >
-                <Input.Password
-                  placeholder="Tạo mật khẩu"
-                  className="custom-password-input"
-                />
+                <Input.Password placeholder="Tạo mật khẩu" />
               </Form.Item>
             </Col>
 
@@ -176,6 +145,7 @@ function Register() {
               <Form.Item
                 label="Họ và tên"
                 name="fullname"
+                className="register_input"
                 rules={[{ required: true, message: "Vui lòng nhập họ và tên" }]}
               >
                 <Input placeholder="Nhập họ và tên của bạn" />
@@ -184,6 +154,7 @@ function Register() {
               <Form.Item
                 label="Số điện thoại"
                 name="phoneNumber"
+                className="register_input"
                 rules={[
                   { required: true, message: "Vui lòng nhập số điện thoại" },
                   { pattern: /^\d{10}$/, message: "Số điện thoại không hợp lệ" }
@@ -195,6 +166,7 @@ function Register() {
               <Form.Item
                 label="Xác nhận mật khẩu"
                 name="confirmPassword"
+                className="register_input"
                 dependencies={["password"]}
                 rules={[
                   { required: true, message: "Vui lòng nhập lại mật khẩu!" },
@@ -209,10 +181,7 @@ function Register() {
                 ]}
                 hasFeedback
               >
-                <Input.Password
-                  placeholder="Nhập lại mật khẩu"
-                  className="custom-password-input"
-                />
+                <Input.Password placeholder="Nhập lại mật khẩu" />
               </Form.Item>
             </Col>
           </Row>
@@ -220,12 +189,13 @@ function Register() {
           <Form.Item
             label="Địa chỉ"
             name="address"
+            className="register_input"
             rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}
           >
             <Input placeholder="Nhập địa chỉ của bạn" />
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item className="terms_checkbox">
             <Checkbox
               checked={agreeTerms}
               onChange={(e) => setAgreeTerms(e.target.checked)}
@@ -245,6 +215,7 @@ function Register() {
               type="primary"
               htmlType="submit"
               loading={loading}
+              className="register_btn"
             >
               Tạo Tài Khoản
             </Button>
