@@ -1,16 +1,8 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ThemeContext } from '../../context/ThemeContext';
 import './WatchHome.css';
 
 export default function WatchHome() {
-  const { theme } = useContext(ThemeContext);
-
-  useEffect(() => {
-    // Apply theme class to body or a container element if needed
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
-
   return (
     <>
       <meta charSet="UTF-8" />
@@ -76,13 +68,13 @@ export default function WatchHome() {
         </div>
         <div className="streams-grid">
           <Link to="/watchLive">
-            <div className="stream-card" style={{ cursor: 'pointer' }}>
+            <div className="stream-card" style={{ cursor: "pointer" }}>
               <div className="stream-thumbnail">
                 <img
                   src="https://th.bing.com/th/id/R.8e4e66e9f40181fe438820b72c858c1f?rik=iUnxzImnEcS3Mw&riu=http%3a%2f%2fwww.rich-group.com.cn%2fupload%2fimage%2f20200909%2f20200909170711431143.JPG&ehk=1AmN2abj2b%2b%2ff2JCt8B1wqgcwHnFmr4%2bQz23yX%2fwetI%3d&risl=&pid=ImgRaw&r=0"
                   alt="Stream thumbnail"
                 />
-                <div className="live-badge">LIVE</div>
+                <div className="live-badge-home">LIVE</div>
               </div>
               <div className="stream-info">
                 <h3 className="stream-title">Hội Thảo Công Nghệ AI 2023</h3>
@@ -97,16 +89,18 @@ export default function WatchHome() {
           </Link>
 
           <Link to="/watchLive">
-            <div className="stream-card" style={{ cursor: 'pointer' }}>
+            <div className="stream-card" style={{ cursor: "pointer" }}>
               <div className="stream-thumbnail">
                 <img
                   src="https://cdn.tuoitre.vn/471584752817336320/2024/5/12/dsc8344-17154910796401821942426.jpg"
                   alt="Stream thumbnail"
                 />
-                <div className="live-badge">LIVE</div>
+                <div className="live-badge-home">LIVE</div>
               </div>
               <div className="stream-info">
-                <h3 className="stream-title">Talkshow: Khởi Nghiệp</h3>
+                <h3 className="stream-title">
+                  Talkshow: Khởi Nghiệp Sinh Viên
+                </h3>
                 <div className="stream-meta">
                   <span>ĐH Kinh Tế</span>
                   <span>
@@ -118,13 +112,13 @@ export default function WatchHome() {
           </Link>
 
           <Link to="/watchLive">
-            <div className="stream-card" style={{ cursor: 'pointer' }}>
+            <div className="stream-card" style={{ cursor: "pointer" }}>
               <div className="stream-thumbnail">
                 <img
                   src="https://vov2.vov.vn/sites/default/files/styles/large/public/2021-01/FPT-hoa-lac-VTN-greenmore6.jpg"
                   alt="Stream thumbnail"
                 />
-                <div className="live-badge">LIVE</div>
+                <div className="live-badge-home">LIVE</div>
               </div>
               <div className="stream-info">
                 <h3 className="stream-title">Workshop: Digital Marketing</h3>
@@ -142,12 +136,12 @@ export default function WatchHome() {
       <section className="section">
         <div className="section-header">
           <h2 className="section-title">Sắp Diễn Ra</h2>
-          <a href="#" className="see-all">
+          <a href="/upcomingList" className="see-all">
             Xem tất cả <i className="fas fa-arrow-right" />
           </a>
         </div>
         <div className="events-grid">
-          <Link to ="/upComing">
+        <Link to ="/upComing">
           <div className="event-card" data-aos="fade-up">
             <div className="event-date">
               <i className="far fa-calendar" /> 25/12/2023 - 14:00
@@ -254,7 +248,9 @@ export default function WatchHome() {
                   className="university-avatar"
                 />
                 <div className="video-meta">
-                  <h3 className="video-title">Top 10 Lý Do Chọn ĐH Bách Khoa</h3>
+                  <h3 className="video-title">
+                    Top 10 Lý Do Chọn ĐH Bách Khoa
+                  </h3>
                   <p className="university-name">ĐH Bách Khoa Hà Nội</p>
                 </div>
               </div>
@@ -386,8 +382,9 @@ export default function WatchHome() {
             </div>
             <div className="post-content">
               <p>
-                📢 Thông báo quan trọng: Đã mở đăng ký học kỳ 2 năm học 2023-2024.
-                Sinh viên vui lòng truy cập cổng thông tin để đăng ký!
+                📢 Thông báo quan trọng: Đã mở đăng ký học kỳ 2 năm học
+                2023-2024. Sinh viên vui lòng truy cập cổng thông tin để đăng
+                ký!
               </p>
               <img
                 src="https://loremflickr.com/320/240?random=2"
@@ -420,8 +417,8 @@ export default function WatchHome() {
             </div>
             <div className="post-content">
               <p>
-                🌟 Chương trình trao đổi sinh viên với các trường đại học Nhật Bản
-                đã chính thức mở đơn!
+                🌟 Chương trình trao đổi sinh viên với các trường đại học Nhật
+                Bản đã chính thức mở đơn!
               </p>
               <img
                 src="https://loremflickr.com/320/240?random=2"
@@ -443,6 +440,5 @@ export default function WatchHome() {
         </div>
       </section>
     </>
-
   );
 }

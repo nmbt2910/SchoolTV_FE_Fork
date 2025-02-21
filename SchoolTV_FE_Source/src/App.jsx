@@ -15,6 +15,7 @@ import StudioPost from "./components/schooltv-studio/functions/StudioPost";
 import StudioVideo from "./components/schooltv-studio/functions/StudioVideo";
 import StudioLiveStream from "./components/schooltv-studio/functions/StudioLiveStream";
 import UpComing from "./pages/upcoming/upcoming";
+import UpComingList from "./pages/upcomingList/upcomingList";
 import ForgottenPassword from "./pages/forgottenPassword/forgottenPassword";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -132,6 +133,10 @@ function App() {
         {
           path: "/userProfile",
           element: <UserProfile />,
+        },
+        {
+          path: "/upcomingList",
+          element: <UpComingList />,
         }
       ],
     },
