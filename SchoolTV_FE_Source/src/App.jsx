@@ -1,5 +1,5 @@
-import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { React, useEffect } from "react";
+import { createBrowserRouter, RouterProvider, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import Home from "./pages/BusinessHome/Home";
 import WatchHome from "./pages/WatchHome/WatchHome";
@@ -22,12 +22,23 @@ import Login from "./pages/login/login";
 import Register from "./pages/register/register";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
+const ScrollToTopWrapper = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 function App() {
   const router = createBrowserRouter([
     {
       path: "/login",
       element: (
         <ThemeProvider>
+          <ScrollToTopWrapper />
           <Login />
         </ThemeProvider>
       ),
@@ -36,6 +47,7 @@ function App() {
       path: "/register",
       element: (
         <ThemeProvider>
+          <ScrollToTopWrapper />
           <Register />
         </ThemeProvider>
       ),
@@ -44,6 +56,7 @@ function App() {
       path: "/forgottenPassword",
       element: (
         <ThemeProvider>
+          <ScrollToTopWrapper />
           <ForgottenPassword />
         </ThemeProvider>
       ),
@@ -52,6 +65,7 @@ function App() {
       path: "school-studio",
       element: (
         <ThemeProvider>
+          <ScrollToTopWrapper />
           <SchoolChannelStudio />
         </ThemeProvider>
       ),
@@ -74,6 +88,7 @@ function App() {
       path: "",
       element: (
         <ThemeProvider>
+          <ScrollToTopWrapper />
           <PageLayout />
         </ThemeProvider>
       ),
