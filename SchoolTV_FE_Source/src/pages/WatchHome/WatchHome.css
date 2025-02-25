@@ -99,7 +99,7 @@ height: 100%;
 object-fit: cover;
 }
 
-.live-badge {
+.live-badge-home {
 position: absolute;
 top: 1rem;
 left: 1rem;
@@ -114,7 +114,7 @@ align-items: center;
 gap: 0.5rem;
 }
 
-.live-badge::before {
+.live-badge-home::before {
 content: '';
 width: 8px;
 height: 8px;
@@ -154,7 +154,7 @@ margin-top: auto;
 
 .events-grid {
 display: grid;
-grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 gap: 1.5rem;
 margin-bottom: 2rem;
 }
@@ -447,7 +447,7 @@ grid-template-columns: 1fr;
 }
 
 .stream-card {
-height: 280px;
+height: 330px;
 }
 
 .stream-thumbnail {

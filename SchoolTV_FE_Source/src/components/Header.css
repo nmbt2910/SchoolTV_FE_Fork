@@ -360,3 +360,65 @@
     font-size: 1.3rem;
   }
 }
+
+/* In Header.css */
+
+.studio-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0.5rem !important;
+  color: var(--primary-color) !important;
+  text-decoration: none !important;
+  border-radius: 5px !important;
+  transition: background 0.3s !important;
+  font-weight: 500 !important;
+}
+
+.studio-link:hover {
+  background: rgba(74, 144, 226, 0.1) !important;
+}
+
+.studio-link i {
+  color: var(--primary-color) !important;
+}
+
+@media screen and (max-width: 768px) {
+  .studio-link {
+    width: 100% !important;
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
+    background: rgba(74, 144, 226, 0.05) !important;
+  }
+}
+
+.mobile-dropdown-close {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem;
+  transition: transform 0.2s ease;
+}
+
+.mobile-dropdown-close:hover {
+  transform: scale(1.1);
+}
+
+@media screen and (max-width: 768px) {
+  .mobile-dropdown-close {
+    display: block;
+  }
+
+  .dropdown-header {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    position: relative;
+    text-align: center;
+  }
+}
