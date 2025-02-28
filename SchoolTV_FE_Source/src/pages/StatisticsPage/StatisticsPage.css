@@ -1,0 +1,630 @@
+/* Base styles and theme variables */
+.statistics-page {
+    padding: 24px;
+    padding-top: 90px;
+    background: var(--bg-color);
+    min-height: 100vh;
+    transition: all 0.3s ease;
+    color: var(--text-color);
+}
+
+/* Header Styles */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-left h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--primary-text);
+    margin-bottom: 8px;
+}
+
+.channel-name {
+    color: var(--secondary-text);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.header-right {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* Export and Create Buttons */
+.export-dropdown {
+    position: relative;
+}
+
+.export-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.export-button:hover {
+    background: var(--secondary-color);
+    border-color: var(--primary-color);
+}
+
+.export-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    z-index: 100;
+    min-width: 180px;
+    backdrop-filter: blur(10px);
+}
+
+.export-menu button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    text-align: left;
+    border: none;
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-weight: 500;
+}
+
+.export-menu button:hover {
+    background: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.create-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.create-button:hover {
+    background: var(--hover-color);
+    transform: translateY(-1px);
+}
+
+/* Time Range Selector */
+.time-range-container {
+    margin-bottom: 32px;
+}
+
+.time-range-selector {
+    display: flex;
+    gap: 2px;
+    background: var(--secondary-color);
+    padding: 4px;
+    border-radius: 12px;
+    width: fit-content;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.time-range-button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.time-range-button.active {
+    background: var(--card-bg);
+    color: var(--primary-color);
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+/* Stats Cards */
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.stats-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px var(--shadow-color);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.card-header .icon {
+    color: var(--primary-color);
+    background: var(--secondary-color);
+    padding: 12px; /* Increased padding */
+    border-radius: 12px;
+    font-size: 24px; /* Increased icon size */
+    width: 48px; /* Fixed width */
+    height: 48px; /* Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-header .label {
+    color: var(--secondary-text);
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.value {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--primary-text);
+    line-height: 1.2;
+}
+
+.trend {
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.trend.positive {
+    color: var(--success-color);
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.trend.negative {
+    color: var(--live-color);
+    background: rgba(255, 71, 87, 0.1);
+}
+
+/* Charts */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+
+.chart-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.chart-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chart-title h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+.info-icon {
+    color: var(--secondary-text);
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.info-icon:hover {
+    color: var(--primary-color);
+}
+
+/* Chart Controls */
+.metric-selector,
+.viewer-filters,
+.distribution-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.metric-button,
+.viewer-filters button,
+.distribution-filters button {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--glass-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.metric-button.active,
+.viewer-filters button.active,
+.distribution-filters button.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Chart Customization */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+    stroke: var(--border-color);
+    stroke-opacity: 0.2;
+}
+
+.recharts-tooltip-wrapper {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    padding: 12px !important;
+}
+
+.recharts-default-tooltip {
+    background: var(--card-bg) !important;
+    border: none !important;
+    border-radius: 8px;
+    padding: 12px !important;
+}
+
+.recharts-tooltip-label {
+    color: var(--primary-text) !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+}
+
+.recharts-tooltip-item {
+    color: var(--secondary-text) !important;
+    padding: 4px 0 !important;
+}
+
+/* Content Sections */
+.content-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 24px; /* Reduced gap */
+}
+
+.content-section {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    border: 1px solid var(--glass-border);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title h3 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+.view-all-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--glass-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.view-all-button:hover {
+    background: var(--secondary-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px; /* Reduced gap */
+}
+
+.content-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid var(--glass-border);
+}
+
+.content-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px var(--shadow-color);
+}
+
+.thumbnail-container {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 aspect ratio */
+}
+
+.thumbnail-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.content-card:hover .thumbnail-container img {
+    transform: scale(1.05);
+}
+
+.duration {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.content-type {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.content-info {
+    padding: 12px;
+}
+
+.content-info h4 {
+    color: var(--primary-text);
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.metrics {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.metrics span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--secondary-text);
+    font-size: 14px;
+}
+
+.performance {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary-color);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .statistics-page {
+        padding: 16px;
+        padding-top: 80px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .export-button span,
+    .create-button span {
+        display: none;
+    }
+
+    .time-range-selector {
+        width: 100%;
+        overflow-x: auto;
+        padding: 4px;
+    }
+
+    .time-range-button {
+        padding: 8px 16px;
+        white-space: nowrap;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .metric-selector,
+    .viewer-filters,
+    .distribution-filters {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+.performance-chart-section {
+    margin-bottom: 32px;
+}
+
+.performance-chart-section .chart-card {
+    width: 100%;
+}
+
+.performance-chart-section .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.performance-chart-section .chart-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.performance-chart-section .chart-title h3 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+.metric-selector-container {
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.performance-chart-section .metric-selector {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.performance-chart-section .metric-button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--glass-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.performance-chart-section .metric-button:hover {
+    background: var(--secondary-color);
+    border-color: var(--primary-color);
+}
+
+.performance-chart-section .metric-button.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.performance-chart-section .chart-container {
+    padding-top: 16px;
+    height: 400px; /* Explicit height */
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .performance-chart-section .metric-selector {
+        overflow-x: auto;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }
+
+    .performance-chart-section .metric-selector::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+
+    .performance-chart-section .metric-button {
+        white-space: nowrap;
+    }
+}

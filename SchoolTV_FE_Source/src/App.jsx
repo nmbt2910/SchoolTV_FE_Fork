@@ -17,11 +17,13 @@ import StudioLiveStream from "./components/schooltv-studio/functions/StudioLiveS
 import UpComingList from "./pages/upcomingList/upcomingList";
 import UpComingDetail from "./pages/upcomingDetail/upcomingDetail";
 import ForgottenPassword from "./pages/forgottenPassword/forgottenPassword";
+import StatisticsPage from "./pages/StatisticsPage/StatisticsPage";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Login from "./pages/login/login";
 import Register from "./pages/register/register";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import CommunityPost from "./pages/CommunityPost/CommunityPost";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -137,6 +139,14 @@ function App() {
         {
           path: "/upcomingDetail",
           element: <UpComingDetail />,
+        },
+        {
+          path: "StatisticsPage",
+          element: <StatisticsPage />
+        },
+        {
+          path: "/communityPost",
+          element: <CommunityPost />,
         }
       ],
     },
