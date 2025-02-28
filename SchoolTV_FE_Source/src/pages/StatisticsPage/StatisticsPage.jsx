@@ -19,6 +19,8 @@ const StatisticsPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [showExportMenu, setShowExportMenu] = useState(false);
+    const [audienceTimeFilter, setAudienceTimeFilter] = useState('hour');
+    const [contentDistFilter, setContentDistFilter] = useState('type');
 
     useEffect(() => {
         // Simulate loading
@@ -35,6 +37,23 @@ const StatisticsPage = () => {
         { date: '24/11', views: 4800, likes: 300, comments: 90, shares: 50, revenue: 240, watchTime: 2000 },
         { date: '25/11', views: 3800, likes: 280, comments: 85, shares: 45, revenue: 190, watchTime: 1800 },
         { date: '26/11', views: 4300, likes: 320, comments: 95, shares: 55, revenue: 215, watchTime: 1900 },
+    ];
+
+    const audienceDataByDay = [
+        { time: 'T2', viewers: 850 },
+        { time: 'T3', viewers: 920 },
+        { time: 'T4', viewers: 1100 },
+        { time: 'T5', viewers: 980 },
+        { time: 'T6', viewers: 1250 },
+        { time: 'T7', viewers: 890 },
+        { time: 'CN', viewers: 750 },
+    ];
+
+    const contentTypeByTopic = [
+        { name: 'Giáo dục', value: 35, color: '#4a90e2' },
+        { name: 'Tin tức', value: 25, color: '#ff4757' },
+        { name: 'Giải trí', value: 20, color: '#28a745' },
+        { name: 'Hướng dẫn', value: 20, color: '#a55eea' },
     ];
 
     const COLORS = ['#4a90e2', '#ff4757', '#28a745'];
@@ -82,37 +101,104 @@ const StatisticsPage = () => {
     };
 
     const popularContent = [
+        // Livestreams
         {
             id: 1,
-            title: 'Hướng dẫn đăng ký học phần HK2 2023-2024',
-            views: '12.5K',
-            likes: '1.2K',
-            comments: '245',
-            type: 'Video',
-            duration: '15:24',
-            thumbnail: 'https://picsum.photos/320/180?random=1',
+            title: 'Lễ tốt nghiệp khoa CNTT 2023',
+            views: '15.2K',
+            likes: '1.8K',
+            comments: '342',
+            type: 'Livestream',
+            duration: '2:45:30',
+            thumbnail: 'https://picsum.photos/800/450?random=1',
             performance: 'Hiệu suất cao hơn bình thường',
         },
         {
             id: 2,
-            title: 'Lễ tốt nghiệp khoa CNTT 2023',
-            views: '8.2K',
-            likes: '856',
-            comments: '167',
+            title: 'Hội thảo: Trí tuệ nhân tạo trong Giáo dục',
+            views: '12.8K',
+            likes: '1.5K',
+            comments: '256',
             type: 'Livestream',
-            duration: '2:15:30',
-            thumbnail: 'https://picsum.photos/320/180?random=2',
-            performance: 'Hiệu suất trung bình',
+            duration: '1:30:15',
+            thumbnail: 'https://picsum.photos/800/450?random=2',
+            performance: 'Đang tăng trưởng',
         },
         {
             id: 3,
-            title: 'Thông báo lịch thi cuối kỳ',
-            views: '5.4K',
-            likes: '423',
-            comments: '98',
-            type: 'Bài viết',
-            thumbnail: 'https://picsum.photos/320/180?random=3',
+            title: 'Talkshow: Định hướng nghề nghiệp CNTT 2024',
+            views: '10.5K',
+            likes: '980',
+            comments: '185',
+            type: 'Livestream',
+            duration: '1:15:45',
+            thumbnail: 'https://picsum.photos/800/450?random=3',
+            performance: 'Hiệu suất trung bình',
+        },
+        // Videos
+        {
+            id: 4,
+            title: 'Hướng dẫn đăng ký học phần HK2 2023-2024',
+            views: '18.3K',
+            likes: '2.1K',
+            comments: '425',
+            type: 'Video',
+            duration: '15:24',
+            thumbnail: 'https://picsum.photos/800/450?random=4',
+            performance: 'Hiệu suất cao hơn bình thường',
+        },
+        {
+            id: 5,
+            title: 'Review chương trình đào tạo ngành KTPM',
+            views: '14.7K',
+            likes: '1.6K',
+            comments: '298',
+            type: 'Video',
+            duration: '22:15',
+            thumbnail: 'https://picsum.photos/800/450?random=5',
             performance: 'Đang tăng trưởng',
+        },
+        {
+            id: 6,
+            title: 'Giới thiệu cơ sở vật chất phòng lab mới',
+            views: '11.9K',
+            likes: '1.3K',
+            comments: '215',
+            type: 'Video',
+            duration: '18:30',
+            thumbnail: 'https://picsum.photos/800/450?random=6',
+            performance: 'Hiệu suất trung bình',
+        },
+        // Bài viết
+        {
+            id: 7,
+            title: 'Thông báo lịch thi cuối kỳ HK1 2023-2024',
+            views: '22.4K',
+            likes: '1.9K',
+            comments: '456',
+            type: 'Bài viết',
+            thumbnail: 'https://picsum.photos/800/450?random=7',
+            performance: 'Hiệu suất cao hơn bình thường',
+        },
+        {
+            id: 8,
+            title: 'Kế hoạch học tập và giảng dạy năm 2024',
+            views: '19.8K',
+            likes: '1.7K',
+            comments: '385',
+            type: 'Bài viết',
+            thumbnail: 'https://picsum.photos/800/450?random=8',
+            performance: 'Đang tăng trưởng',
+        },
+        {
+            id: 9,
+            title: 'Thông báo học bổng khoa CNTT 2024',
+            views: '17.2K',
+            likes: '1.4K',
+            comments: '312',
+            type: 'Bài viết',
+            thumbnail: 'https://picsum.photos/800/450?random=9',
+            performance: 'Hiệu suất trung bình',
         },
     ];
 
@@ -261,7 +347,7 @@ const StatisticsPage = () => {
 
                     <button
                         className="create-button"
-                        onClick={() => navigate('/school-studio/posts')}
+                        onClick={() => navigate('/school-studio/post')}
                     >
                         <Video size={18} />
                         <span>Tạo nội dung</span>
@@ -314,13 +400,18 @@ const StatisticsPage = () => {
                                     className={`metric-button ${selectedMetric === metric.key ? 'active' : ''}`}
                                     onClick={() => setSelectedMetric(metric.key)}
                                 >
+                                    {metric.key === 'views' && <Eye size={16} />}
+                                    {metric.key === 'watchTime' && <Clock size={16} />}
+                                    {metric.key === 'likes' && <ThumbsUp size={16} />}
+                                    {metric.key === 'revenue' && <DollarSign size={16} />}
                                     {metric.label}
                                 </button>
                             ))}
                         </div>
                     </div>
+
                     <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={400}>
+                        <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                                 data={viewData}
                                 margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
@@ -382,33 +473,66 @@ const StatisticsPage = () => {
                             <h3>Phân tích khán giả</h3>
                             <Info size={16} className="info-icon" />
                         </div>
-                        <div className="viewer-filters">
-                            <button className="active">Theo giờ</button>
-                            <button>Theo ngày</button>
+                        <div className="chart-filters">
+                            <button
+                                className={audienceTimeFilter === 'hour' ? 'active' : ''}
+                                onClick={() => setAudienceTimeFilter('hour')}
+                            >
+                                Theo giờ
+                            </button>
+                            <button
+                                className={audienceTimeFilter === 'day' ? 'active' : ''}
+                                onClick={() => setAudienceTimeFilter('day')}
+                            >
+                                Theo ngày
+                            </button>
                         </div>
                     </div>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={audienceData}>
-                            <defs>
-                                <linearGradient id="colorAudience" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#4a90e2" stopOpacity={0.8} />
-                                    <stop offset="95%" stopColor="#4a90e2" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="time" />
-                            <YAxis />
-                            <Tooltip />
-                            <Area
-                                type="monotone"
-                                dataKey="viewers"
-                                stroke="#4a90e2"
-                                fillOpacity={1}
-                                fill="url(#colorAudience)"
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    <div className="chart-container">
+                        <ResponsiveContainer width="100%" height={300}>
+                            <AreaChart
+                                data={audienceTimeFilter === 'hour' ? audienceData : audienceDataByDay}
+                                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                            >
+                                <defs>
+                                    <linearGradient id="colorAudience" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#4a90e2" stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor="#4a90e2" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis
+                                    dataKey="time"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    dy={10}
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    dx={-10}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        background: 'var(--card-bg)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '8px',
+                                        padding: '10px'
+                                    }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="viewers"
+                                    stroke="#4a90e2"
+                                    strokeWidth={2}
+                                    fillOpacity={1}
+                                    fill="url(#colorAudience)"
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
+
 
                 <div className="chart-card content-distribution">
                     <div className="chart-header">
@@ -416,22 +540,57 @@ const StatisticsPage = () => {
                             <h3>Phân bố nội dung</h3>
                             <Info size={16} className="info-icon" />
                         </div>
-                        <div className="distribution-filters">
-                            <button className="active">Theo loại</button>
-                            <button>Theo chủ đề</button>
+                        <div className="chart-filters">
+                            <button
+                                className={contentDistFilter === 'type' ? 'active' : ''}
+                                onClick={() => setContentDistFilter('type')}
+                            >
+                                Theo loại
+                            </button>
+                            <button
+                                className={contentDistFilter === 'topic' ? 'active' : ''}
+                                onClick={() => setContentDistFilter('topic')}
+                            >
+                                Theo chủ đề
+                            </button>
                         </div>
                     </div>
-                    <div className="content-chart-container">
+                    <div className="chart-container">
                         <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={contentTypeData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <Tooltip />
-                                <Bar dataKey="value" fill="#4a90e2">
-                                    {contentTypeData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
+                            <BarChart
+                                data={contentDistFilter === 'type' ? contentTypeData : contentTypeByTopic}
+                                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis
+                                    dataKey="name"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    dy={10}
+                                />
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
+                                    dx={-10}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        background: 'var(--card-bg)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '8px',
+                                        padding: '10px'
+                                    }}
+                                />
+                                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                    {(contentDistFilter === 'type' ? contentTypeData : contentTypeByTopic)
+                                        .map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={entry.color}
+                                                style={{ filter: 'brightness(1.1)' }}
+                                            />
+                                        ))
+                                    }
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>

@@ -141,12 +141,12 @@ function App() {
           element: <UpComingDetail />,
         },
         {
-          path: "StatisticsPage",
-          element: <StatisticsPage />
-        },
-        {
           path: "/communityPost",
           element: <CommunityPost />,
+        },
+        {
+          path: "StatisticsPage",
+          element: <StatisticsPage />
         }
       ],
     },
