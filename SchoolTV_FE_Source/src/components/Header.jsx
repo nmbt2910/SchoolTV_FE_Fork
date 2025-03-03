@@ -113,7 +113,7 @@ const Header = () => {
                 </div>
                 <div className="dropdown-divider"></div>
                 {isSchoolOwner && (
-                  <a href="/school-studio/post" className="dropdown-item studio-link">
+                  <a href="/StatisticsPage" className="dropdown-item studio-link">
                     <i className="fas fa-tv"></i> SchoolTV Studio
                   </a>
                 )}
