@@ -24,6 +24,8 @@ import Login from "./pages/login/login";
 import Register from "./pages/register/register";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import CommunityPost from "./pages/CommunityPost/CommunityPost";
+import SchoolLogin from "./pages/SchoolLogin/SchoolLogin";
+import SchoolRegister from "./pages/SchoolRegister/SchoolRegister";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -55,6 +57,24 @@ function App() {
         </ThemeProvider>
       ),
     },     
+    {
+      path: "/school-register",
+      element: (
+        <ThemeProvider>
+          <ScrollToTopWrapper />
+          <SchoolRegister />
+        </ThemeProvider>
+      ),
+    },
+    {
+      path: "/school-login",
+      element: (
+        <ThemeProvider>
+          <ScrollToTopWrapper />
+          <SchoolLogin />
+        </ThemeProvider>
+      ),
+    },
     {
       path: "/forgottenPassword",
       element: (

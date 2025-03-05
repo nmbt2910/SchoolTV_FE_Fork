@@ -187,37 +187,37 @@ const UserProfile = () => {
     }
 
     return (
-        <div className="school-profile-container">
-            <div className="school-profile-header">
-                <div className="header-content">
-                    <div className="profile-avatar-wrapper">
-                        <div className="profile-avatar">
+        <div className="user-profile-container">
+            <div className="user-profile-header">
+                <div className="user-profile-header-content">
+                    <div className="user-profile-avatar-wrapper">
+                        <div className="user-profile-avatar">
                             <img
                                 src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname)}&size=200&background=random`}
                                 alt={user.fullname}
                             />
-                            <div className="avatar-edit">
+                            <div className="user-profile-avatar-edit">
                                 <EditOutlined />
                             </div>
                         </div>
                     </div>
-                    <div className="profile-main-info">
+                    <div className="user-profile-main-info">
                         <h1>{user.fullname}</h1>
-                        <p className="username-userprofile">@{user.username}</p>
-                        <p className="bio">Học sinh lớp 12 - THPT Chu Văn An. Đam mê công nghệ và khoa học máy tính. 🚀</p>
-                        <div className="profile-actions">
+                        <p className="user-profile-username">@{user.username}</p>
+                        <p className="user-profile-bio">Học sinh lớp 12 - THPT Chu Văn An. Đam mê công nghệ và khoa học máy tính. 🚀</p>
+                        <div className="user-profile-actions">
                             <Button
                                 type="primary"
                                 icon={<EditOutlined />}
                                 onClick={() => setEditModalVisible(true)}
-                                className="edit-profile-btn"
+                                className="user-profile-edit-btn"
                             >
                                 Chỉnh Sửa Hồ Sơ
                             </Button>
                             <Button
                                 icon={<KeyOutlined />}
                                 onClick={() => setPasswordModalVisible(true)}
-                                className="change-password-btn"
+                                className="user-profile-password-btn"
                             >
                                 Đổi Mật Khẩu
                             </Button>
@@ -226,27 +226,33 @@ const UserProfile = () => {
                 </div>
             </div>
 
-            <div className="school-profile-content">
+            <div className="user-profile-content">
                 <div className="content-left">
-                    <div className="info-card contact-info">
+                    <div className="user-profile-info-card contact-info">
                         <h2>Thông Tin Liên Hệ</h2>
-                        <div className="info-list">
-                            <div className="info-item">
-                                <MailOutlined />
+                        <div className="user-profile-info-list">
+                            <div className="user-profile-info-item">
+                                <div className="info-icon">
+                                    <MailOutlined />
+                                </div>
                                 <div>
                                     <label>Email</label>
                                     <span>{user.email}</span>
                                 </div>
                             </div>
-                            <div className="info-item">
-                                <PhoneOutlined />
+                            <div className="user-profile-info-item">
+                                <div className="info-icon">
+                                    <PhoneOutlined />
+                                </div>
                                 <div>
                                     <label>Số điện thoại</label>
                                     <span>{user.phoneNumber || 'Chưa cập nhật'}</span>
                                 </div>
                             </div>
-                            <div className="info-item">
-                                <EnvironmentOutlined />
+                            <div className="user-profile-info-item">
+                                <div className="info-icon">
+                                    <EnvironmentOutlined />
+                                </div>
                                 <div>
                                     <label>Địa chỉ</label>
                                     <span>{user.address || 'Chưa cập nhật'}</span>
@@ -255,17 +261,17 @@ const UserProfile = () => {
                         </div>
                     </div>
 
-                    <div className="info-card connected-accounts">
+                    <div className="user-profile-info-card connected-accounts">
                         <h2>Tài Khoản Liên Kết</h2>
-                        <div className="account-item">
-                            <div className="account-icon">
+                        <div className="user-profile-account-item">
+                            <div className="user-profile-account-icon">
                                 <GoogleOutlined />
                             </div>
-                            <div className="account-info">
+                            <div className="user-profile-account-info">
                                 <span>Google Account</span>
                                 <p>{user.email}</p>
                             </div>
-                            <div className="account-status connected">
+                            <div className="user-profile-account-status connected">
                                 Đã liên kết
                             </div>
                         </div>
@@ -273,42 +279,43 @@ const UserProfile = () => {
                 </div>
 
                 <div className="content-right">
-                    <div className="info-card recent-activities">
+                    <div className="user-profile-info-card recent-activities">
+                        <div className="activity-background"></div>
                         <h2>Hoạt Động Gần Đây</h2>
-                        <div className="activity-list">
-                            <div className="activity-item live">
-                                <div className="activity-icon">
+                        <div className="user-profile-activity-list">
+                            <div className="user-profile-activity-item live">
+                                <div className="user-profile-activity-icon">
                                     <VideoCameraOutlined />
                                 </div>
-                                <div className="activity-content">
-                                    <span className="activity-tag">LIVE</span>
+                                <div className="user-profile-activity-content">
+                                    <span className="user-profile-activity-tag">LIVE</span>
                                     <h3>Hội Thảo: Định Hướng Ngành CNTT</h3>
                                     <p>ĐH Bách Khoa HN</p>
-                                    <span className="activity-time">2 giờ trước</span>
+                                    <span className="user-profile-activity-time">2 giờ trước</span>
                                 </div>
                             </div>
 
-                            <div className="activity-item">
-                                <div className="activity-icon">
+                            <div className="user-profile-activity-item">
+                                <div className="user-profile-activity-icon">
                                     <BookOutlined />
                                 </div>
-                                <div className="activity-content">
-                                    <span className="activity-tag">VIDEO</span>
+                                <div className="user-profile-activity-content">
+                                    <span className="user-profile-activity-tag">VIDEO</span>
                                     <h3>Ôn Tập Toán: Giải Tích</h3>
                                     <p>Thầy Nguyễn Văn B</p>
-                                    <span className="activity-time">Hôm qua</span>
+                                    <span className="user-profile-activity-time">Hôm qua</span>
                                 </div>
                             </div>
 
-                            <div className="activity-item">
-                                <div className="activity-icon">
+                            <div className="user-profile-activity-item">
+                                <div className="user-profile-activity-icon">
                                     <CalendarOutlined />
                                 </div>
-                                <div className="activity-content">
-                                    <span className="activity-tag">SỰ KIỆN</span>
+                                <div className="user-profile-activity-content">
+                                    <span className="user-profile-activity-tag">SỰ KIỆN</span>
                                     <h3>Ngày Hội Tư Vấn Tuyển Sinh 2024</h3>
                                     <p>ĐH Quốc Gia HN</p>
-                                    <span className="activity-time">2 ngày trước</span>
+                                    <span className="user-profile-activity-time">2 ngày trước</span>
                                 </div>
                             </div>
                         </div>
@@ -321,7 +328,7 @@ const UserProfile = () => {
                 visible={editModalVisible}
                 onCancel={() => setEditModalVisible(false)}
                 footer={null}
-                className="school-profile-modal profile-update-modal"
+                className="user-profile-modal"
                 width={800}
                 centered
             >
@@ -336,7 +343,7 @@ const UserProfile = () => {
                         profile_phone: user.phoneNumber,
                         profile_address: user.address
                     }}
-                    className="profile-update-form"
+                    className="user-profile-update-form"
                 >
                     <Row gutter={24}>
                         <Col xs={24} sm={12}>
@@ -348,6 +355,7 @@ const UserProfile = () => {
                                 <Input
                                     prefix={<UserOutlined />}
                                     placeholder="Nhập tên người dùng"
+                                    className="user-profile-input"
                                 />
                             </Form.Item>
 
@@ -359,6 +367,7 @@ const UserProfile = () => {
                                 <Input
                                     prefix={<UserOutlined />}
                                     placeholder="Nhập họ và tên đầy đủ"
+                                    className="user-profile-input"
                                 />
                             </Form.Item>
 
@@ -373,6 +382,7 @@ const UserProfile = () => {
                                 <Input
                                     prefix={<MailOutlined />}
                                     placeholder="example@domain.com"
+                                    className="user-profile-input"
                                 />
                             </Form.Item>
                         </Col>
@@ -385,6 +395,7 @@ const UserProfile = () => {
                                 <Input
                                     prefix={<PhoneOutlined />}
                                     placeholder="Nhập số điện thoại"
+                                    className="user-profile-input"
                                 />
                             </Form.Item>
 
@@ -395,6 +406,7 @@ const UserProfile = () => {
                                 <Input
                                     prefix={<HomeOutlined />}
                                     placeholder="Nhập địa chỉ"
+                                    className="user-profile-input"
                                 />
                             </Form.Item>
                         </Col>
@@ -406,7 +418,7 @@ const UserProfile = () => {
                         </Button>
                     </Form.Item>
 
-                    <div className="modal-footer-info">
+                    <div className="user-profile-modal-footer-info">
                         ℹ️ Cập nhật thông tin của bạn sẽ giúp chúng tôi phục vụ bạn tốt hơn.
                     </div>
                 </Form>
@@ -417,7 +429,7 @@ const UserProfile = () => {
                 visible={passwordModalVisible}
                 onCancel={() => setPasswordModalVisible(false)}
                 footer={null}
-                className="school-profile-modal password-change-modal"
+                className="user-profile-modal"
                 width={600}
                 centered
             >
@@ -425,7 +437,7 @@ const UserProfile = () => {
                     form={passwordForm}
                     layout="vertical"
                     onFinish={handlePasswordChange}
-                    className="password-change-form"
+                    className="user-profile-password-form"
                 >
                     <Row gutter={24}>
                         <Col span={24}>
@@ -437,6 +449,7 @@ const UserProfile = () => {
                                 <Input.Password
                                     prefix={<LockOutlined />}
                                     placeholder="Nhập mật khẩu hiện tại"
+                                    className="user-profile-input"
                                 />
                             </Form.Item>
                         </Col>
@@ -453,6 +466,7 @@ const UserProfile = () => {
                                 <Input.Password
                                     prefix={<LockOutlined />}
                                     placeholder="Nhập mật khẩu mới"
+                                    className="user-profile-input"
                                 />
                             </Form.Item>
                         </Col>
@@ -476,6 +490,7 @@ const UserProfile = () => {
                                 <Input.Password
                                     prefix={<LockOutlined />}
                                     placeholder="Xác nhận mật khẩu mới"
+                                    className="user-profile-input"
                                 />
                             </Form.Item>
                         </Col>
@@ -487,7 +502,7 @@ const UserProfile = () => {
                         </Button>
                     </Form.Item>
 
-                    <div className="modal-footer-info">
+                    <div className="user-profile-modal-footer-info">
                         🔒 Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt. Không bao gồm dấu chấm.
                     </div>
                 </Form>

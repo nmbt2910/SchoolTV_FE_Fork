@@ -1,5 +1,6 @@
+/* StatisticsPage.css - Modified with unique class names */
 /* Base styles and theme variables */
-.statistics-page {
+.stats-page {
     padding: 24px 5%; /* Changed from just 24px to match header's 5% */
     padding-top: 90px;
     background: var(--bg-color);
@@ -9,7 +10,7 @@
 }
 
 /* Header Styles */
-.page-header {
+.stats-page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -18,31 +19,31 @@
     border-bottom: 1px solid var(--border-color);
 }
 
-.header-left h1 {
+.stats-header-left h1 {
     font-size: 28px;
     font-weight: 600;
     color: var(--primary-text);
     margin-bottom: 8px;
 }
 
-.channel-name {
+.stats-channel-name {
     color: var(--secondary-text);
     font-size: 16px;
     font-weight: 500;
 }
 
-.header-right {
+.stats-header-right {
     display: flex;
     gap: 16px;
     align-items: center;
 }
 
 /* Export and Create Buttons */
-.export-dropdown {
+.stats-export-dropdown {
     position: relative;
 }
 
-.export-button {
+.stats-export-button {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -57,12 +58,12 @@
     font-weight: 500;
 }
 
-.export-button:hover {
+.stats-export-button:hover {
     background: var(--secondary-color);
     border-color: var(--primary-color);
 }
 
-.export-menu {
+.stats-export-menu {
     position: absolute;
     top: calc(100% + 8px);
     right: 0;
@@ -75,7 +76,7 @@
     backdrop-filter: blur(10px);
 }
 
-.export-menu button {
+.stats-export-menu button {
     display: block;
     width: 100%;
     padding: 12px 20px;
@@ -88,12 +89,12 @@
     font-weight: 500;
 }
 
-.export-menu button:hover {
+.stats-export-menu button:hover {
     background: var(--secondary-color);
     color: var(--primary-color);
 }
 
-.create-button {
+.stats-create-button {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -108,17 +109,17 @@
     box-shadow: 0 2px 8px var(--shadow-color);
 }
 
-.create-button:hover {
+.stats-create-button:hover {
     background: var(--hover-color);
     transform: translateY(-1px);
 }
 
 /* Time Range Selector */
-.time-range-container {
+.stats-time-range-container {
     margin-bottom: 32px;
 }
 
-.time-range-selector {
+.stats-time-range-selector {
     display: flex;
     gap: 2px;
     background: var(--secondary-color);
@@ -128,7 +129,7 @@
     box-shadow: 0 2px 8px var(--shadow-color);
 }
 
-.time-range-button {
+.stats-time-range-button {
     padding: 10px 20px;
     border-radius: 8px;
     border: none;
@@ -139,7 +140,7 @@
     font-weight: 500;
 }
 
-.time-range-button.active {
+.stats-time-range-button.active {
     background: var(--card-bg);
     color: var(--primary-color);
     box-shadow: 0 2px 4px var(--shadow-color);
@@ -168,14 +169,14 @@
     box-shadow: 0 8px 30px var(--shadow-color);
 }
 
-.card-header {
+.stats-card-header {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 20px;
 }
 
-.card-header .icon {
+.stats-card-header .stats-icon {
     color: var(--primary-color);
     background: var(--secondary-color);
     padding: 12px; /* Increased padding */
@@ -188,26 +189,26 @@
     justify-content: center;
 }
 
-.card-header .label {
+.stats-card-header .stats-label {
     color: var(--secondary-text);
     font-size: 15px;
     font-weight: 500;
 }
 
-.card-content {
+.stats-card-content {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
 }
 
-.value {
+.stats-value {
     font-size: 28px;
     font-weight: 600;
     color: var(--primary-text);
     line-height: 1.2;
 }
 
-.trend {
+.stats-trend {
     font-size: 14px;
     font-weight: 500;
     display: flex;
@@ -217,25 +218,25 @@
     border-radius: 20px;
 }
 
-.trend.positive {
+.stats-trend.positive {
     color: var(--success-color);
     background: rgba(40, 167, 69, 0.1);
 }
 
-.trend.negative {
+.stats-trend.negative {
     color: var(--live-color);
     background: rgba(255, 71, 87, 0.1);
 }
 
 /* Charts */
-.analytics-grid {
+.stats-analytics-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
     margin-bottom: 32px;
 }
 
-.chart-card {
+.stats-chart-card {
     background: var(--card-bg);
     border-radius: 20px;
     padding: 24px;
@@ -244,12 +245,12 @@
     backdrop-filter: blur(10px);
 }
 
-.chart-card:hover {
+.stats-chart-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 30px var(--shadow-color);
 }
 
-.chart-container {
+.stats-chart-container {
     background: var(--bg-color);
     border-radius: 16px;
     padding: 20px;
@@ -258,7 +259,7 @@
 }
 
 /* Enhanced Chart Filters */
-.chart-filters {
+.stats-chart-filters {
     display: flex;
     gap: 8px;
     background: var(--secondary-color);
@@ -267,7 +268,7 @@
     box-shadow: 0 2px 8px var(--shadow-color);
 }
 
-.chart-filters button {
+.stats-chart-filters button {
     padding: 8px 16px;
     border-radius: 8px;
     border: none;
@@ -280,53 +281,53 @@
     white-space: nowrap;
 }
 
-.chart-filters button.active {
+.stats-chart-filters button.active {
     background: var(--card-bg);
     color: var(--primary-color);
     box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-.chart-header {
+.stats-chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
 }
 
-.chart-title {
+.stats-chart-title {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.chart-title h3 {
+.stats-chart-title h3 {
     font-size: 20px;
     font-weight: 600;
     color: var(--primary-text);
 }
 
-.info-icon {
+.stats-info-icon {
     color: var(--secondary-text);
     cursor: pointer;
     transition: color 0.2s ease;
 }
 
-.info-icon:hover {
+.stats-info-icon:hover {
     color: var(--primary-color);
 }
 
 /* Chart Controls */
-.metric-selector,
-.viewer-filters,
-.distribution-filters {
+.stats-metric-selector,
+.stats-viewer-filters,
+.stats-distribution-filters {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-.metric-button,
-.viewer-filters button,
-.distribution-filters button {
+.stats-metric-button,
+.stats-viewer-filters button,
+.stats-distribution-filters button {
     padding: 8px 16px;
     border-radius: 20px;
     border: 1px solid var(--border-color);
@@ -338,9 +339,9 @@
     font-weight: 500;
 }
 
-.metric-button.active,
-.viewer-filters button.active,
-.distribution-filters button.active {
+.stats-metric-button.active,
+.stats-viewer-filters button.active,
+.stats-distribution-filters button.active {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
@@ -398,24 +399,24 @@
 
 /* Responsive Design Enhancements */
 @media (max-width: 1024px) {
-    .analytics-grid {
+    .stats-analytics-grid {
         grid-template-columns: 1fr;
         gap: 24px;
     }
 
-    .chart-card {
+    .stats-chart-card {
         height: auto;
     }
 }
 
 /* Content Sections */
-.content-sections {
+.stats-content-sections {
     display: flex;
     flex-direction: column;
     gap: 24px; /* Reduced gap */
 }
 
-.content-section {
+.stats-content-section {
     background: var(--card-bg);
     border-radius: 20px;
     padding: 20px;
@@ -423,25 +424,25 @@
     border: 1px solid var(--glass-border);
 }
 
-.section-header {
+.stats-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.section-title {
+.stats-section-title {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.section-title h3 {
+.stats-section-title h3 {
     font-size: 22px;
     font-weight: 600;
     color: var(--primary-text);
 }
 
-.view-all-button {
+.stats-view-all-button {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -455,20 +456,20 @@
     font-weight: 500;
 }
 
-.view-all-button:hover {
+.stats-view-all-button:hover {
     background: var(--secondary-color);
     border-color: var(--primary-color);
     color: var(--primary-color);
 }
 
-.content-grid {
+.stats-content-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 24px;
     padding: 8px;
 }
 
-.content-card {
+.stats-content-card {
     background: var(--card-bg);
     border-radius: 16px;
     overflow: hidden;
@@ -479,12 +480,12 @@
     flex-direction: column;
 }
 
-.content-card:hover {
+.stats-content-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 30px var(--shadow-color);
 }
 
-.thumbnail-container {
+.stats-thumbnail-container {
     position: relative;
     width: 100%;
     padding-top: 56.25%;
@@ -492,7 +493,7 @@
     border-radius: 12px 12px 0 0; /* Added rounded corners to top edges */
 }
 
-.thumbnail-container img {
+.stats-thumbnail-container img {
     position: absolute;
     top: 0;
     left: 0;
@@ -503,11 +504,11 @@
     border-radius: 12px 12px 0 0; /* Added rounded corners to match container */
 }
 
-.content-card:hover .thumbnail-container img {
+.stats-content-card:hover .stats-thumbnail-container img {
     transform: scale(1.05);
 }
 
-.duration {
+.stats-duration {
     position: absolute;
     bottom: 12px;
     right: 12px;
@@ -520,7 +521,7 @@
     backdrop-filter: blur(4px);
 }
 
-.content-type {
+.stats-content-type {
     position: absolute;
     top: 12px;
     left: 12px;
@@ -533,7 +534,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.content-info {
+.stats-content-info {
     padding: 12px; /* Reduced from 16px */
     flex-grow: 1;
     display: flex;
@@ -542,7 +543,7 @@
     gap: 8px; /* Reduced from 12px */
 }
 
-.content-info h4 {
+.stats-content-info h4 {
     color: var(--primary-text);
     font-size: 16px;
     font-weight: 600;
@@ -555,14 +556,14 @@
 }
 
 
-.metrics {
+.stats-metrics {
     display: flex;
     flex-wrap: wrap;
     gap: 12px; /* Reduced from 16px */
     margin-bottom: 4px; /* Reduced from 12px */
 }
 
-.metrics span {
+.stats-metrics span {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -570,9 +571,10 @@
     font-size: 14px;
     background: var(--secondary-color);
     border-radius: 20px;
+    padding: 4px 10px;
 }
 
-.performance {
+.stats-performance {
     display: flex;
     align-items: center;
     gap: 6px; /* Reduced from 8px */
@@ -581,114 +583,115 @@
     font-weight: 500;
     background: var(--secondary-color);
     border-radius: 12px;
+    padding: 4px 10px;
 }
 
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .statistics-page {
+    .stats-page {
         padding: 16px 3%; /* Match header's 3% on tablet */
         padding-top: 80px;
     }
 
-    .page-header {
+    .stats-page-header {
         flex-direction: column;
         gap: 16px;
         align-items: flex-start;
     }
 
-    .header-right {
+    .stats-header-right {
         width: 100%;
         justify-content: space-between;
     }
 
-    .analytics-grid {
+    .stats-analytics-grid {
         grid-template-columns: 1fr;
     }
 
-    .export-button span,
-    .create-button span {
+    .stats-export-button span,
+    .stats-create-button span {
         display: none;
     }
 
-    .time-range-selector {
+    .stats-time-range-selector {
         width: 100%;
         overflow-x: auto;
         padding: 4px;
     }
 
-    .time-range-button {
+    .stats-time-range-button {
         padding: 8px 16px;
         white-space: nowrap;
     }
 
-    .chart-header {
+    .stats-chart-header {
         flex-direction: column;
         gap: 16px;
         align-items: flex-start;
     }
 
-    .chart-filters {
+    .stats-chart-filters {
         width: 100%;
         justify-content: space-between;
     }
 
-    .chart-filters button {
+    .stats-chart-filters button {
         flex: 1;
         text-align: center;
     }
 
-    .chart-container {
+    .stats-chart-container {
         padding: 16px;
     }
 
 
 
-    .metric-selector,
-    .viewer-filters,
-    .distribution-filters {
+    .stats-metric-selector,
+    .stats-viewer-filters,
+    .stats-distribution-filters {
         width: 100%;
         justify-content: flex-start;
     }
 }
 
-.performance-chart-section {
+.stats-performance-chart-section {
     margin-bottom: 32px;
 }
 
-.performance-chart-section .chart-card {
+.stats-performance-chart-section .stats-chart-card {
     width: 100%;
     display: flex;
     flex-direction: column;
 }
 
-.performance-chart-section .chart-header {
+.stats-performance-chart-section .stats-chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
 }
 
-.performance-chart-section .chart-title {
+.stats-performance-chart-section .stats-chart-title {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.performance-chart-section .chart-title h3 {
+.stats-performance-chart-section .stats-chart-title h3 {
     font-size: 22px;
     font-weight: 600;
     color: var(--primary-text);
 }
 
-.metric-selector-container {
+.stats-metric-selector-container {
     margin-bottom: 24px;
     width: 100%;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 16px;
 }
 
-.performance-chart-section .metric-selector {
+.stats-performance-chart-section .stats-metric-selector {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
@@ -696,7 +699,7 @@
     margin-top: 16px;
 }
 
-.performance-chart-section .metric-button {
+.stats-performance-chart-section .stats-metric-button {
     width: 100%;
     padding: 12px;
     border-radius: 12px;
@@ -713,76 +716,76 @@
     gap: 8px;
 }
 
-.performance-chart-section .metric-button:hover {
+.stats-performance-chart-section .stats-metric-button:hover {
     background: var(--secondary-color);
     border-color: var(--primary-color);
 }
 
-.performance-chart-section .metric-button.active {
+.stats-performance-chart-section .stats-metric-button.active {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
 }
 
-.performance-chart-section .chart-container {
+.stats-performance-chart-section .stats-chart-container {
     height: 400px;
     width: 100%;
 }
 
 /* Responsive styles */
 @media (max-width: 768px) {
-    .performance-chart-section .metric-selector {
+    .stats-performance-chart-section .stats-metric-selector {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
     }
 
-    .performance-chart-section .metric-button {
+    .stats-performance-chart-section .stats-metric-button {
         padding: 10px;
         font-size: 13px;
     }
 
-    .performance-chart-section .chart-container {
+    .stats-performance-chart-section .stats-chart-container {
         height: 300px;
     }
 
-    .content-grid {
+    .stats-content-grid {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 16px;
     }
 
-    .content-info h4 {
+    .stats-content-info h4 {
         font-size: 15px;
     }
 
-    .metrics span {
+    .stats-metrics span {
         font-size: 13px;
     }
 }
 
 @media (max-width: 480px) {
-    .statistics-page {
+    .stats-page {
         padding: 16px 3%; /* Keep consistent with mobile header */
         padding-top: 70px;
     }
 
-    .performance-chart-section .metric-selector {
+    .stats-performance-chart-section .stats-metric-selector {
         grid-template-columns: 1fr;
     }
 
-    .chart-card {
+    .stats-chart-card {
         padding: 16px;
     }
 
-    .chart-title h3 {
+    .stats-chart-title h3 {
         font-size: 18px;
     }
 
-    .chart-filters button {
+    .stats-chart-filters button {
         padding: 6px 12px;
         font-size: 13px;
     }
 
-    .content-grid {
+    .stats-content-grid {
         grid-template-columns: 1fr;
     }
 }
