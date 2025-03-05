@@ -1,13 +1,14 @@
+// SchoolLogin.jsx
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { notification } from "antd";
 import { ThemeContext } from "../../context/ThemeContext";
 import axios from "axios";
-import "./login.scss";
+import "./schoolLogin.scss";
 
 const API_URL = "https://localhost:44316/api/accounts/login";
 
-function Login() {
+function SchoolLogin() {
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -61,12 +62,13 @@ function Login() {
 
           notification.success({
             message: "Đăng nhập thành công!",
-            description: "Chào mừng bạn quay trở lại!",
+            description: "Chào mừng đơn vị trường học quay trở lại!",
             placement: "topRight",
             duration: 3,
           });
 
-          navigate("/watchHome");
+          // Redirect to appropriate dashboard for school owners
+          navigate("/");
         } else {
           throw new Error('Invalid response format');
         }
@@ -88,46 +90,30 @@ function Login() {
   };
 
   return (
-    <div className="auth-login-container" data-theme={theme}>
-      <div className="auth-login-card">
-        <h1>Chào mừng trở lại</h1>
-        <p>Đăng nhập để tiếp tục hành trình của bạn</p>
-        
-        <button className="auth-login-google">
-          <img 
-            src="https://img.icons8.com/color/24/000000/google-logo.png" 
-            alt="Google" 
-            className="auth-login-google-icon" 
-          />
-          Tiếp tục với Google
-        </button>
-        
-        <Link to="/school-login" className="auth-login-school">
-          <svg className="auth-login-school-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+    <div className="school-login-container" data-theme={theme}>
+      <div className="school-login-card">
+        <div className="school-login-header">
+          <svg className="school-login-logo" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
-          Bạn muốn tiếp tục với tư cách trường học?
-        </Link>
-        
-        <div className="auth-login-divider">
-          <div className="auth-login-divider-line"></div>
-          <span className="auth-login-divider-text">Hoặc</span>
-          <div className="auth-login-divider-line"></div>
+          <h1>Đăng nhập Trường học</h1>
         </div>
         
-        <form onSubmit={handleSubmit}>
-          <div className="auth-login-field">
-            <label className="auth-login-label">Địa chỉ Email</label>
-            <div className="auth-login-input-wrapper">
-              <svg className="auth-login-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <p className="school-login-description">Đăng nhập với tư cách đơn vị trường học để quản lý nội dung và tương tác với sinh viên</p>
+        
+        <form onSubmit={handleSubmit} className="school-login-form">
+          <div className="school-login-field">
+            <label className="school-login-label">Email đơn vị trường học</label>
+            <div className="school-login-input-wrapper">
+              <svg className="school-login-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                 <polyline points="22,6 12,13 2,6"></polyline>
               </svg>
               <input 
                 type="email" 
-                className="auth-login-input" 
-                placeholder="Nhập email của bạn" 
+                className="school-login-input" 
+                placeholder="Nhập email trường học" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -135,16 +121,16 @@ function Login() {
             </div>
           </div>
           
-          <div className="auth-login-field">
-            <label className="auth-login-label">Mật khẩu</label>
-            <div className="auth-login-input-wrapper">
-              <svg className="auth-login-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="school-login-field">
+            <label className="school-login-label">Mật khẩu</label>
+            <div className="school-login-input-wrapper">
+              <svg className="school-login-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
               <input 
                 type={showPassword ? "text" : "password"} 
-                className="auth-login-input auth-login-password" 
+                className="school-login-input school-login-password" 
                 placeholder="Nhập mật khẩu" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -152,7 +138,7 @@ function Login() {
               />
               <svg 
                 onClick={() => setShowPassword(!showPassword)}
-                className="auth-login-eye-icon" 
+                className="school-login-eye-icon" 
                 xmlns="http://www.w3.org/2000/svg" 
                 width="20" 
                 height="20" 
@@ -179,36 +165,48 @@ function Login() {
             </div>
           </div>
           
-          <div className="auth-login-options">
-            <div className="auth-login-remember">
+          <div className="school-login-options">
+            <div className="school-login-remember">
               <input 
                 type="checkbox" 
-                className="auth-login-checkbox" 
+                className="school-login-checkbox" 
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                id="remember-me"
+                id="remember-me-school"
               />
-              <label htmlFor="remember-me" className="auth-login-remember-text">Ghi nhớ mình nhé</label>
+              <label htmlFor="remember-me-school" className="school-login-remember-text">Ghi nhớ đăng nhập</label>
             </div>
-            <Link to="/forgottenPassword" className="auth-login-forgot">Quên mật khẩu?</Link>
+            <Link to="/forgottenPassword" className="school-login-forgot">Quên mật khẩu?</Link>
           </div>
           
           <button 
             type="submit" 
-            className="auth-login-submit"
+            className="school-login-submit"
             disabled={loading}
           >
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+            {loading ? "Đang xử lý..." : "Đăng nhập vào hệ thống trường học"}
           </button>
         </form>
         
-        <div className="auth-login-register">
-          <span>Chưa có tài khoản?</span>
-          <Link to="/register" className="auth-login-register-link">Đăng ký ngay</Link>
+        <div className="school-login-footer">
+          <div className="school-login-register">
+            <span>Chưa có tài khoản trường học?</span>
+            <Link to="/school-register" className="school-login-register-link">Đăng ký tài khoản trường học</Link>
+          </div>
+          
+          <div className="school-login-back">
+            <Link to="/login" className="school-login-back-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              Quay lại đăng nhập thông thường
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-export default Login;
+export default SchoolLogin;

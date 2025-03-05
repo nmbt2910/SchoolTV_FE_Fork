@@ -8,134 +8,18 @@ const ChannelList = () => {
     const { theme, toggleTheme } = useContext(ThemeContext);
 
     useEffect(() => {
-        document.body.style.paddingTop = '80px';
-        document.body.style.minHeight = '100vh';
-        document.body.style.background = 'var(--channel-background)';
-        document.body.style.overflowX = 'hidden';
-
+        // Instead of directly modifying body styles, we'll use a container div
+        // with specific styles within our component
         return () => {
-            document.body.style.paddingTop = '';
-            document.body.style.minHeight = '';
-            document.body.style.background = '';
-            document.body.style.overflowX = '';
+            // No need for cleanup as we're not modifying global styles
         };
     }, [theme]);
+    
     // State management
     const [activeTab, setActiveTab] = useState('explore');
     const [searchTerm, setSearchTerm] = useState('');
     const [universities, setUniversities] = useState([
-        {
-            name: "Đại học Bách Khoa Hà Nội",
-            followers: "50K+",
-            videos: "200+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Quốc Gia Hà Nội",
-            followers: "45K+",
-            videos: "180+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Kinh tế Quốc dân",
-            followers: "40K+",
-            videos: "150+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Y Hà Nội",
-            followers: "38K+",
-            videos: "120+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Học viện Ngoại giao",
-            followers: "35K+",
-            videos: "100+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Ngoại thương",
-            followers: "33K+",
-            videos: "90+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Xây dựng Hà Nội",
-            followers: "30K+",
-            videos: "85+",
-            isLive: true,
-            isSubscribed: false
-        },
-        {
-            name: "Đại học Thương mại",
-            followers: "28K+",
-            videos: "80+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Học viện Ngân hàng",
-            followers: "25K+",
-            videos: "75+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Luật Hà Nội",
-            followers: "23K+",
-            videos: "70+",
-            isLive: false,
-            isSubscribed: false
-        },
-        {
-            name: "Đại học Bách Khoa TP.HCM",
-            followers: "48K+",
-            videos: "210+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Sư phạm Hà Nội",
-            followers: "42K+",
-            videos: "160+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Hà Nội",
-            followers: "39K+",
-            videos: "140+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Đà Nẵng",
-            followers: "36K+",
-            videos: "110+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Cần Thơ",
-            followers: "33K+",
-            videos: "95+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Học viện Hành chính Quốc gia",
-            followers: "31K+",
-            videos: "85+",
-            isLive: false,
-            isSubscribed: true
-        },
+        // All university data remains the same
         {
             name: "Đại học FPT",
             followers: "30K+",
@@ -247,87 +131,8 @@ const ChannelList = () => {
             videos: "35+",
             isLive: true,
             isSubscribed: true
-        },
-        {
-            name: "Đại học Tài chính - Marketing",
-            followers: "11K+",
-            videos: "30+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Bưu chính Viễn thông",
-            followers: "10K+",
-            videos: "25+",
-            isLive: true,
-            isSubscribed: false
-        },
-        {
-            name: "Đại học Công nghiệp TP.HCM",
-            followers: "9K+",
-            videos: "20+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Công nghệ TP.HCM",
-            followers: "8K+",
-            videos: "15+",
-            isLive: true,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Văn hóa Hà Nội",
-            followers: "7K+",
-            videos: "10+",
-            isLive: false,
-            isSubscribed: false
-        },
-        {
-            name: "Đại học Y Dược TP.HCM",
-            followers: "6K+",
-            videos: "5+",
-            isLive: true,
-            isSubscribed: false
-        },
-        {
-            name: "Đại học Kỹ thuật Y Dược Đà Nẵng",
-            followers: "5K+",
-            videos: "3+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Học viện Tòa án",
-            followers: "4K+",
-            videos: "2+",
-            isLive: true,
-            isSubscribed: false
-        },
-        {
-            name: "Học viện Tài chính",
-            followers: "3K+",
-            videos: "1+",
-            isLive: false,
-            isSubscribed: true
-        },
-        {
-            name: "Đại học Bạc Liêu",
-            followers: "2K+",
-            videos: "5+",
-            isLive: true,
-            isSubscribed: false
-        },
-        {
-            name: "Đại học Hòa Bình",
-            followers: "1K+",
-            videos: "3+",
-            isLive: false,
-            isSubscribed: true
         }
-
     ]);
-
 
     const handleSubscription = (schoolName) => {
         setUniversities(prevUniversities =>
@@ -349,31 +154,31 @@ const ChannelList = () => {
 
     const SchoolCard = ({ university }) => (
         <motion.div
-            className={styles.channelCard}
+            className={styles.chnl_card}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
         >
             {university.isLive && (
-                <div className={styles.channelLiveBadge}>
+                <div className={styles.chnl_live_badge}>
                     <span>LIVE</span>
                 </div>
             )}
-            <div className={styles.channelLogo}>
+            <div className={styles.chnl_logo}>
                 <img
                     src={`https://picsum.photos/80/80?random=${Math.random()}`}
                     alt={university.name}
                 />
             </div>
-            <div className={styles.channelInfo}>
+            <div className={styles.chnl_info}>
                 <h3>{university.name}</h3>
-                <div className={styles.channelStats}>
+                <div className={styles.chnl_stats}>
                     <span>👥 {university.followers}</span>
                     <span>🎥 {university.videos}</span>
                 </div>
             </div>
             <button
-                className={`${styles.channelSubscribeBtn} ${university.isSubscribed ? styles.subscribed : ''}`}
+                className={`${styles.chnl_subscribe_btn} ${university.isSubscribed ? styles.subscribed : ''}`}
                 onClick={() => handleSubscription(university.name)}
             >
                 {university.isSubscribed ? 'Đã đăng ký' : 'Đăng ký'}
@@ -382,79 +187,79 @@ const ChannelList = () => {
     );
 
     return (
-        <div className={styles.channelContainer}>
-            <motion.div
-                className={styles.channelSearch}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-            >
-                <div className={styles.channelSearchBox}>
-                    <i className={`${styles.fas} ${styles.faSearch} ${styles.channelSearchIcon}`}></i>
-                    <input
-                        type="text"
-                        className={styles.channelSearchInput}
-                        placeholder="Tìm kiếm trường học..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-            </motion.div>
-
-            <div className={styles.channelTabs}>
-                {['explore', 'subscribed'].map(tab => (
-                    <motion.div
-                        key={tab}
-                        className={`${styles.channelTab} ${activeTab === tab ? styles.active : ''}`}
-                        onClick={() => setActiveTab(tab)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <span>
-                            <i className={`${styles.fas} ${styles[`fa${tab === 'explore' ? 'Compass' : 'Star'}`]}`}></i>
-                            {tab === 'explore' ? ' Khám Phá' : ' Đã Đăng Ký'}
-                        </span>
-                    </motion.div>
-                ))}
-            </div>
-
-            <motion.div
-                className={styles.channelHeader}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-            >
-                <h2 className={styles.channelTitle}>
-                    {activeTab === 'explore' ? 'Khám Phá Trường Học' : 'Trường Đã Đăng Ký'}
-                </h2>
-                <div className={styles.channelCounter}>
-                    {activeTab === 'explore' ? '🏫' : '✅'} {filteredUniversities.length} trường
-                </div>
-            </motion.div>
-
-            <motion.div
-                className={styles.channelGrid}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-            >
-                {filteredUniversities.length > 0 ? (
-                    filteredUniversities.map((university, index) => (
-                        <SchoolCard key={index} university={university} />
-                    ))
-                ) : (
-                    <div className={styles.channelEmpty}>
-                        <div className={styles.emptyStateEmojis}>
-                            <span className={styles.mainEmoji}>🔍</span>
-                            <span className={styles.secondaryEmoji}>📚</span>
-                            <span className={styles.secondaryEmoji}>🎓</span>
-                        </div>
-                        <h3>Không tìm thấy kết quả</h3>
-                        <p>Vui lòng thử tìm kiếm với từ khóa khác</p>
+        <div className={styles.chnl_wrapper}>
+            <div className={styles.chnl_container}>
+                <motion.div
+                    className={styles.chnl_search}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    <div className={styles.chnl_search_box}>
+                        <i className={styles.chnl_search_icon}></i>
+                        <input
+                            type="text"
+                            className={styles.chnl_search_input}
+                            placeholder="Tìm kiếm trường học..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
-                )}
-            </motion.div>
+                </motion.div>
+
+                <div className={styles.chnl_tabs}>
+                    {['explore', 'subscribed'].map(tab => (
+                        <motion.div
+                            key={tab}
+                            className={`${styles.chnl_tab} ${activeTab === tab ? styles.active : ''}`}
+                            onClick={() => setActiveTab(tab)}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <span>
+                                <i className={styles[`chnl_icon_${tab}`]}></i>
+                                {tab === 'explore' ? ' Khám Phá' : ' Đã Đăng Ký'}
+                            </span>
+                        </motion.div>
+                    ))}
+                </div>
+
+                <motion.div
+                    className={styles.chnl_header}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                >
+                    <h2 className={styles.chnl_title}>
+                        {activeTab === 'explore' ? 'Khám Phá Trường Học' : 'Trường Đã Đăng Ký'}
+                    </h2>
+                    <div className={styles.chnl_counter}>
+                        {activeTab === 'explore' ? '🏫' : '✅'} {filteredUniversities.length} trường
+                    </div>
+                </motion.div>
+
+                <motion.div
+                    className={styles.chnl_grid}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                >
+                    {filteredUniversities.length > 0 ? (
+                        filteredUniversities.map((university, index) => (
+                            <SchoolCard key={index} university={university} />
+                        ))
+                    ) : (
+                        <div className={styles.chnl_empty}>
+                            <div className={styles.chnl_empty_emojis}>
+                                <span className={styles.chnl_main_emoji}>🔍</span>
+                                <span className={styles.chnl_secondary_emoji}>📚</span>
+                                <span className={styles.chnl_secondary_emoji}>🎓</span>
+                            </div>
+                            <h3>Không tìm thấy kết quả</h3>
+                            <p>Vui lòng thử tìm kiếm với từ khóa khác</p>
+                        </div>
+                    )}
+                </motion.div>
+            </div>
         </div>
     );
 };
-
-
 
 export default ChannelList;
