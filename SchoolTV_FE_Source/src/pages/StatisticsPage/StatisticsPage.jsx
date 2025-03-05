@@ -263,13 +263,13 @@ const StatisticsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
         >
-            <div className="card-header">
-                <Icon size={24} className="icon" />
-                <span className="label">{label}</span>
+            <div className="stats-card-header">
+                <Icon size={24} className="stats-icon" />
+                <span className="stats-label">{label}</span>
             </div>
-            <div className="card-content">
-                <span className="value">{value}</span>
-                <span className={`trend ${isPositive ? 'positive' : 'negative'}`}>
+            <div className="stats-card-content">
+                <span className="stats-value">{value}</span>
+                <span className={`stats-trend ${isPositive ? 'positive' : 'negative'}`}>
                     {trend}
                 </span>
             </div>
@@ -277,18 +277,18 @@ const StatisticsPage = () => {
     );
 
     const ContentSection = ({ title, items, icon: Icon }) => (
-        <div className="content-section">
-            <div className="section-header">
-                <div className="section-title">
+        <div className="stats-content-section">
+            <div className="stats-section-header">
+                <div className="stats-section-title">
                     <Icon size={20} />
                     <h3>{title}</h3>
                 </div>
-                <button className="view-all-button">
+                <button className="stats-view-all-button">
                     Xem tất cả
                     <ChevronRight size={16} />
                 </button>
             </div>
-            <div className="content-grid">
+            <div className="stats-content-grid">
                 {items.map((content) => (
                     <ContentCard key={content.id} content={content} />
                 ))}
@@ -297,20 +297,20 @@ const StatisticsPage = () => {
     );
 
     const ContentCard = ({ content }) => (
-        <div className="content-card">
-            <div className="thumbnail-container">
+        <div className="stats-content-card">
+            <div className="stats-thumbnail-container">
                 <img src={content.thumbnail} alt={content.title} />
-                {content.duration && <span className="duration">{content.duration}</span>}
-                <div className="content-type">{content.type}</div>
+                {content.duration && <span className="stats-duration">{content.duration}</span>}
+                <div className="stats-content-type">{content.type}</div>
             </div>
-            <div className="content-info">
+            <div className="stats-content-info">
                 <h4>{content.title}</h4>
-                <div className="metrics">
+                <div className="stats-metrics">
                     <span><Eye size={14} /> {content.views}</span>
                     <span><ThumbsUp size={14} /> {content.likes}</span>
                     <span><MessageCircle size={14} /> {content.comments}</span>
                 </div>
-                <div className="performance">
+                <div className="stats-performance">
                     <Zap size={14} />
                     <span>{content.performance}</span>
                 </div>
@@ -319,17 +319,17 @@ const StatisticsPage = () => {
     );
 
     return (
-        <div className={`statistics-page ${isDarkMode ? 'dark-mode' : ''}`}>
-            <header className="page-header">
-                <div className="header-left">
+        <div className={`stats-page ${isDarkMode ? 'dark-mode' : ''}`}>
+            <header className="stats-page-header">
+                <div className="stats-header-left">
                     <h1>Số liệu phân tích kênh</h1>
-                    <span className="channel-name">School Studio</span>
+                    <span className="stats-channel-name">School Studio</span>
                 </div>
-                <div className="header-right">
+                <div className="stats-header-right">
 
-                    <div className="export-dropdown">
+                    <div className="stats-export-dropdown">
                         <button
-                            className="export-button"
+                            className="stats-export-button"
                             onClick={() => setShowExportMenu(!showExportMenu)}
                         >
                             <Download size={18} />
@@ -337,7 +337,7 @@ const StatisticsPage = () => {
                             <ChevronDown size={16} />
                         </button>
                         {showExportMenu && (
-                            <div className="export-menu">
+                            <div className="stats-export-menu">
                                 <button>Xuất PDF</button>
                                 <button>Xuất Excel</button>
                                 <button>Xuất CSV</button>
@@ -346,7 +346,7 @@ const StatisticsPage = () => {
                     </div>
 
                     <button
-                        className="create-button"
+                        className="stats-create-button"
                         onClick={() => navigate('/school-studio/post')}
                     >
                         <Video size={18} />
@@ -355,8 +355,8 @@ const StatisticsPage = () => {
                 </div>
             </header>
 
-            <div className="time-range-container">
-                <div className="time-range-selector">
+            <div className="stats-time-range-container">
+                <div className="stats-time-range-selector">
                     {[
                         { id: '7days', label: '7 ngày' },
                         { id: '30days', label: '30 ngày' },
@@ -366,14 +366,14 @@ const StatisticsPage = () => {
                         <button
                             key={range.id}
                             onClick={() => handleTimeRangeChange(range.id)}
-                            className={`time-range-button ${timeRange === range.id ? 'active' : ''}`}
+                            className={`stats-time-range-button ${timeRange === range.id ? 'active' : ''}`}
                         >
                             {range.label}
                         </button>
                     ))}
                 </div>
                 {timeRange === 'custom' && (
-                    <div className="custom-date-picker">
+                    <div className="stats-custom-date-picker">
                         {/* Add your custom date picker component here */}
                     </div>
                 )}
@@ -383,21 +383,21 @@ const StatisticsPage = () => {
                 {summaryStats.map((stat, index) => renderStatsCard(stat))}
             </div>
 
-            <div className="performance-chart-section">
-                <div className="chart-card performance">
-                    <div className="chart-header">
-                        <div className="chart-title">
+            <div className="stats-performance-chart-section">
+                <div className="stats-chart-card performance">
+                    <div className="stats-chart-header">
+                        <div className="stats-chart-title">
                             <h3>Hiệu suất tổng quan</h3>
-                            <Info size={16} className="info-icon" />
+                            <Info size={16} className="stats-info-icon" />
                         </div>
                     </div>
 
-                    <div className="metric-selector-container">
-                        <div className="metric-selector">
+                    <div className="stats-metric-selector-container">
+                        <div className="stats-metric-selector">
                             {metrics.map((metric) => (
                                 <button
                                     key={metric.key}
-                                    className={`metric-button ${selectedMetric === metric.key ? 'active' : ''}`}
+                                    className={`stats-metric-button ${selectedMetric === metric.key ? 'active' : ''}`}
                                     onClick={() => setSelectedMetric(metric.key)}
                                 >
                                     {metric.key === 'views' && <Eye size={16} />}
@@ -410,7 +410,7 @@ const StatisticsPage = () => {
                         </div>
                     </div>
 
-                    <div className="chart-container">
+                    <div className="stats-chart-container">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                                 data={viewData}
@@ -464,16 +464,16 @@ const StatisticsPage = () => {
                 </div>
             </div>
 
-            <div className="analytics-grid">
+            <div className="stats-analytics-grid">
 
 
-                <div className="chart-card audience">
-                    <div className="chart-header">
-                        <div className="chart-title">
+                <div className="stats-chart-card audience">
+                    <div className="stats-chart-header">
+                        <div className="stats-chart-title">
                             <h3>Phân tích khán giả</h3>
-                            <Info size={16} className="info-icon" />
+                            <Info size={16} className="stats-info-icon" />
                         </div>
-                        <div className="chart-filters">
+                        <div className="stats-chart-filters">
                             <button
                                 className={audienceTimeFilter === 'hour' ? 'active' : ''}
                                 onClick={() => setAudienceTimeFilter('hour')}
@@ -488,7 +488,7 @@ const StatisticsPage = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="chart-container">
+                    <div className="stats-chart-container">
                         <ResponsiveContainer width="100%" height={300}>
                             <AreaChart
                                 data={audienceTimeFilter === 'hour' ? audienceData : audienceDataByDay}
@@ -534,13 +534,13 @@ const StatisticsPage = () => {
                 </div>
 
 
-                <div className="chart-card content-distribution">
-                    <div className="chart-header">
-                        <div className="chart-title">
+                <div className="stats-chart-card content-distribution">
+                    <div className="stats-chart-header">
+                        <div className="stats-chart-title">
                             <h3>Phân bố nội dung</h3>
-                            <Info size={16} className="info-icon" />
+                            <Info size={16} className="stats-info-icon" />
                         </div>
-                        <div className="chart-filters">
+                        <div className="stats-chart-filters">
                             <button
                                 className={contentDistFilter === 'type' ? 'active' : ''}
                                 onClick={() => setContentDistFilter('type')}
@@ -555,7 +555,7 @@ const StatisticsPage = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="chart-container">
+                    <div className="stats-chart-container">
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart
                                 data={contentDistFilter === 'type' ? contentTypeData : contentTypeByTopic}
@@ -598,7 +598,7 @@ const StatisticsPage = () => {
                 </div>
             </div>
 
-            <div className="content-sections">
+            <div className="stats-content-sections">
                 <ContentSection
                     title="Livestreams"
                     items={popularContent.filter(c => c.type === 'Livestream')}
