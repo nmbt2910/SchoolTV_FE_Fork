@@ -16,76 +16,81 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      notification.warning({
-        message: "Vui lòng kiểm tra lại thông tin đăng nhập!",
-        description: "Bạn cần nhập đầy đủ thông tin trước khi đăng nhập.",
-        placement: "topRight",
-        duration: 5,
-      });
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      const response = await axios.post(API_URL, 
-        { email, password, remember: rememberMe }, 
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+// Inside login.jsx, update the handleSubmit function:
 
-      if (response.status === 200 && response.data) {
-        console.log('Login response:', response.data);
-
-        // Extract token and accountID from the correct structure
-        const { token, account } = response.data;
-
-        if (token && account?.accountID) {
-          localStorage.setItem("authToken", token);
-          localStorage.setItem("accountID", account.accountID);
-
-          // Store additional user info if needed
-          localStorage.setItem("userData", JSON.stringify({
-            username: account.username,
-            email: account.email,
-            fullname: account.fullname,
-            roleName: account.roleName
-          }));
-
-          notification.success({
-            message: "Đăng nhập thành công!",
-            description: "Chào mừng bạn quay trở lại!",
-            placement: "topRight",
-            duration: 3,
-          });
-
-          navigate("/watchHome");
-        } else {
-          throw new Error('Invalid response format');
-        }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!email || !password) {
+    notification.warning({
+      message: "Vui lòng kiểm tra lại thông tin đăng nhập!",
+      description: "Bạn cần nhập đầy đủ thông tin trước khi đăng nhập.",
+      placement: "topRight",
+      duration: 5,
+    });
+    return;
+  }
+  
+  setLoading(true);
+  
+  try {
+    const response = await axios.post(API_URL, 
+      { email, password, remember: rememberMe }, 
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
-    } catch (error) {
-      console.error("Lỗi đăng nhập:", error);
+    );
 
-      notification.error({
-        message: "Đăng nhập thất bại!",
-        description: error.response?.status === 401
-          ? "Email hoặc mật khẩu của bạn đã sai! Hãy kiểm tra lại."
-          : "Có lỗi xảy ra trong quá trình đăng nhập, vui lòng thử lại.",
-        placement: "topRight",
-        duration: 5,
-      });
-    } finally {
-      setLoading(false);
+    if (response.status === 200 && response.data) {
+      console.log('Login response:', response.data);
+
+      // Extract token and account data from response
+      const { token, account } = response.data;
+
+      if (token && account) {
+        // Store token in localStorage
+        localStorage.setItem("authToken", token);
+        
+        // Store user data including the roleName
+        const userData = {
+          accountID: account.accountID,
+          username: account.username,
+          email: account.email,
+          fullname: account.fullname,
+          roleName: account.roleName
+        };
+        
+        localStorage.setItem("userData", JSON.stringify(userData));
+
+        notification.success({
+          message: "Đăng nhập thành công!",
+          description: "Chào mừng bạn quay trở lại!",
+          placement: "topRight",
+          duration: 3,
+        });
+
+        navigate("/watchHome");
+      } else {
+        throw new Error('Invalid response format');
+      }
     }
-  };
+  } catch (error) {
+    console.error("Lỗi đăng nhập:", error);
+
+    notification.error({
+      message: "Đăng nhập thất bại!",
+      description: error.response?.status === 401
+        ? "Email hoặc mật khẩu của bạn đã sai! Hãy kiểm tra lại."
+        : "Có lỗi xảy ra trong quá trình đăng nhập, vui lòng thử lại.",
+      placement: "topRight",
+      duration: 5,
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-login-container" data-theme={theme}>

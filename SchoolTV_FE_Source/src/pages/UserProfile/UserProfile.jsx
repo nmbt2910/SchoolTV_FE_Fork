@@ -27,27 +27,45 @@ const UserProfile = () => {
     const [passwordForm] = Form.useForm();
 
     useEffect(() => {
-        const accountID = localStorage.getItem('accountID');
         const token = localStorage.getItem('authToken');
         const storedUserData = localStorage.getItem('userData');
 
-        if (!accountID || !token) {
+        if (!token) {
             setLoading(false);
+            notification.error({
+                message: 'Lỗi xác thực!',
+                description: 'Bạn cần đăng nhập để xem thông tin người dùng.',
+                placement: 'topRight'
+            });
             return;
         }
 
+        // Set initial user data from localStorage if available
         if (storedUserData) {
             setUser(JSON.parse(storedUserData));
-            setLoading(false);
         }
 
-        axios.get(`https://localhost:44316/api/accounts/admin/${accountID}`, {
+        // Fetch updated user info from the new API endpoint
+        axios.get('https://localhost:44316/api/accounts/info', {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(response => {
                 if (response.data) {
-                    setUser(response.data);
-                    localStorage.setItem('userData', JSON.stringify(response.data));
+                    console.log('User data from API:', response.data);
+                    
+                    // Get the roleName from localStorage as it's not in the new API response
+                    const userData = JSON.parse(localStorage.getItem('userData')) || {};
+                    
+                    // Combine the API response with roleName from localStorage
+                    const updatedUserData = {
+                        ...response.data,
+                        roleName: userData.roleName || 'User' // Default to 'User' if not found
+                    };
+                    
+                    setUser(updatedUserData);
+                    
+                    // Update localStorage with the latest data including roleName
+                    localStorage.setItem('userData', JSON.stringify(updatedUserData));
                 } else {
                     throw new Error('No user data received');
                 }
@@ -56,14 +74,19 @@ const UserProfile = () => {
                 console.error('Error fetching user data:', error);
                 if (error.response?.status === 401) {
                     localStorage.removeItem('authToken');
-                    localStorage.removeItem('accountID');
                     localStorage.removeItem('userData');
+                    notification.error({
+                        message: 'Phiên đăng nhập hết hạn!',
+                        description: 'Vui lòng đăng nhập lại để tiếp tục.',
+                        placement: 'topRight'
+                    });
+                } else {
+                    notification.error({
+                        message: 'Lỗi!',
+                        description: 'Không thể tải thông tin người dùng.',
+                        placement: 'topRight'
+                    });
                 }
-                notification.error({
-                    message: 'Lỗi!',
-                    description: 'Không thể tải thông tin người dùng.',
-                    placement: 'topRight'
-                });
             })
             .finally(() => {
                 setLoading(false);
@@ -72,6 +95,7 @@ const UserProfile = () => {
 
     const handleUpdateInfo = async (values) => {
         try {
+            // Format the data according to the API expectations
             const mappedValues = {
                 username: values.profile_username,
                 email: values.profile_email,
@@ -79,23 +103,31 @@ const UserProfile = () => {
                 phoneNumber: values.profile_phone,
                 address: values.profile_address
             };
-            const accountID = localStorage.getItem('accountID');
+            
             const token = localStorage.getItem('authToken');
 
-            const response = await axios.patch(
-                `https://localhost:44316/api/accounts/update/${accountID}`,
-                mappedValues,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+            const response = await axios({
+                method: 'PATCH',
+                url: 'https://localhost:44316/api/accounts/update',
+                data: mappedValues,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
-            );
+            });
 
             if (response.status === 200) {
-                setUser(response.data.account);
-                localStorage.setItem('userData', JSON.stringify(response.data.account));
+                // Get updated user data
+                const updatedUser = response.data.account || response.data;
+                
+                // Preserve the roleName from the current user state
+                const updatedUserWithRole = {
+                    ...updatedUser,
+                    roleName: user.roleName
+                };
+                
+                setUser(updatedUserWithRole);
+                localStorage.setItem('userData', JSON.stringify(updatedUserWithRole));
 
                 notification.success({
                     message: 'Cập nhật thành công!',
@@ -108,6 +140,7 @@ const UserProfile = () => {
                 form.resetFields();
             }
         } catch (error) {
+            console.error('Update error:', error);
             notification.error({
                 message: 'Cập nhật thất bại!',
                 description: error.response?.data?.message || 'Đã có lỗi xảy ra khi cập nhật thông tin.',
@@ -128,19 +161,21 @@ const UserProfile = () => {
         }
 
         try {
-            const accountID = localStorage.getItem('accountID');
             const token = localStorage.getItem('authToken');
 
-            const response = await axios.patch(
-                `https://localhost:44316/api/accounts/change-password/${accountID}`,
-                values,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+            const response = await axios({
+                method: 'PATCH',
+                url: 'https://localhost:44316/api/accounts/change-password',
+                data: {
+                    currentPassword: values.currentPassword,
+                    newPassword: values.newPassword,
+                    confirmNewPassword: values.confirmNewPassword
+                },
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
-            );
+            });
 
             if (response.status === 200) {
                 notification.success({
@@ -154,6 +189,7 @@ const UserProfile = () => {
                 passwordForm.resetFields();
             }
         } catch (error) {
+            console.error('Password change error:', error);
             notification.error({
                 message: 'Cập nhật mật khẩu thất bại!',
                 description: error.response?.data?.message || 'Đã có lỗi xảy ra khi cập nhật mật khẩu.',
@@ -209,14 +245,26 @@ const UserProfile = () => {
                             <Button
                                 type="primary"
                                 icon={<EditOutlined />}
-                                onClick={() => setEditModalVisible(true)}
+                                onClick={() => {
+                                    form.setFieldsValue({
+                                        profile_username: user.username,
+                                        profile_email: user.email,
+                                        profile_fullname: user.fullname,
+                                        profile_phone: user.phoneNumber || '',
+                                        profile_address: user.address || ''
+                                    });
+                                    setEditModalVisible(true);
+                                }}
                                 className="user-profile-edit-btn"
                             >
                                 Chỉnh Sửa Hồ Sơ
                             </Button>
                             <Button
                                 icon={<KeyOutlined />}
-                                onClick={() => setPasswordModalVisible(true)}
+                                onClick={() => {
+                                    passwordForm.resetFields();
+                                    setPasswordModalVisible(true);
+                                }}
                                 className="user-profile-password-btn"
                             >
                                 Đổi Mật Khẩu
@@ -325,7 +373,7 @@ const UserProfile = () => {
 
             <Modal
                 title="Cập nhật thông tin"
-                visible={editModalVisible}
+                open={editModalVisible}
                 onCancel={() => setEditModalVisible(false)}
                 footer={null}
                 className="user-profile-modal"
@@ -336,13 +384,6 @@ const UserProfile = () => {
                     form={form}
                     layout="vertical"
                     onFinish={handleUpdateInfo}
-                    initialValues={{
-                        profile_username: user.username,
-                        profile_email: user.email,
-                        profile_fullname: user.fullname,
-                        profile_phone: user.phoneNumber,
-                        profile_address: user.address
-                    }}
                     className="user-profile-update-form"
                 >
                     <Row gutter={24}>
@@ -426,7 +467,7 @@ const UserProfile = () => {
 
             <Modal
                 title="Đổi mật khẩu"
-                visible={passwordModalVisible}
+                open={passwordModalVisible}
                 onCancel={() => setPasswordModalVisible(false)}
                 footer={null}
                 className="user-profile-modal"

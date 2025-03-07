@@ -14,39 +14,60 @@ const Header = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    const accountID = localStorage.getItem('accountID');
-
-    if (token && accountID) {
+    
+    if (token) {
+      // First try to load from localStorage for immediate display
       const storedUserData = localStorage.getItem('userData');
       if (storedUserData) {
-        const parsedUserData = JSON.parse(storedUserData);
-        setUser(parsedUserData);
-        console.log("Parsed user data:", parsedUserData);
+        try {
+          const parsedUserData = JSON.parse(storedUserData);
+          setUser(parsedUserData);
+          console.log("Loaded user data from localStorage:", parsedUserData);
+        } catch (error) {
+          console.error("Error parsing stored user data:", error);
+        }
       }
 
-      fetch(`https://localhost:44316/api/accounts/admin/${accountID}`, {
+      // Then fetch fresh data from the API
+      fetch('https://localhost:44316/api/accounts/info', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'accept': '*/*'
         }
       })
         .then(res => {
-          if (!res.ok) throw new Error('Failed to fetch user data');
+          if (!res.ok) {
+            throw new Error(`Failed to fetch user data: ${res.status}`);
+          }
           return res.json();
         })
         .then(data => {
+          console.log("API response for user info:", data);
+          
+          // Create a user object with the necessary fields
           const userData = {
-            ...data,
-            roleName: data.role?.roleName
+            accountID: data.accountID,
+            username: data.username,
+            email: data.email,
+            fullname: data.fullname,
+            address: data.address,
+            phoneNumber: data.phoneNumber,
+            // Get roleName from localStorage if not in the current response
+            roleName: localStorage.getItem('userData') ? 
+              JSON.parse(localStorage.getItem('userData')).roleName : 
+              null
           };
+          
           setUser(userData);
           localStorage.setItem('userData', JSON.stringify(userData));
         })
         .catch(err => {
-          console.error('Error fetching user:', err);
-          if (err.message === 'Failed to fetch user data') {
+          console.error('Error fetching user info:', err);
+          if (err.message.includes('Failed to fetch user data')) {
+            // If the token is invalid, clear auth data
             localStorage.removeItem('authToken');
-            localStorage.removeItem('accountID');
             localStorage.removeItem('userData');
+            setUser(null);
           }
         });
     }
@@ -54,18 +75,15 @@ const Header = () => {
     AOS.init({ duration: 800, once: true });
   }, []);
 
-  console.log("Current user state:", user);
-
   const handleLogout = () => {
     localStorage.removeItem('authToken');
-    localStorage.removeItem('accountID');
     localStorage.removeItem('userData');
     setUser(null);
     navigate('/login');
   };
 
-  // Check for role in both places: direct roleName and nested role.roleName
-  const isSchoolOwner = user && (user.roleName === "SchoolOwner" || user.role?.roleName === "SchoolOwner");
+  // Check for roleName in user object
+  const isSchoolOwner = user && user.roleName === "SchoolOwner";
 
   return (
     <header className="header">
@@ -92,7 +110,7 @@ const Header = () => {
         {user ? (
           <div className="user-profile" onClick={() => setShowDropdown(!showDropdown)}>
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname)}&background=random`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}&background=random`}
               alt="Profile"
               className="profile-pic"
             />
