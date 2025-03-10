@@ -344,14 +344,6 @@ const StatisticsPage = () => {
                             </div>
                         )}
                     </div>
-
-                    <button
-                        className="stats-create-button"
-                        onClick={() => navigate('/school-studio/post')}
-                    >
-                        <Video size={18} />
-                        <span>Tạo nội dung</span>
-                    </button>
                 </div>
             </header>
 

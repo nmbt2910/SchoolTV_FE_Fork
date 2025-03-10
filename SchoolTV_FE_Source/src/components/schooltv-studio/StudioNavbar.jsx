@@ -4,7 +4,7 @@ import { Flex } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 
 function StudioNavbar() {
-  const buttonLabel = ["Đăng Bài Viết", "Đăng Video", "Live Stream"];
+  const buttonLabel = ["Đăng Bài Viết", "Đăng Video", "Live Stream", "Thống kê dữ liệu"];
   const [activeButton, setActiveButton] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,6 +19,9 @@ function StudioNavbar() {
         break;
       case "/school-studio/live-stream":
         setActiveButton(2);
+        break;
+      case "/school-studio/statistics":
+        setActiveButton(3);
         break;
       default:
         setActiveButton(null);
@@ -37,6 +40,9 @@ function StudioNavbar() {
         break;
       case 2:
         navigate("/school-studio/live-stream");
+        break;
+      case 3:
+        navigate("/school-studio/statistics");
         break;
       default:
         break;
