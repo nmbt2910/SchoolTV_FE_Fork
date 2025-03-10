@@ -12,7 +12,7 @@ api.defaults.baseURL = baseUrl;
 // handle before call API
 const handleBefore = (config) => {
   // lấy ra cái token và đính kèm theo cái request
-  const token = localStorage.getItem("token")?.replaceAll('"', "");
+  const token = localStorage.getItem("authToken")?.replaceAll('"', "");
   config.headers["Authorization"] = `Bearer ${token}`;
   return config;
 };
