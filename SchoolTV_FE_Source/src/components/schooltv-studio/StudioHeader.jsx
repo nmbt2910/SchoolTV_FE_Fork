@@ -119,7 +119,7 @@ function StudioHeader() {
             height={50}
             style={{ borderRadius: "50%" }}
             preview={false}
-            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}&background=random`}
+            src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
           />
         </Flex>
 
