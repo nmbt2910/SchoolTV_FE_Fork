@@ -5,8 +5,10 @@ import { notification } from "antd";
 import { ThemeContext } from "../../context/ThemeContext";
 import axios from "axios";
 import "./schoolLogin.scss";
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../../redux/features/userData/userLoginSlice';
 
-const API_URL = "https://localhost:44316/api/accounts/login";
+const API_URL = "https://localhost:7057/api/accounts/login";
 
 function SchoolLogin() {
   const { theme } = useContext(ThemeContext);
@@ -16,6 +18,9 @@ function SchoolLogin() {
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const user = useSelector((state) => state.userData.user);
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,7 +64,9 @@ function SchoolLogin() {
             fullname: account.fullname,
             roleName: account.roleName
           }));
-
+          console.log("dispatching login action with account", account);
+          dispatch(login(account));
+          console.log("Redux state after login:", user);
           notification.success({
             message: "Đăng nhập thành công!",
             description: "Chào mừng đơn vị trường học quay trở lại!",

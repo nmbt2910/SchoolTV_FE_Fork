@@ -115,7 +115,7 @@ function SchoolRegister() {
     
     try {
       const response = await axios.post(
-        "https://localhost:44316/api/accounts/schoolowner/signup",
+        "https://localhost:7057/api/accounts/schoolowner/signup",
         userData,
         {
           headers: {

@@ -132,7 +132,7 @@ const Header = () => {
                 <div className="dropdown-divider"></div>
                 {isSchoolOwner && (
                   <>
-                    <a href="/StatisticsPage" className="dropdown-item studio-link">
+                    <a href="school-studio/statistics" className="dropdown-item studio-link">
                       <i className="fas fa-tv"></i> SchoolTV Studio
                     </a>
                     <div className="dropdown-divider"></div>
