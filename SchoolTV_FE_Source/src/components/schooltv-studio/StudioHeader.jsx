@@ -4,12 +4,18 @@ import { Badge, Drawer, Flex, Image } from "antd";
 import { ThemeContext } from "../../context/ThemeContext";
 import { Dropdown } from "antd";
 import { IoMenu, IoNotifications } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function StudioHeader() {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [countNotification, setCountNotification] = useState(0);
   const [openSmallMenu, setOpenSmallMenu] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(theme);
+  const navigate = useNavigate();
+
+  const user  = useSelector((state) => state.userData.user);
+  console.log('User:', user);
 
   const items = [
     {
@@ -83,6 +89,7 @@ function StudioHeader() {
           <button
             style={{ marginRight: "35px" }}
             className="schoolStudio-switch-button"
+            onClick={() => navigate("/")}
           >
             Chuyển đến SchoolTV
           </button>

@@ -94,6 +94,10 @@ function App() {
       ),
       children: [
         {
+          path: "statistics",
+          element: <StatisticsPage />
+        },
+        {
           path: "post",
           element: <StudioPost />
         },
@@ -164,10 +168,6 @@ function App() {
           path: "/communityPost",
           element: <CommunityPost />,
         },
-        {
-          path: "StatisticsPage",
-          element: <StatisticsPage />
-        }
       ],
     },
   ]);
