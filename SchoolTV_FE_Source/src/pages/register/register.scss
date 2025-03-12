@@ -51,13 +51,12 @@
   &::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.05);
-    backdrop-filter: blur(10px);
-    z-index: 0;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0.5;
+    animation: backgroundMove 60s linear infinite;
   }
 }
 
@@ -66,7 +65,7 @@
   width: 100%;
   max-width: 800px;
   background: var(--auth-register-form-bg);
-  padding: 40px;
+  padding: 30px;
   border-radius: 16px;
   box-shadow: var(--auth-register-shadow);
   backdrop-filter: blur(10px);
@@ -76,8 +75,8 @@
 
   h1 {
     color: var(--auth-register-text-primary);
-    font-size: 2.5rem;
-    margin-bottom: 8px;
+    font-size: 2rem;
+    margin-bottom: 6px;
     text-align: center;
     font-weight: 700;
     animation: auth-register-fade 0.8s ease-out;
@@ -85,16 +84,16 @@
 
   p {
     color: var(--auth-register-text-secondary);
-    font-size: 1.1rem;
+    font-size: 1rem;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     animation: auth-register-fade 0.8s ease-out 0.2s backwards;
   }
 }
 
 // Form fields
 .auth-register-field {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   
   .auth-register-label {
     display: block;
@@ -119,7 +118,7 @@
     
     .auth-register-input {
       width: 100%;
-      height: 50px;
+      height: 45px;
       background: var(--auth-register-input-bg);
       color: var(--auth-register-input-text);
       border: 1px solid var(--auth-register-input-border);
@@ -227,7 +226,7 @@
 // Login link
 .auth-register-login {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px;
   color: var(--auth-register-text-secondary);
   font-size: 0.95rem;
   
@@ -362,6 +361,15 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes backgroundMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-50%, -50%);
   }
 }
 
