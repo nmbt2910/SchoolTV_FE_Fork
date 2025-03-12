@@ -1,0 +1,57 @@
+.post-preview-container {
+  background-color: var(--unique-video-card-bg);
+  width: 49%;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 20px 20px;
+  max-height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 20px;
+
+  .post-preview-owner {
+    display: flex;
+
+    .post-preview-owner-info {
+      margin-left: 10px;
+
+      p {
+        margin: 0;
+      }
+    }
+  }
+
+  .post-preview-content {
+    height: 100%;
+    margin-top: 20px;
+
+    .post-preview-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--text-color);
+      margin: 0;
+    }
+
+    .post-preview-description {
+      margin-top: 10px;
+      ol,
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+    }
+
+    .post-preview-description-lc-more :nth-last-child(2) {
+      display: inline;
+    }
+
+    .post-preview-btn-more {
+      color: var(--postBtn-view-more-color);
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+    }
+  }
+}

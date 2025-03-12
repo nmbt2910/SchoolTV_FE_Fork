@@ -11,9 +11,8 @@ import PlayFeaturedVideo from "./pages/featuredVideo/PlayFeaturedVideo";
 import UserProfile from "./pages/UserProfile/UserProfile";
 import PageLayout from "./components/layout/PageLayout";
 import SchoolChannelStudio from "./pages/school-channel/SchoolChannelStudio";
-import StudioPost from "./components/schooltv-studio/functions/StudioPost";
-import StudioVideo from "./components/schooltv-studio/functions/StudioVideo";
-import StudioLiveStream from "./components/schooltv-studio/functions/StudioLiveStream";
+import StudioVideo from "./components/schooltv-studio/functions/up-video/StudioVideo";
+import StudioLiveStream from "./components/schooltv-studio/functions/live-stream/StudioLiveStream";
 import UpComingList from "./pages/upcomingList/upcomingList";
 import UpComingDetail from "./pages/upcomingDetail/upcomingDetail";
 import ForgottenPassword from "./pages/forgottenPassword/forgottenPassword";
@@ -26,6 +25,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import CommunityPost from "./pages/CommunityPost/CommunityPost";
 import SchoolLogin from "./pages/SchoolLogin/SchoolLogin";
 import SchoolRegister from "./pages/SchoolRegister/SchoolRegister";
+import StudioPost from "./components/schooltv-studio/functions/post/StudioPost";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();

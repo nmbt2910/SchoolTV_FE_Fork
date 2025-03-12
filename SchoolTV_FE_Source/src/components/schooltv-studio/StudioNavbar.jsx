@@ -50,7 +50,7 @@ function StudioNavbar() {
   };
 
   return (
-    <Flex className="studio-navbar-container">
+    <Flex className="studio-navbar-container" justify="flex-start">
       {buttonLabel.map((label, index) => (
         <div
           key={index}
