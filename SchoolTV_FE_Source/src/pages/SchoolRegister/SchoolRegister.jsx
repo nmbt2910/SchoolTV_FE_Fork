@@ -485,8 +485,11 @@ function SchoolRegister() {
           </>
         ) : (
           <div className="otp-verification-container">
-            <h1>Xác thực email</h1>
-            <p>Vui lòng nhập mã OTP đã được gửi đến {registeredEmail}</p>
+            <h1>Xác thực tài khoản</h1>
+            <p>
+            Vui lòng nhập mã OTP đã được gửi đến {registeredEmail}<br/>
+            Vui lòng kiểm tra cả hộp thư spam nếu bạn không nhận được email.
+            </p>
 
             <div className="auth-otp-inputs">
               {otpValues.map((value, index) => (
