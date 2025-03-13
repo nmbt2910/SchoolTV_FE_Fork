@@ -8,7 +8,7 @@ import "./schoolLogin.scss";
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../redux/features/userData/userLoginSlice';
 
-const API_URL = "https://localhost:7057/api/accounts/login";
+const API_URL = "https://localhost:44316/api/accounts/login";
 
 function SchoolLogin() {
   const { theme } = useContext(ThemeContext);
