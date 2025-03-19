@@ -1,5 +1,9 @@
 import { React, useEffect } from "react";
-import { createBrowserRouter, RouterProvider, useLocation } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  useLocation,
+} from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import Home from "./pages/BusinessHome/Home";
 import WatchHome from "./pages/WatchHome/WatchHome";
@@ -56,7 +60,7 @@ function App() {
           <Register />
         </ThemeProvider>
       ),
-    },     
+    },
     {
       path: "/school-register",
       element: (
@@ -83,7 +87,7 @@ function App() {
           <ForgottenPassword />
         </ThemeProvider>
       ),
-    },        
+    },
     {
       path: "school-studio",
       element: (
@@ -94,22 +98,26 @@ function App() {
       ),
       children: [
         {
+          index: true, // ✅ Route mặc định khi vào /school-studio
+          element: <StatisticsPage />,
+        },
+        {
           path: "statistics",
-          element: <StatisticsPage />
+          element: <StatisticsPage />,
         },
         {
           path: "post",
-          element: <StudioPost />
+          element: <StudioPost />,
         },
         {
           path: "video",
-          element: <StudioVideo />
+          element: <StudioVideo />,
         },
         {
           path: "live-stream",
-          element: <StudioLiveStream />
-        }
-      ]
+          element: <StudioLiveStream />,
+        },
+      ],
     },
     {
       path: "",

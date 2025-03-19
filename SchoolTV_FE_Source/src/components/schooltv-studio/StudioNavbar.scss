@@ -14,13 +14,13 @@ body {
 
 .studio-navbar-container {
   padding: 10px;
-  margin-bottom: 30px;
   border-radius: 7px;
+  margin-top: 100px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   background-color: var(--unique-video-card-bg);
   position: sticky;
-  top: 129px;
-  z-index: 100;
+  top: 79px;
+  z-index: 1000;
   width: 100%;
   transition: all var(--transition-speed) ease;
 

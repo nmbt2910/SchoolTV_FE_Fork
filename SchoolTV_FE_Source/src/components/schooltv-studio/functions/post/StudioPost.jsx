@@ -25,12 +25,15 @@ import {
 import "@mdxeditor/editor/style.css";
 
 import StudioPostPreview from "./StudioPostPreview";
+import removeMd from "remove-markdown";
+import apiFetch from "../../../../config/baseAPI";
 
 const { Dragger } = Upload;
 
 function StudioPost() {
   const user = useSelector((state) => state.userData.user);
   console.log(user);
+
   const [postStatus, setPostStatus] = useState(null);
   const [form] = Form.useForm();
   const [fileUrlList, setFileUrlList] = useState([]);
@@ -74,21 +77,54 @@ function StudioPost() {
     setFileUrlList(newFileList);
   };
 
-  //handle rich text
-  const handleChangeFormatText = (value) => {
-    setPreviewPostData((prev) => ({
-      ...prev,
-      Content: value,
-    }))
+  const handleRemoveImage = (file) => {
+    const updatedFileList = fileUrlList.filter((item) => item.uid !== file.uid);
+    form.setFieldsValue({ ImageFiles: updatedFileList });
+
+    const newPreviewList = updatedFileList.map((file) => ({
+      ...file,
+      preview: file.originFileObj
+        ? URL.createObjectURL(file.originFileObj)
+        : file.url,
+    }));
+
+    setFileUrlList(newPreviewList);
   };
 
-  // console.log(previewPostData.Content);
+  //handle rich text
+  const handleChangeFormatText = (value) => {
+    const text = removeMd(value);
+
+    if (!text.trim()) {
+      form.setFields([
+        {
+          name: "Content",
+          errors: ["Vui lòng nhập nội dung!"],
+        },
+      ]);
+    } else if (text.length < 1200) {
+      form.setFieldsValue({ Content: value });
+      form.setFields([{ name: "Content", errors: [] }]);
+    } else {
+      form.setFields([
+        {
+          name: "Content",
+          errors: ["Nội dung không được vượt quá 1200 ký tự!"],
+        },
+      ]);
+    }
+
+    setPreviewPostData((prev) => ({
+      ...prev,
+      Content: value ? value : "",
+    }));
+  };
 
   //Cập nhật text xem trước
   const handleFormChange = (_, allValues) => {
     setPreviewPostData((prev) => ({
       ...prev,
-      ...allValues,
+      Title: allValues.Title || "",
     }));
   };
 
@@ -109,11 +145,46 @@ function StudioPost() {
   }, [postStatus]);
 
   //Gửi data hoàn chỉnh về API
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     if (!values.ImageFiles || values.ImageFiles.length === 0) {
       values.ImageFiles = [];
     }
-    console.log("Success:", values);
+
+    try {
+      
+      const formData = new FormData();
+
+      formData.append("Title", values.Title);
+      formData.append("Content", values.Content);
+      formData.append("FollowerMode", values.FollowerMode);
+
+      if (user?.accountID) {
+        formData.append("SchoolChannelID", user.accountID);
+      }
+
+      if (values.ImageFiles && values.ImageFiles.length > 0) {
+        values.ImageFiles.forEach((file) => {
+          formData.append("ImageFiles", file.originFileObj || file);
+        });
+      }
+
+      const response = await apiFetch("News/CreateNews", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Có lỗi xảy ra!");
+      }
+
+      console.log("News created successfully:", data);
+    } catch (error) {
+      console.error("Error creating news:", error);
+    }
+
+    // console.log(values);
   };
 
   //Handle menu xem trước bài viết
@@ -192,7 +263,7 @@ function StudioPost() {
         postPreviewContainer.style.top = "50%";
         postPreviewContainer.style.left = "50%";
         postPreviewContainer.style.transform = "translate(-50%, -50%)";
-        postPreviewContainer.style.zIndex = 1000;
+        postPreviewContainer.style.zIndex = 1001;
         postPreviewContainer.style.width = "80%";
         postPreviewContainer.style.borderRadius = "10px";
         postPreviewContainer.style.boxShadow = "0 4px 10px rgba(0, 0, 0, 0.3)";
@@ -224,7 +295,7 @@ function StudioPost() {
   }, [isOpenPreview, isMobile]);
 
   return (
-    <div style={{ marginTop: "90px" }}>
+    <div style={{ marginTop: "50px" }}>
       {/* Class applied from main title of SChoolChannelStudio.scss */}
       <h1 className="studio-function-title">Tuỳ chỉnh bài viết của bạn</h1>
       <div className="studio-post-layout" id="studio-post-layout">
@@ -255,6 +326,7 @@ function StudioPost() {
               </Form.Item>
 
               <Form.Item
+                name="Content"
                 label={<h2 className="studio-post-des">Nội dung</h2>}
                 rules={[
                   {
@@ -288,7 +360,7 @@ function StudioPost() {
                       listsPlugin(),
                       thematicBreakPlugin(),
                       diffSourcePlugin({
-                        readOnlyDiff: true
+                        readOnlyDiff: true,
                       }),
                     ]}
                   />
@@ -303,6 +375,7 @@ function StudioPost() {
                   className="studio-post-dragger"
                   beforeUpload={handleBeforeUpload}
                   onChange={handleChangeImage}
+                  onRemove={handleRemoveImage}
                 >
                   <p className="ant-upload-drag-icon">
                     <FaImage style={{ fontSize: 50 }} />
@@ -373,7 +446,10 @@ function StudioPost() {
             </Form>
           </div>
         </div>
-        <StudioPostPreview previewPostData={previewPostData} />
+        <StudioPostPreview
+          previewPostData={previewPostData}
+          isMobile={isMobile}
+        />
         <div id="modal-overlay" className="modal-overlay"></div>
       </div>
     </div>
