@@ -2,27 +2,26 @@ import React, { useState, useEffect, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faBroadcastTower,
-    faClock,
     faSearch,
     faUsers,
     faPlay,
-    faChevronRight
+    faVideo,
+    faTimes,
+    faSpinner,
+    faSort,
+    faSchool
 } from '@fortawesome/free-solid-svg-icons';
-import AOS from 'aos';
 import { ThemeContext } from '../../context/ThemeContext';
-import 'aos/dist/aos.css';
-
-// Import all styled components
 import {
     GlobalStyle,
     MainContainer,
     FilterSection,
     FilterGroup,
-    FilterLabel,
-    FilterSelect,
     SearchBox,
     SearchInput,
     SearchIcon,
+    SearchButton,
+    CancelButton,
     ContentGrid,
     StreamCard,
     StreamThumbnail,
@@ -35,129 +34,312 @@ import {
     StreamStats,
     StreamUniversity,
     UniversityAvatar,
-    LoadMoreButton,
     SectionHeader,
     SectionTitle,
-    StreamCount
+    StreamCount,
+    SortButton,
+    FilterButton,
+    ModalOverlay,
+    ModalContent,
+    UniversityModalContent,
+    ModalHeader,
+    ModalOptions,
+    ModalOption,
+    UniversityList,
+    ModalActions,
+    FilterButtonGroup,
+    SearchBoxWrapper
 } from './LiveList.styles';
 
-// Constants
-const universities = [
-    "Đại học Quốc gia Hà Nội",
-    "Đại học Bách Khoa Hà Nội",
-    "Đại học Ngoại thương",
-    "Đại học Kinh tế Quốc dân",
-    "Học viện Ngân hàng",
-    "Đại học Y Hà Nội",
-    "Đại học FPT",
-    "Đại học Văn Lang",
-    "Đại học Tôn Đức Thắng",
-    "Đại học RMIT Việt Nam",
-    "Đại học Công nghệ - ĐHQGHN",
-    "Đại học Sư phạm Hà Nội",
-    "Đại học Thương mại",
-    "Học viện Công nghệ Bưu chính Viễn thông",
-    "Đại học Hà Nội",
-    "Đại học Thủy lợi",
-    "Đại học Xây dựng",
-    "Đại học Giao thông vận tải",
-    "Đại học Công nghiệp Hà Nội",
-    "Đại học Mỏ - Địa chất"
-];
+const SortModal = ({ isOpen, onClose, currentSort, onSave }) => {
+    const [selectedSort, setSelectedSort] = useState(currentSort);
+    
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+    }, [isOpen]);
 
-const liveStreamTitles = [
-    "Lễ Tốt nghiệp Khoa CNTT năm 2023",
-    "Hội thảo: Trí tuệ nhân tạo trong Y học hiện đại",
-    "Talkshow: Khởi nghiệp trong thời đại số",
-    "Lễ khai giảng năm học 2023-2024",
-    "Hội nghị Sinh viên nghiên cứu khoa học",
-    "Workshop: Kỹ năng mềm trong công việc",
-    "Chung kết cuộc thi Tài năng sinh viên",
-    "Seminar: Blockchain và tương lai của Fintech",
-    "Tọa đàm: Cơ hội việc làm ngành IT",
-    "Festival Văn hóa Sinh viên 2023",
-    "Hội thảo: Chuyển đổi số trong giáo dục đại học",
-    "Giao lưu doanh nghiệp - sinh viên 2023",
-    "Lễ kỷ niệm ngày Nhà giáo Việt Nam 20/11",
-    "Cuộc thi Hackathon 2023",
-    "Workshop: Xu hướng công nghệ mới",
-    "Talkshow: Định hướng nghề nghiệp",
-    "Hội thảo: Phát triển bền vững",
-    "Seminar: IoT và Smart City",
-    "Festival Sáng tạo & Khởi nghiệp",
-    "Diễn đàn Sinh viên ASEAN 2023"
-];
+    if (!isOpen) return null;
 
-const recordedStreamTitles = [
-    "Định hướng nghề nghiệp cho sinh viên IT",
-    "Hội thảo: Chuyển đổi số trong giáo dục",
-    "Lễ kỷ niệm 65 năm thành lập trường",
-    "Talkshow: Xu hướng công nghệ 2024",
-    "Workshop: Digital Marketing cho người mới bắt đầu",
-    "Seminar: Machine Learning trong thực tiễn",
-    "Giao lưu doanh nghiệp - sinh viên",
-    "Hội thảo: Phát triển bền vững trong kinh doanh",
-    "Tọa đàm: Kinh nghiệm thực tập tại doanh nghiệp",
-    "Festival Sáng tạo & Khởi nghiệp",
-    "Hội nghị khoa học sinh viên năm 2023",
-    "Chương trình giao lưu văn hóa quốc tế",
-    "Workshop: Kỹ năng thuyết trình chuyên nghiệp",
-    "Seminar: Big Data và ứng dụng",
-    "Talkshow: Khởi nghiệp cùng chuyên gia",
-    "Hội thảo: An toàn thông tin mạng",
-    "Lễ trao giải cuộc thi Innovation 2023",
-    "Workshop: UI/UX Design Trends",
-    "Tọa đàm: Nghề nghiệp tương lai",
-    "Diễn đàn khoa học công nghệ sinh viên"
-];
+    return (
+        <ModalOverlay onClick={onClose}>
+            <ModalContent onClick={(e) => e.stopPropagation()}>
+                <ModalHeader>
+                    <h3>Sắp xếp theo</h3>
+                    <button onClick={onClose}>
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                </ModalHeader>
+                <ModalOptions>
+                    <ModalOption
+                        $selected={selectedSort === 'newest'}
+                        onClick={() => setSelectedSort('newest')}
+                    >
+                        <input
+                            type="radio"
+                            name="sort"
+                            checked={selectedSort === 'newest'}
+                            readOnly
+                        />
+                        <label>Mới nhất</label>
+                    </ModalOption>
+                    <ModalOption
+                        $selected={selectedSort === 'viewers'}
+                        onClick={() => setSelectedSort('viewers')}
+                    >
+                        <input
+                            type="radio"
+                            name="sort"
+                            checked={selectedSort === 'viewers'}
+                            readOnly
+                        />
+                        <label>Lượt xem cao nhất</label>
+                    </ModalOption>
+                </ModalOptions>
+                <ModalActions>
+                    <button onClick={onClose}>Hủy</button>
+                    <button onClick={() => onSave(selectedSort)}>Áp dụng</button>
+                </ModalActions>
+            </ModalContent>
+        </ModalOverlay>
+    );
+};
 
-// Helper functions
-const getRandomItem = (array) => array[Math.floor(Math.random() * array.length)];
+const UniversityModal = ({ 
+    isOpen, 
+    onClose, 
+    universities, 
+    selectedUniversity,
+    onSelect 
+}) => {
+    const [searchQuery, setSearchQuery] = useState('');
 
-const createStreamObject = (isLive = true) => {
-    const title = isLive ? getRandomItem(liveStreamTitles) : getRandomItem(recordedStreamTitles);
-    const university = getRandomItem(universities);
-    const viewers = Math.floor(Math.random() * 10000);
-    const duration = `${Math.floor(Math.random() * 2 + 1)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`;
-    const timestamp = Date.now() - Math.floor(Math.random() * 1000000000);
-    const trending = Math.random() * 100;
-
-    return {
-        title,
-        university,
-        viewers,
-        duration,
-        timestamp,
-        trending,
-        thumbnail: `https://picsum.photos/800/450?random=${Math.random()}`,
-        universityAvatar: `https://picsum.photos/24/24?random=${Math.random()}`
+    const handleClose = () => {
+        setSearchQuery('');
+        onClose();
     };
+
+    const handleSelect = (uni) => {
+        onSelect(uni);
+        handleClose();
+    };
+
+    const filteredUniversities = universities.filter(uni =>
+        uni.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (!isOpen) return null;
+
+    return (
+        <ModalOverlay onClick={handleClose}>
+            <UniversityModalContent onClick={(e) => e.stopPropagation()}>
+                <ModalHeader>
+                    <h3>Chọn trường</h3>
+                    <button onClick={handleClose}>
+                        <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                </ModalHeader>
+                
+                <SearchBox style={{ marginBottom: '1.5rem', borderWidth: '1px' }}>
+                    <SearchIcon icon={faSearch} />
+                    <SearchInput
+                        type="text"
+                        placeholder="Tìm kiếm trường..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </SearchBox>
+
+                <UniversityList>
+                    <ModalOptions>
+                        <ModalOption
+                            $selected={selectedUniversity === 'all'}
+                            onClick={() => handleSelect('all')}
+                        >
+                            <input
+                                type="radio"
+                                name="university"
+                                checked={selectedUniversity === 'all'}
+                                readOnly
+                            />
+                            <label>Tất cả trường</label>
+                        </ModalOption>
+                        
+                        {filteredUniversities.map((uni) => (
+                            <ModalOption
+                                key={uni}
+                                $selected={selectedUniversity === uni}
+                                onClick={() => handleSelect(uni)}
+                            >
+                                <input
+                                    type="radio"
+                                    name="university"
+                                    checked={selectedUniversity === uni}
+                                    readOnly
+                                />
+                                <label>{uni}</label>
+                            </ModalOption>
+                        ))}
+                    </ModalOptions>
+                </UniversityList>
+
+                <ModalActions>
+                    <button onClick={handleClose}>Đóng</button>
+                </ModalActions>
+            </UniversityModalContent>
+        </ModalOverlay>
+    );
 };
 
 const LiveList = () => {
     const { theme } = useContext(ThemeContext);
-    const [streams, setStreams] = useState({ live: [], recorded: [] });
+    const [streams, setStreams] = useState({ live: [], videos: [] });
     const [filters, setFilters] = useState({
         sort: 'newest',
         university: 'all',
-        category: 'all',
         search: ''
     });
+    const [searchError, setSearchError] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+    const [universities, setUniversities] = useState([]);
+    const [initialLive, setInitialLive] = useState([]);
+    const [showSortModal, setShowSortModal] = useState(false);
+    const [showUniversityModal, setShowUniversityModal] = useState(false);
+
+    const calculateDuration = (startTime, endTime) => {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+        const diff = end - start;
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    const fetchLivePrograms = async (searchQuery = '') => {
+        const token = localStorage.getItem('authToken');
+        if (!token) return [];
+        
+        try {
+            const url = searchQuery 
+                ? `https://localhost:7057/api/Program/search?name=${encodeURIComponent(searchQuery)}`
+                : 'https://localhost:7057/api/Program/active';
+
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'accept': '*/*'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 400) {
+                    setSearchError('Vui lòng nhập từ khóa tìm kiếm');
+                    return [];
+                }
+                if (response.status === 404) {
+                    setSearchError('Không tìm thấy chương trình phù hợp');
+                    return [];
+                }
+                throw new Error('Lỗi khi tải dữ liệu');
+            }
+
+            const data = await response.json();
+            setSearchError('');
+            return data.$values.map(program => ({
+                title: program.title || program.programName,
+                university: program.schoolChannel?.name || "Trường không xác định",
+                viewers: Math.floor(Math.random() * 10000),
+                duration: calculateDuration(program.schedule.startTime, program.schedule.endTime),
+                timestamp: new Date(program.schedule.startTime).getTime(),
+                thumbnail: `https://picsum.photos/800/450?random=${Math.random()}`,
+                universityAvatar: `https://picsum.photos/24/24?random=${Math.random()}`
+            }));
+        } catch (error) {
+            console.error('Lỗi khi tìm kiếm:', error);
+            setSearchError(error.message);
+            return [];
+        }
+    };
+
+    const fetchVideoHistory = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) return [];
+        
+        try {
+            const response = await fetch('https://localhost:7057/api/VideoHistory/active', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'accept': '*/*'
+                }
+            });
+            
+            if (!response.ok) throw new Error('Lỗi khi tải lịch sử video');
+            const data = await response.json();
+            
+            return data.$values.map(video => ({
+                title: video.program?.title || video.program?.programName || "Chương trình không xác định",
+                university: video.program?.schoolChannel?.name || "Trường không xác định",
+                viewers: Math.floor(Math.random() * 10000),
+                duration: calculateDuration(video.streamAt, new Date(video.streamAt).getTime() + 3600000),
+                timestamp: new Date(video.streamAt).getTime(),
+                thumbnail: `https://picsum.photos/800/450?random=${Math.random()}`,
+                universityAvatar: `https://picsum.photos/24/24?random=${Math.random()}`
+            }));
+        } catch (error) {
+            console.error('Lỗi khi tải video:', error);
+            return [];
+        }
+    };
+
+    const handleSearch = async () => {
+        const searchTerm = filters.search;
+        setIsSearching(true);
+        try {
+            if (searchTerm.trim()) {
+                const results = await fetchLivePrograms(searchTerm);
+                setStreams(prev => ({ ...prev, live: results }));
+            } else {
+                const initialLive = await fetchLivePrograms();
+                setStreams(prev => ({ ...prev, live: initialLive }));
+            }
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleSearchCancel = async () => {
+        setFilters(prev => ({ ...prev, search: '' }));
+        const results = await fetchLivePrograms();
+        setStreams(prev => ({ ...prev, live: results }));
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
     useEffect(() => {
-        AOS.init({ duration: 800, once: true });
-        initializeStreams();
-        // Apply theme to body or container element
         document.body.setAttribute('data-theme', theme);
-    }, [theme]); // Add theme dependency
 
-    const initializeStreams = () => {
-        const initialStreams = {
-            live: Array(12).fill().map(() => createStreamObject(true)),
-            recorded: Array(12).fill().map(() => createStreamObject(false))
+        const initializeData = async () => {
+            const initialLive = await fetchLivePrograms();
+            const videoStreams = await fetchVideoHistory();
+            setStreams({ live: initialLive, videos: videoStreams });
+            setInitialLive(initialLive);
         };
-        setStreams(initialStreams);
-    };
+        
+        initializeData();
+    }, [theme]);
+
+    useEffect(() => {
+        const uniqueUniversities = [...new Set(streams.live.map(stream => stream.university))];
+        setUniversities(uniqueUniversities);
+    }, [streams.live]);
 
     const sortStreams = (streamArray, criteria) => {
         const sortedArray = [...streamArray];
@@ -166,8 +348,6 @@ const LiveList = () => {
                 return sortedArray.sort((a, b) => b.timestamp - a.timestamp);
             case 'viewers':
                 return sortedArray.sort((a, b) => b.viewers - a.viewers);
-            case 'trending':
-                return sortedArray.sort((a, b) => b.trending - a.trending);
             default:
                 return sortedArray;
         }
@@ -175,55 +355,21 @@ const LiveList = () => {
 
     const filterByUniversity = (streamArray, university) => {
         if (university === 'all') return streamArray;
-        return streamArray.filter(stream =>
-            stream.university.toLowerCase().includes(university.toLowerCase())
-        );
-    };
-
-    const filterByCategory = (streamArray, category) => {
-        if (category === 'all') return streamArray;
-        return streamArray.filter(stream => {
-            const title = stream.title.toLowerCase();
-            switch (category) {
-                case 'academic':
-                    return title.includes('hội thảo') || title.includes('seminar') || title.includes('nghiên cứu');
-                case 'culture':
-                    return title.includes('văn hóa') || title.includes('festival') || title.includes('giao lưu');
-                case 'sports':
-                    return title.includes('thể thao') || title.includes('giải đấu') || title.includes('tournament');
-                default:
-                    return true;
-            }
-        });
-    };
-
-    const searchStreams = (streamArray, searchTerm) => {
-        if (!searchTerm) return streamArray;
-        const normalizedSearchTerm = searchTerm.toLowerCase();
-        return streamArray.filter(stream =>
-            stream.title.toLowerCase().includes(normalizedSearchTerm) ||
-            stream.university.toLowerCase().includes(normalizedSearchTerm)
-        );
+        return streamArray.filter(stream => stream.university === university);
     };
 
     const getFilteredStreams = (type) => {
         let filteredStreams = streams[type];
-        filteredStreams = sortStreams(filteredStreams, filters.sort);
-        filteredStreams = filterByUniversity(filteredStreams, filters.university);
-        filteredStreams = filterByCategory(filteredStreams, filters.category);
-        filteredStreams = searchStreams(filteredStreams, filters.search);
+        if (type === 'live') {
+            filteredStreams = sortStreams(filteredStreams, filters.sort);
+            filteredStreams = filterByUniversity(filteredStreams, filters.university);
+        }
         return filteredStreams;
-    };
-
-    const handleLoadMore = (type) => {
-        setStreams(prev => ({
-            ...prev,
-            [type]: [...prev[type], ...Array(4).fill().map(() => createStreamObject(type === 'live'))]
-        }));
     };
 
     const StreamSection = ({ type, title, icon }) => {
         const filteredStreams = getFilteredStreams(type);
+        
         return (
             <section>
                 <SectionHeader>
@@ -231,47 +377,61 @@ const LiveList = () => {
                         <FontAwesomeIcon icon={icon} />
                         {title}
                         <StreamCount isLive={type === 'live'}>
-                            {type === 'live' ? `${filteredStreams.length} live` : `${filteredStreams.length}+ video`}
+                            {`${filteredStreams.length} ${type === 'live' ? 'live' : 'video'}`}
                         </StreamCount>
                     </SectionTitle>
                 </SectionHeader>
-                <ContentGrid>
-                    {filteredStreams.map((stream, index) => (
-                        <StreamCard key={index} data-aos="fade-up">
-                            <StreamThumbnail>
-                                <img src={stream.thumbnail} alt={stream.title} />
-                                {type === 'live' ? (
-                                    <LiveBadge>LIVE</LiveBadge>
-                                ) : (
-                                    <RecordedBadge>
-                                        <FontAwesomeIcon icon={faPlay} /> ĐÃ PHÁT
-                                    </RecordedBadge>
-                                )}
-                                <StreamDuration>{stream.duration}</StreamDuration>
-                            </StreamThumbnail>
-                            <StreamInfo>
-                                <StreamTitle>{stream.title}</StreamTitle>
-                                <StreamMeta>
-                                    <StreamUniversity>
-                                        <UniversityAvatar src={stream.universityAvatar} alt="University" />
-                                        <span>{stream.university}</span>
-                                    </StreamUniversity>
-                                    <StreamStats>
-                                        <span>
-                                            <FontAwesomeIcon icon={faUsers} />{' '}
-                                            {type === 'live'
-                                                ? `${stream.viewers.toLocaleString('vi-VN')} đang xem`
-                                                : `${Math.floor(stream.viewers / 1000)}K lượt xem`}
-                                        </span>
-                                    </StreamStats>
-                                </StreamMeta>
-                            </StreamInfo>
-                        </StreamCard>
-                    ))}
-                </ContentGrid>
-                <LoadMoreButton onClick={() => handleLoadMore(type)}>
-                    Xem thêm <FontAwesomeIcon icon={faChevronRight} />
-                </LoadMoreButton>
+                
+                {type === 'live' && searchError && (
+                    <div style={{ color: 'var(--error-color)', textAlign: 'center', margin: '1rem' }}>
+                        {searchError}
+                    </div>
+                )}
+
+                {isSearching && type === 'live' ? (
+                    <div style={{ textAlign: 'center', margin: '2rem' }}>Đang tìm kiếm...</div>
+                ) : (
+                    filteredStreams.length > 0 ? (
+                        <ContentGrid>
+                            {filteredStreams.map((stream, index) => (
+                                <StreamCard key={index}>
+                                    <StreamThumbnail>
+                                        <img src={stream.thumbnail} alt={stream.title} />
+                                        {type === 'live' ? (
+                                            <LiveBadge>LIVE</LiveBadge>
+                                        ) : (
+                                            <RecordedBadge>
+                                                <FontAwesomeIcon icon={faPlay} /> ĐÃ PHÁT
+                                            </RecordedBadge>
+                                        )}
+                                        <StreamDuration>{stream.duration}</StreamDuration>
+                                    </StreamThumbnail>
+                                    <StreamInfo>
+                                        <StreamTitle>{stream.title}</StreamTitle>
+                                        <StreamMeta>
+                                            <StreamUniversity>
+                                                <UniversityAvatar src={stream.universityAvatar} alt="University" />
+                                                <span>{stream.university}</span>
+                                            </StreamUniversity>
+                                            <StreamStats>
+                                                <span>
+                                                    <FontAwesomeIcon icon={faUsers} />{' '}
+                                                    {`${Math.floor(stream.viewers / 1000)}K lượt xem`}
+                                                </span>
+                                            </StreamStats>
+                                        </StreamMeta>
+                                    </StreamInfo>
+                                </StreamCard>
+                            ))}
+                        </ContentGrid>
+                    ) : (
+                        !searchError && (
+                            <div style={{ textAlign: 'center', margin: '2rem' }}>
+                                {type === 'live' ? 'Không có live nào đang phát' : 'Không tìm thấy video'}
+                            </div>
+                        )
+                    )
+                )}
             </section>
         );
     };
@@ -281,51 +441,73 @@ const LiveList = () => {
             <GlobalStyle theme={theme} />
             <MainContainer data-theme={theme}>
                 <FilterSection>
-                    <FilterGroup>
-                        <FilterLabel>Sắp xếp:</FilterLabel>
-                        <FilterSelect
-                            value={filters.sort}
-                            onChange={e => setFilters(prev => ({ ...prev, sort: e.target.value }))}
-                        >
-                            <option value="newest">Mới nhất</option>
-                            <option value="viewers">Lượt xem cao nhất</option>
-                            <option value="trending">Đang thịnh hành</option>
-                        </FilterSelect>
-                    </FilterGroup>
-                    <FilterGroup>
-                        <FilterLabel>Trường:</FilterLabel>
-                        <FilterSelect
-                            value={filters.university}
-                            onChange={e => setFilters(prev => ({ ...prev, university: e.target.value }))}
-                        >
-                            <option value="all">Tất cả</option>
-                            <option value="bachkhoa">ĐH Bách Khoa</option>
-                            <option value="fpt">ĐH FPT</option>
-                            <option value="neu">ĐH Kinh tế Quốc dân</option>
-                        </FilterSelect>
-                    </FilterGroup>
-                    <FilterGroup>
-                        <FilterLabel>Thể loại:</FilterLabel>
-                        <FilterSelect
-                            value={filters.category}
-                            onChange={e => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                        >
-                            <option value="all">Tất cả</option>
-                            <option value="academic">Học thuật</option>
-                            <option value="culture">Văn hóa</option>
-                            <option value="sports">Thể thao</option>
-                        </FilterSelect>
-                    </FilterGroup>
+                    <FilterButtonGroup>
+                        <SortButton onClick={() => setShowSortModal(true)}>
+                            <FontAwesomeIcon icon={faSort} />
+                            Sắp xếp
+                            {filters.sort !== 'newest' && (
+                                <span style={{ marginLeft: '0.5rem' }}>
+                                    ({filters.sort === 'viewers' ? 'Lượt xem' : ''})
+                                </span>
+                            )}
+                        </SortButton>
+
+                        <FilterButton onClick={() => setShowUniversityModal(true)}>
+                            <FontAwesomeIcon icon={faSchool} />
+                            Trường
+                            {filters.university !== 'all' && (
+                                <span style={{ marginLeft: '0.5rem' }}>
+                                    ({filters.university})
+                                </span>
+                            )}
+                        </FilterButton>
+                    </FilterButtonGroup>
+
+                    <SearchBoxWrapper>
                     <SearchBox>
-                        <SearchIcon icon={faSearch} />
+                        <SearchIcon 
+                            icon={isSearching ? faSpinner : faSearch} 
+                            spin={isSearching}
+                        />
                         <SearchInput
                             type="text"
-                            placeholder="Tìm kiếm live stream..."
+                            placeholder="Tìm kiếm chương trình live..."
                             value={filters.search}
                             onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                            onKeyPress={handleKeyPress}
                         />
+                        {filters.search && (
+                            <CancelButton onClick={handleSearchCancel}>
+                                <FontAwesomeIcon icon={faTimes} />
+                            </CancelButton>
+                        )}
+                        <SearchButton 
+                            onClick={handleSearch} 
+                            disabled={isSearching}
+                        >
+                            {isSearching ? 'Đang tìm...' : 'Tìm kiếm'}
+                        </SearchButton>
                     </SearchBox>
+                    </SearchBoxWrapper>
                 </FilterSection>
+
+                <SortModal
+                    isOpen={showSortModal}
+                    onClose={() => setShowSortModal(false)}
+                    currentSort={filters.sort}
+                    onSave={(sort) => {
+                        setFilters(prev => ({ ...prev, sort }));
+                        setShowSortModal(false);
+                    }}
+                />
+
+                <UniversityModal
+                    isOpen={showUniversityModal}
+                    onClose={() => setShowUniversityModal(false)}
+                    universities={universities}
+                    selectedUniversity={filters.university}
+                    onSelect={(uni) => setFilters(prev => ({ ...prev, university: uni }))}
+                />
 
                 <StreamSection
                     type="live"
@@ -334,9 +516,9 @@ const LiveList = () => {
                 />
 
                 <StreamSection
-                    type="recorded"
-                    title="Live Đã Phát"
-                    icon={faClock}
+                    type="videos"
+                    title="Video Lưu Trữ"
+                    icon={faVideo}
                 />
             </MainContainer>
         </>
