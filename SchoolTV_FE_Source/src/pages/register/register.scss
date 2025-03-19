@@ -436,3 +436,86 @@
     }
   }
 }
+
+// Add these styles to your existing register.scss file
+
+// OTP card specific styles
+.auth-otp-card {
+  max-width: 500px !important;
+  text-align: center;
+  
+  h1 {
+    margin-bottom: 20px !important;
+  }
+  
+  p {
+    margin-bottom: 30px !important;
+    line-height: 1.6;
+  }
+}
+
+// OTP input container
+.auth-otp-inputs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+// Individual OTP input
+.auth-otp-input {
+  width: 50px;
+  height: 60px;
+  border: 2px solid var(--auth-register-input-border);
+  border-radius: 12px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  background: var(--auth-register-input-bg);
+  color: var(--auth-register-input-text);
+  transition: all 0.3s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: var(--auth-register-primary);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+  }
+}
+
+// Resend OTP section
+.auth-otp-resend {
+  margin-top: 10px;
+  
+  p {
+    color: var(--auth-register-text-secondary);
+    margin: 0 !important;
+  }
+  
+  .auth-otp-resend-button {
+    background: none;
+    border: none;
+    color: var(--auth-register-primary);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(74, 144, 226, 0.1);
+    }
+  }
+}
+
+// Mobile responsiveness for OTP inputs
+@media (max-width: 480px) {
+  .auth-otp-inputs {
+    gap: 8px;
+  }
+  
+  .auth-otp-input {
+    width: 40px;
+    height: 50px;
+    font-size: 20px;
+  }
+}

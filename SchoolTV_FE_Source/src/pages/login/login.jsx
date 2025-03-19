@@ -5,7 +5,7 @@ import { ThemeContext } from "../../context/ThemeContext";
 import axios from "axios";
 import "./login.scss";
 
-const API_URL = "https://localhost:44316/api/accounts/login";
+const API_URL = "https://localhost:7057/api/accounts/login";
 
 function Login() {
   const { theme } = useContext(ThemeContext);

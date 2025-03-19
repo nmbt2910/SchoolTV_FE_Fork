@@ -29,7 +29,7 @@ const Header = () => {
       }
 
       // Then fetch fresh data from the API
-      fetch('https://localhost:44316/api/accounts/info', {
+      fetch('https://localhost:7057/api/accounts/info', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'accept': '*/*'
