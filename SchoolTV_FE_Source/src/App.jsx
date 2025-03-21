@@ -29,6 +29,9 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import CommunityPost from "./pages/CommunityPost/CommunityPost";
 import SchoolLogin from "./pages/SchoolLogin/SchoolLogin";
 import SchoolRegister from "./pages/SchoolRegister/SchoolRegister";
+import PricingPage from "./pages/pricing/pricing";
+import Checkout from "./pages/payment/payment";
+import StudioPost from "./components/schooltv-studio/functions/post/StudioPost";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
