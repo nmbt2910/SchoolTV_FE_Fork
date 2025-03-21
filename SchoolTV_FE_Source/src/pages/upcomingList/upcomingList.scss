@@ -157,6 +157,7 @@ body {
 }
 
 .status-upcoming {
+  width: fit-content;
   background: #28a745;
   color: white;
 }
@@ -164,6 +165,7 @@ body {
 .status-past {
   background: #6c757d;
   color: white;
+  width: fit-content;
 }
 
 .event-date {
