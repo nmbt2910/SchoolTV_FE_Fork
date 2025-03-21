@@ -10,21 +10,17 @@ body {
               box-shadow var(--transition-speed) ease;
 }
 
-.studio-post-container {
-  width: 100%;
-  margin-top: 90px;
-  position: relative;
-  z-index: 1;
+.studio-video-container {
+  margin-top: 50px;
   
-  .studio-post-content {
-      background-color: var(--unique-video-card-bg);
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      padding: 20px 12px;
-      position: relative;
-      transition: all var(--transition-speed) ease;
+  .studio-video-content {
+    background-color: var(--unique-video-card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 20px 12px;
+    transition: all var(--transition-speed) ease;
 
-    .studio-post-input {
+    .studio-video-input {
       background-color: var(--form-input-bg);
 
       &::placeholder {
@@ -32,13 +28,13 @@ body {
       }
     }
 
-    .studio-post-dragger {
+    .studio-video-dragger {
       p {
         color: var(--form-input-placeholder);
       }
     }
 
-    .studio-post-des {
+    .studio-video-des {
       margin: 0;
       font-size: 14px;
       font-weight: bold;
@@ -49,7 +45,7 @@ body {
       display: inline-block;
     }
 
-    .studio-post-status {
+    .studio-video-status {
       width: 49%;
       border: 1px solid #e5e5e5;
       padding: 10px;
@@ -63,20 +59,29 @@ body {
       }
     }
 
-    .studio-post-status__active {
+    .studio-video-status__active {
       background-color: rgba(74, 144, 226, 0.1);
       border: 1px solid #4a90e2;
     }
 
-    .studio-post-button {
-      margin-right: 10px;
-      background-color: lightgray;
+    .video-plan-picker {
+      background-color: var(--form-input-bg);
 
-      &:last-child {
-        background-color: #4a90e2;
-        color: white;
-        border: none;
+      .ant-picker-input {
+        input::placeholder {
+          color: var(--form-input-placeholder);
+        }
       }
+
+      .ant-picker-suffix {
+        color: var(--form-input-placeholder);
+      }
+    }
+
+    .studio-video-button {
+      background-color: #4a90e2;
+      color: white;
+      border: none;
     }
   }
 }
