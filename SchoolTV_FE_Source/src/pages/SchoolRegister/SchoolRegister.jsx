@@ -99,7 +99,7 @@ function SchoolRegister() {
 
     try {
       const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/resend",
+        "https://localhost:44316/api/accounts/otp/resend",
         { email: registeredEmail }
       );
 
@@ -132,7 +132,7 @@ function SchoolRegister() {
 
     try {
       const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/schoolowner/verify",
+        "https://localhost:44316/api/accounts/otp/schoolowner/verify",
         {
           email: registeredEmail,
           otpCode: otpCode,
@@ -200,7 +200,7 @@ function SchoolRegister() {
 
     try {
       const response = await axios.post(
-        "https://localhost:7057/api/accounts/schoolowner/signup",
+        "https://localhost:44316/api/accounts/schoolowner/signup",
         formData
       );
 

@@ -157,7 +157,7 @@ function Register() {
 
     try {
       const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/verify",
+        "https://localhost:44316/api/accounts/otp/verify",
         {
           email: otpEmail,
           otpCode: otpCode,
@@ -185,7 +185,7 @@ function Register() {
   const handleResendOTP = async () => {
     try {
       const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/resend",
+        "https://localhost:44316/api/accounts/otp/resend",
         {
           email: otpEmail,
         }
@@ -229,7 +229,7 @@ function Register() {
     
     try {
       const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/register",
+        "https://localhost:44316/api/accounts/otp/register",
         formData
       );
 

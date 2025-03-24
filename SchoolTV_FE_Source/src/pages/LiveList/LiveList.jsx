@@ -225,8 +225,8 @@ const LiveList = () => {
         
         try {
             const url = searchQuery 
-                ? `https://localhost:7057/api/Program/search?name=${encodeURIComponent(searchQuery)}`
-                : 'https://localhost:7057/api/Program/active';
+                ? `https://localhost:44316/api/Program/search?name=${encodeURIComponent(searchQuery)}`
+                : 'https://localhost:44316/api/Program/active';
 
             const response = await fetch(url, {
                 headers: {
@@ -270,7 +270,7 @@ const LiveList = () => {
         if (!token) return [];
         
         try {
-            const response = await fetch('https://localhost:7057/api/VideoHistory/active', {
+            const response = await fetch('https://localhost:44316/api/VideoHistory/active', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'accept': '*/*'
