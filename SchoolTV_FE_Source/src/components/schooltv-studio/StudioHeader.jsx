@@ -14,8 +14,7 @@ function StudioHeader() {
   const [currentTheme, setCurrentTheme] = useState(theme);
   const navigate = useNavigate();
 
-  const user  = useSelector((state) => state.userData.user);
-  console.log('User:', user);
+  const user = useSelector((state) => state.userData.user);
 
   const items = [
     {
@@ -53,27 +52,26 @@ function StudioHeader() {
   useEffect(() => {
     handleCloseMenuResize();
     window.addEventListener("resize", handleCloseMenuResize);
-  
+
     // Cleanup khi component unmount
     return () => {
       window.removeEventListener("resize", handleCloseMenuResize);
     };
   }, []);
-  
+
   useEffect(() => {
     // Update currentTheme when theme changes
     setCurrentTheme(theme);
-  
+
     // Update body's data-theme attribute
     document.body.setAttribute("data-theme", theme);
   }, [theme]);
-  
 
   const handleThemeToggle = () => {
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
     setCurrentTheme(newTheme);
     toggleTheme();
-    document.body.setAttribute('data-theme', newTheme);
+    document.body.setAttribute("data-theme", newTheme);
   };
 
   return (
@@ -97,9 +95,15 @@ function StudioHeader() {
           <button
             onClick={handleThemeToggle}
             className="theme-toggle studio-header-icon"
-            aria-label={`Switch to ${currentTheme === 'light' ? 'dark' : 'light'} mode`}
+            aria-label={`Switch to ${
+              currentTheme === "light" ? "dark" : "light"
+            } mode`}
           >
-            <i className={`fas ${currentTheme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
+            <i
+              className={`fas ${
+                currentTheme === "light" ? "fa-moon" : "fa-sun"
+              }`}
+            ></i>
           </button>
 
           <Dropdown
@@ -119,7 +123,9 @@ function StudioHeader() {
             height={50}
             style={{ borderRadius: "50%" }}
             preview={false}
-            src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+              user?.fullname || "User"
+            )}&background=random`}
           />
         </Flex>
 
@@ -133,9 +139,13 @@ function StudioHeader() {
           open={openSmallMenu}
           onClose={onCloseSmallMenu}
           width={200}
+          style={{ backgroundColor: "var(--card-bg)" }}
         >
-          <Flex vertical align="center" gap={16}>
-            <button className="schoolStudio-switch-button">
+          <Flex vertical align="center" justify="center" gap={16}>
+            <button
+              className="schoolStudio-switch-button"
+              onClick={() => navigate("/")}
+            >
               Chuyển đến SchoolTV
             </button>
 
@@ -167,7 +177,9 @@ function StudioHeader() {
               height={50}
               style={{ borderRadius: "50%" }}
               preview={false}
-              src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                user?.fullname || "User"
+              )}&background=random`}
             />
           </Flex>
         </Drawer>

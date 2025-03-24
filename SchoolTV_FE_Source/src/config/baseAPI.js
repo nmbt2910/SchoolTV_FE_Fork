@@ -1,22 +1,18 @@
-import axios from "axios";
-const baseUrl = "https://localhost:7057/api/";
+const originalFetch = globalThis.fetch;
 
-const config = {
-  baseUrl: baseUrl,
-};
+/**
+ * @param {URL | string} request
+ * @param {Parameters<typeof originalFetch>[1]} requestInit
+ * @returns {Promise<Response>}
+ */
+export default function apiFetch(request, requestInit) {
+  const url = new URL(request, import.meta.env.VITE_SERVER_API_URL);
 
-const api = axios.create(config);
-
-api.defaults.baseURL = baseUrl;
-
-// handle before call API
-const handleBefore = (config) => {
-  // lấy ra cái token và đính kèm theo cái request
   const token = localStorage.getItem("authToken")?.replaceAll('"', "");
-  config.headers["Authorization"] = `Bearer ${token}`;
-  return config;
-};
+  const headers = {
+    ...requestInit?.headers,
+    Authorization: `Bearer ${token}`
+  };
 
-api.interceptors.request.use(handleBefore, null);
-
-export default api;
+  return originalFetch(url, { ...requestInit, headers });
+}

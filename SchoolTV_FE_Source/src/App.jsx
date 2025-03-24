@@ -1,5 +1,9 @@
 import { React, useEffect } from "react";
-import { createBrowserRouter, RouterProvider, useLocation } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  useLocation,
+} from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import Home from "./pages/BusinessHome/Home";
 import WatchHome from "./pages/WatchHome/WatchHome";
@@ -11,9 +15,8 @@ import PlayFeaturedVideo from "./pages/featuredVideo/PlayFeaturedVideo";
 import UserProfile from "./pages/UserProfile/UserProfile";
 import PageLayout from "./components/layout/PageLayout";
 import SchoolChannelStudio from "./pages/school-channel/SchoolChannelStudio";
-import StudioPost from "./components/schooltv-studio/functions/StudioPost";
-import StudioVideo from "./components/schooltv-studio/functions/StudioVideo";
-import StudioLiveStream from "./components/schooltv-studio/functions/StudioLiveStream";
+import StudioVideo from "./components/schooltv-studio/functions/up-video/StudioVideo";
+import StudioLiveStream from "./components/schooltv-studio/functions/live-stream/StudioLiveStream";
 import UpComingList from "./pages/upcomingList/upcomingList";
 import UpComingDetail from "./pages/upcomingDetail/upcomingDetail";
 import ForgottenPassword from "./pages/forgottenPassword/forgottenPassword";
@@ -26,6 +29,12 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import CommunityPost from "./pages/CommunityPost/CommunityPost";
 import SchoolLogin from "./pages/SchoolLogin/SchoolLogin";
 import SchoolRegister from "./pages/SchoolRegister/SchoolRegister";
+import PricingPage from "./pages/pricing/pricing";
+import Checkout from "./pages/payment/payment";
+import StudioPost from "./components/schooltv-studio/functions/post/StudioPost";
+import AdminPage from "./pages/AdminPage/AdminPage";
+import UserList from "./pages/AdminPage/UserList";
+import SchoolOwner from "./pages/AdminPage/SchoolOwner";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -56,7 +65,7 @@ function App() {
           <Register />
         </ThemeProvider>
       ),
-    },     
+    },
     {
       path: "/school-register",
       element: (
@@ -83,7 +92,7 @@ function App() {
           <ForgottenPassword />
         </ThemeProvider>
       ),
-    },        
+    },
     {
       path: "school-studio",
       element: (
@@ -94,22 +103,26 @@ function App() {
       ),
       children: [
         {
+          index: true, // ✅ Route mặc định khi vào /school-studio
+          element: <StatisticsPage />,
+        },
+        {
           path: "statistics",
-          element: <StatisticsPage />
+          element: <StatisticsPage />,
         },
         {
           path: "post",
-          element: <StudioPost />
+          element: <StudioPost />,
         },
         {
           path: "video",
-          element: <StudioVideo />
+          element: <StudioVideo />,
         },
         {
           path: "live-stream",
-          element: <StudioLiveStream />
-        }
-      ]
+          element: <StudioLiveStream />,
+        },
+      ],
     },
     {
       path: "",
@@ -161,6 +174,14 @@ function App() {
           element: <UpComingList />,
         },
         {
+          path: "/package",
+          element: <PricingPage />,
+        },
+        {
+          path: "/checkout",
+          element: <Checkout />,
+        },
+        {
           path: "/upcomingDetail",
           element: <UpComingDetail />,
         },
@@ -168,6 +189,18 @@ function App() {
           path: "/communityPost",
           element: <CommunityPost />,
         },
+        {
+          path: "/adminpage",
+          element: <AdminPage />,
+        },
+        {
+          path: "/userlist",
+          element: <UserList />,
+        },
+        {
+          path: "/schoolowner",
+          element: <SchoolOwner />,
+        }
       ],
     },
   ]);
