@@ -139,8 +139,7 @@ function StudioHeader() {
           open={openSmallMenu}
           onClose={onCloseSmallMenu}
           width={200}
-          style={{backgroundColor: "var(--card-bg)"}}
-          
+          style={{ backgroundColor: "var(--card-bg)" }}
         >
           <Flex vertical align="center" justify="center" gap={16}>
             <button
