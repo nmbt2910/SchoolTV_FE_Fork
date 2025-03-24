@@ -43,7 +43,7 @@ const ForgottenPassword = () => {
   const handleEmailSubmit = async (values) => {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://localhost:44316/api/accounts/forgot-password', {
+      const response = await axios.post('https://localhost:7057/api/accounts/forgot-password', {
         email: values.email
       });
   
@@ -73,7 +73,7 @@ const ForgottenPassword = () => {
   const handleResendEmail = async () => {
     setIsLoading(true);
     try {
-      await axios.post('https://localhost:44316/api/accounts/forgot-password', {
+      await axios.post('https://localhost:7057/api/accounts/forgot-password', {
         email: userEmail
       });
       setResendTimer(60);
@@ -98,7 +98,7 @@ const ForgottenPassword = () => {
   const handlePasswordReset = async (values) => {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://localhost:44316/api/accounts/reset-password', {
+      const response = await axios.post('https://localhost:7057/api/accounts/reset-password', {
         email: userEmail,
         token: values.token,
         newPassword: values.newPassword,

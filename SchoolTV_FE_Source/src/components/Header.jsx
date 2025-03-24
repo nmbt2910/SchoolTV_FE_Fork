@@ -34,8 +34,8 @@ const Header = () => {
 
       // Then fetch fresh data from the appropriate API
       const apiUrl = isAdmin 
-        ? `https://localhost:44316/api/accounts/admin/${accountID}`
-        : 'https://localhost:44316/api/accounts/info';
+        ? `https://localhost:7057/api/accounts/admin/${accountID}`
+        : 'https://localhost:7057/api/accounts/info';
 
       fetch(apiUrl, {
         headers: {

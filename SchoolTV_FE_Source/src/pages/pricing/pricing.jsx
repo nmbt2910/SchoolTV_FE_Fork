@@ -39,7 +39,7 @@ const PricingPage = () => {
     }
 
     setLoading(true);
-    fetch(`https://localhost:44316/api/Package/active`, {
+    fetch(`https://localhost:7057/api/Package/active`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
