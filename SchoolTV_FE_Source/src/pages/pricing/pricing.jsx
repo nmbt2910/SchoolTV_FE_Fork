@@ -5,8 +5,8 @@ import "./pricing.css";
 const PricingPage = () => {
   const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
-  const [loading, setLoading] = useState(true); // Thêm state loading
-  const [error, setError] = useState(null); // Thêm state error
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const featureMapping = {
     1: [
@@ -30,7 +30,7 @@ const PricingPage = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken"); // Lấy token từ localStorage
+    const token = localStorage.getItem("authToken");
     if (!token) {
       console.error("No token found");
       setError("No token found");
@@ -38,12 +38,12 @@ const PricingPage = () => {
       return;
     }
 
-    setLoading(true); // Bắt đầu tải
+    setLoading(true);
     fetch(`https://localhost:7057/api/Package/active`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Thêm token vào header
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((response) => {
@@ -59,28 +59,26 @@ const PricingPage = () => {
           setError("No packages data available");
           return;
         }
-        // Xử lý dữ liệu và thêm featureMapping
         const formattedPackages = data.$values.map((pkg) => ({
           ...pkg,
           features: featureMapping[pkg.packageID] || [
             "Tính năng đang cập nhật...",
           ],
         }));
-        setPackages(formattedPackages); // Gán dữ liệu vào state
+        setPackages(formattedPackages);
         console.log("Formatted packages:", formattedPackages);
-        setError(null); // Xóa lỗi nếu thành công
+        setError(null);
       })
       .catch((error) => {
         console.error("Error fetching packages:", error);
         setError(`Failed to fetch packages: ${error.message}`);
       })
       .finally(() => {
-        setLoading(false); // Kết thúc tải
+        setLoading(false);
       });
   }, []);
 
   const handlePayment = (selectedPackage) => {
-    // Store the selected package in localStorage
     localStorage.setItem("selectedPackage", JSON.stringify(selectedPackage));
     navigate("/checkout");
   };
@@ -106,22 +104,25 @@ const PricingPage = () => {
           packages.map((pkg, index) => (
             <div key={index} className="pricing-card">
               <h3>{pkg.name}</h3>
-              <div className="price">
+              <div className="pricing-price">
                 {pkg.price.toLocaleString()} VND
-                <span className="price-span">/tháng</span>
+                <span className="pricing-price-span">/tháng</span>
               </div>
               <div className="pricing-features">
                 {pkg.features.map((feature, index) => (
-                  <div key={index} className="feature">
+                  <div key={index} className="pricing-feature">
                     <span className="pricing-feature-icon">✓</span>
                     <span>{feature}</span>
                   </div>
                 ))}
               </div>
-              <button onClick={() => handlePayment(pkg)} className="try-button">
+              <button
+                onClick={() => handlePayment(pkg)}
+                className="pricing-try-button"
+              >
                 Mua ngay
               </button>
-              <button className="secondary-button">Tìm hiểu thêm</button>
+              <button className="pricing-secondary-button">Tìm hiểu thêm</button>
             </div>
           ))
         )}

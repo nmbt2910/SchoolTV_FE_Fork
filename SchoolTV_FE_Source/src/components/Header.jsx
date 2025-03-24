@@ -28,8 +28,16 @@ const Header = () => {
         }
       }
 
-      // Then fetch fresh data from the API
-      fetch('https://localhost:7057/api/accounts/info', {
+      // Determine if user is Admin from localStorage
+      const isAdmin = storedUserData && JSON.parse(storedUserData).roleName === "Admin";
+      const accountID = storedUserData && JSON.parse(storedUserData).accountID;
+
+      // Then fetch fresh data from the appropriate API
+      const apiUrl = isAdmin 
+        ? `https://localhost:7057/api/accounts/admin/${accountID}`
+        : 'https://localhost:7057/api/accounts/info';
+
+      fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'accept': '*/*'
@@ -44,18 +52,24 @@ const Header = () => {
         .then(data => {
           console.log("API response for user info:", data);
           
-          // Create a user object with the necessary fields
-          const userData = {
+          // Handle different response structures for Admin vs regular user
+          const userData = isAdmin ? {
             accountID: data.accountID,
             username: data.username,
             email: data.email,
             fullname: data.fullname,
             address: data.address,
             phoneNumber: data.phoneNumber,
-            // Get roleName from localStorage if not in the current response
-            roleName: localStorage.getItem('userData') ? 
-              JSON.parse(localStorage.getItem('userData')).roleName : 
-              null
+            roleName: data.role.roleName // Admin response has nested role object
+          } : {
+            // Regular user response structure
+            accountID: data.accountID,
+            username: data.username,
+            email: data.email,
+            fullname: data.fullname,
+            address: data.address,
+            phoneNumber: data.phoneNumber,
+            roleName: data.roleName || (storedUserData ? JSON.parse(storedUserData).roleName : null)
           };
           
           setUser(userData);
@@ -82,8 +96,9 @@ const Header = () => {
     navigate('/login');
   };
 
-  // Check for roleName in user object
+  // Check for roles in user object
   const isSchoolOwner = user && user.roleName === "SchoolOwner";
+  const isAdmin = user && user.roleName === "Admin";
 
   return (
     <header className="header">
@@ -130,6 +145,14 @@ const Header = () => {
                   <p className="user-email">{user.email}</p>
                 </div>
                 <div className="dropdown-divider"></div>
+                {isAdmin && (
+                  <>
+                    <a href="/adminpage" className="dropdown-item studio-link">
+                      <i className="fas fa-shield-alt"></i> Admin Dashboard
+                    </a>
+                    <div className="dropdown-divider"></div>
+                  </>
+                )}
                 {isSchoolOwner && (
                   <>
                     <a href="school-studio/statistics" className="dropdown-item studio-link">
