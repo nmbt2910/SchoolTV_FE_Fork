@@ -46,7 +46,7 @@ const UserProfile = () => {
         }
 
         // Fetch updated user info from the new API endpoint
-        axios.get('https://localhost:44316/api/accounts/info', {
+        axios.get('https://localhost:7057/api/accounts/info', {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(response => {
@@ -108,7 +108,7 @@ const UserProfile = () => {
 
             const response = await axios({
                 method: 'PATCH',
-                url: 'https://localhost:44316/api/accounts/update',
+                url: 'https://localhost:7057/api/accounts/update',
                 data: mappedValues,
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -165,7 +165,7 @@ const UserProfile = () => {
 
             const response = await axios({
                 method: 'PATCH',
-                url: 'https://localhost:44316/api/accounts/change-password',
+                url: 'https://localhost:7057/api/accounts/change-password',
                 data: {
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword,

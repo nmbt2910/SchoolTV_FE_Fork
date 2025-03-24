@@ -488,3 +488,36 @@
       }
     }
   }
+
+  .otp-verification-container {
+    text-align: center;
+    
+    .school-register-description {
+      margin-bottom: 50px;
+    }
+
+    .auth-otp-inputs{
+        margin-top: 15px;
+    }
+  }
+  
+  .resend-otp-section {
+    text-align: center;
+    
+    .resend-otp-button {
+      background: none;
+      border: none;
+      color: var(--school-register-primary);
+      cursor: pointer;
+      font-size: 0.9rem;
+      
+      &:disabled {
+        color: var(--school-register-text-secondary);
+        cursor: not-allowed;
+      }
+      
+      &:hover:not(:disabled) {
+        text-decoration: underline;
+      }
+    }
+  }
