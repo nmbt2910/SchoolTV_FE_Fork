@@ -32,6 +32,9 @@ import SchoolRegister from "./pages/SchoolRegister/SchoolRegister";
 import PricingPage from "./pages/pricing/pricing";
 import Checkout from "./pages/payment/payment";
 import StudioPost from "./components/schooltv-studio/functions/post/StudioPost";
+import AdminPage from "./pages/AdminPage/AdminPage";
+import UserList from "./pages/AdminPage/UserList";
+import SchoolOwner from "./pages/AdminPage/SchoolOwner";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -186,6 +189,18 @@ function App() {
           path: "/communityPost",
           element: <CommunityPost />,
         },
+        {
+          path: "/adminpage",
+          element: <AdminPage />,
+        },
+        {
+          path: "/userlist",
+          element: <UserList />,
+        },
+        {
+          path: "/schoolowner",
+          element: <SchoolOwner />,
+        }
       ],
     },
   ]);
