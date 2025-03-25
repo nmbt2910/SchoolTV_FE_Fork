@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Modal, Form, Row, Col, Input, Button, notification, Spin } from 'antd';
 import {
     UserOutlined,
@@ -17,6 +16,7 @@ import {
     GoogleOutlined
 } from '@ant-design/icons';
 import './UserProfile.css';
+import apiFetch from '../../config/baseAPI';
 
 const UserProfile = () => {
     const [user, setUser] = useState(null);
@@ -27,52 +27,47 @@ const UserProfile = () => {
     const [passwordForm] = Form.useForm();
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        const storedUserData = localStorage.getItem('userData');
+        const fetchUserData = async () => {
+            const token = localStorage.getItem('authToken');
+            const storedUserData = localStorage.getItem('userData');
 
-        if (!token) {
-            setLoading(false);
-            notification.error({
-                message: 'Lỗi xác thực!',
-                description: 'Bạn cần đăng nhập để xem thông tin người dùng.',
-                placement: 'topRight'
-            });
-            return;
-        }
+            if (!token) {
+                setLoading(false);
+                notification.error({
+                    message: 'Lỗi xác thực!',
+                    description: 'Bạn cần đăng nhập để xem thông tin người dùng.',
+                    placement: 'topRight'
+                });
+                return;
+            }
 
-        // Set initial user data from localStorage if available
-        if (storedUserData) {
-            setUser(JSON.parse(storedUserData));
-        }
+            if (storedUserData) {
+                setUser(JSON.parse(storedUserData));
+            }
 
-        // Fetch updated user info from the new API endpoint
-        axios.get('https://localhost:7057/api/accounts/info', {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(response => {
-                if (response.data) {
-                    console.log('User data from API:', response.data);
-                    
-                    // Get the roleName from localStorage as it's not in the new API response
-                    const userData = JSON.parse(localStorage.getItem('userData')) || {};
-                    
-                    // Combine the API response with roleName from localStorage
-                    const updatedUserData = {
-                        ...response.data,
-                        roleName: userData.roleName || 'User' // Default to 'User' if not found
-                    };
-                    
-                    setUser(updatedUserData);
-                    
-                    // Update localStorage with the latest data including roleName
-                    localStorage.setItem('userData', JSON.stringify(updatedUserData));
-                } else {
-                    throw new Error('No user data received');
+            try {
+                const response = await apiFetch('accounts/info', {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch user data');
                 }
-            })
-            .catch(error => {
+
+                const data = await response.json();
+                const userData = JSON.parse(localStorage.getItem('userData')) || {};
+                
+                const updatedUserData = {
+                    ...data,
+                    roleName: userData.roleName || 'User'
+                };
+                
+                setUser(updatedUserData);
+                localStorage.setItem('userData', JSON.stringify(updatedUserData));
+            } catch (error) {
                 console.error('Error fetching user data:', error);
-                if (error.response?.status === 401) {
+                if (error.message.includes('401')) {
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('userData');
                     notification.error({
@@ -87,15 +82,16 @@ const UserProfile = () => {
                         placement: 'topRight'
                     });
                 }
-            })
-            .finally(() => {
+            } finally {
                 setLoading(false);
-            });
+            }
+        };
+
+        fetchUserData();
     }, []);
 
     const handleUpdateInfo = async (values) => {
         try {
-            // Format the data according to the API expectations
             const mappedValues = {
                 username: values.profile_username,
                 email: values.profile_email,
@@ -103,47 +99,41 @@ const UserProfile = () => {
                 phoneNumber: values.profile_phone,
                 address: values.profile_address
             };
-            
-            const token = localStorage.getItem('authToken');
 
-            const response = await axios({
+            const response = await apiFetch('accounts/update', {
                 method: 'PATCH',
-                url: 'https://localhost:7057/api/accounts/update',
-                data: mappedValues,
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                body: JSON.stringify(mappedValues),
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            if (response.status === 200) {
-                // Get updated user data
-                const updatedUser = response.data.account || response.data;
-                
-                // Preserve the roleName from the current user state
-                const updatedUserWithRole = {
-                    ...updatedUser,
-                    roleName: user.roleName
-                };
-                
-                setUser(updatedUserWithRole);
-                localStorage.setItem('userData', JSON.stringify(updatedUserWithRole));
-
-                notification.success({
-                    message: 'Cập nhật thành công!',
-                    description: 'Thông tin của bạn đã được cập nhật.',
-                    placement: 'topRight',
-                    duration: 3,
-                });
-
-                setEditModalVisible(false);
-                form.resetFields();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Update failed');
             }
+
+            const updatedUser = await response.json();
+            const updatedUserWithRole = {
+                ...updatedUser.account,
+                roleName: user.roleName
+            };
+
+            setUser(updatedUserWithRole);
+            localStorage.setItem('userData', JSON.stringify(updatedUserWithRole));
+
+            notification.success({
+                message: 'Cập nhật thành công!',
+                description: 'Thông tin của bạn đã được cập nhật.',
+                placement: 'topRight',
+                duration: 3,
+            });
+
+            setEditModalVisible(false);
+            form.resetFields();
         } catch (error) {
             console.error('Update error:', error);
             notification.error({
                 message: 'Cập nhật thất bại!',
-                description: error.response?.data?.message || 'Đã có lỗi xảy ra khi cập nhật thông tin.',
+                description: error.message || 'Đã có lỗi xảy ra khi cập nhật thông tin.',
                 placement: 'topRight',
                 duration: 4,
             });
@@ -161,38 +151,35 @@ const UserProfile = () => {
         }
 
         try {
-            const token = localStorage.getItem('authToken');
-
-            const response = await axios({
+            const response = await apiFetch('accounts/change-password', {
                 method: 'PATCH',
-                url: 'https://localhost:7057/api/accounts/change-password',
-                data: {
+                body: JSON.stringify({
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword,
                     confirmNewPassword: values.confirmNewPassword
-                },
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                }),
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            if (response.status === 200) {
-                notification.success({
-                    message: 'Thành công!',
-                    description: 'Mật khẩu của bạn đã được cập nhật.',
-                    placement: 'topRight',
-                    duration: 3,
-                });
-
-                setPasswordModalVisible(false);
-                passwordForm.resetFields();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Password change failed');
             }
+
+            notification.success({
+                message: 'Thành công!',
+                description: 'Mật khẩu của bạn đã được cập nhật.',
+                placement: 'topRight',
+                duration: 3,
+            });
+
+            setPasswordModalVisible(false);
+            passwordForm.resetFields();
         } catch (error) {
             console.error('Password change error:', error);
             notification.error({
                 message: 'Cập nhật mật khẩu thất bại!',
-                description: error.response?.data?.message || 'Đã có lỗi xảy ra khi cập nhật mật khẩu.',
+                description: error.message || 'Đã có lỗi xảy ra khi cập nhật mật khẩu.',
                 placement: 'topRight',
                 duration: 4,
             });

@@ -12,6 +12,7 @@ import {
     faSchool
 } from '@fortawesome/free-solid-svg-icons';
 import { ThemeContext } from '../../context/ThemeContext';
+import apiFetch from '../../config/baseAPI';
 import {
     GlobalStyle,
     MainContainer,
@@ -220,19 +221,13 @@ const LiveList = () => {
     };
 
     const fetchLivePrograms = async (searchQuery = '') => {
-        const token = localStorage.getItem('authToken');
-        if (!token) return [];
-        
         try {
             const url = searchQuery 
-                ? `https://localhost:7057/api/Program/search?name=${encodeURIComponent(searchQuery)}`
-                : 'https://localhost:7057/api/Program/active';
+                ? `Program/search?name=${encodeURIComponent(searchQuery)}`
+                : 'Program/active';
 
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'accept': '*/*'
-                }
+            const response = await apiFetch(url, {
+                headers: { 'accept': '*/*' }
             });
 
             if (!response.ok) {
@@ -266,15 +261,9 @@ const LiveList = () => {
     };
 
     const fetchVideoHistory = async () => {
-        const token = localStorage.getItem('authToken');
-        if (!token) return [];
-        
         try {
-            const response = await fetch('https://localhost:7057/api/VideoHistory/active', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'accept': '*/*'
-                }
+            const response = await apiFetch('VideoHistory/active', {
+                headers: { 'accept': '*/*' }
             });
             
             if (!response.ok) throw new Error('Lỗi khi tải lịch sử video');

@@ -4,6 +4,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import './Header.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import apiFetch from '../config/baseAPI';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,12 +35,11 @@ const Header = () => {
 
       // Then fetch fresh data from the appropriate API
       const apiUrl = isAdmin 
-        ? `https://localhost:7057/api/accounts/admin/${accountID}`
-        : 'https://localhost:7057/api/accounts/info';
+        ? `accounts/admin/${accountID}`
+        : 'accounts/info';
 
-      fetch(apiUrl, {
+      apiFetch(apiUrl, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'accept': '*/*'
         }
       })
@@ -60,9 +60,8 @@ const Header = () => {
             fullname: data.fullname,
             address: data.address,
             phoneNumber: data.phoneNumber,
-            roleName: data.role.roleName // Admin response has nested role object
+            roleName: data.role.roleName
           } : {
-            // Regular user response structure
             accountID: data.accountID,
             username: data.username,
             email: data.email,
@@ -78,7 +77,6 @@ const Header = () => {
         .catch(err => {
           console.error('Error fetching user info:', err);
           if (err.message.includes('Failed to fetch user data')) {
-            // If the token is invalid, clear auth data
             localStorage.removeItem('authToken');
             localStorage.removeItem('userData');
             setUser(null);

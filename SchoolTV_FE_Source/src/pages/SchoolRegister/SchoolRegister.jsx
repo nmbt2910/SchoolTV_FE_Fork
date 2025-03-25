@@ -1,11 +1,10 @@
-
-            // SchoolRegister.jsx
+// SchoolRegister.jsx
 import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { notification } from "antd";
 import { ThemeContext } from "../../context/ThemeContext";
-import axios from "axios";
 import "./schoolRegister.scss";
+import apiFetch from "../../config/baseAPI";
 
 function SchoolRegister() {
   const { theme } = useContext(ThemeContext);
@@ -98,22 +97,29 @@ function SchoolRegister() {
     if (countdown > 0) return;
 
     try {
-      const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/resend",
-        { email: registeredEmail }
-      );
-
-      notification.success({
-        message: "Đã gửi lại mã OTP",
-        description: response.data.message,
-        placement: "topRight",
+      const response = await apiFetch("accounts/otp/resend", {
+        method: "POST",
+        body: JSON.stringify({ email: registeredEmail }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-      setCountdown(60);
+      if (response.ok) {
+        const data = await response.json();
+        notification.success({
+          message: "Đã gửi lại mã OTP",
+          description: data.message,
+          placement: "topRight",
+        });
+        setCountdown(60);
+      } else {
+        throw new Error("Failed to resend OTP");
+      }
     } catch (error) {
       notification.error({
         message: "Lỗi",
-        description: error.response?.data?.message || "Không thể gửi lại mã OTP",
+        description: error.message || "Không thể gửi lại mã OTP",
         placement: "topRight",
       });
     }
@@ -131,27 +137,35 @@ function SchoolRegister() {
     }
 
     try {
-      const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/schoolowner/verify",
-        {
+      const response = await apiFetch("accounts/otp/schoolowner/verify", {
+        method: "POST",
+        body: JSON.stringify({
           email: registeredEmail,
           otpCode: otpCode,
-        }
-      );
-
-      notification.success({
-        message: "Thành công",
-        description: response.data.message,
-        placement: "topRight",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-      setTimeout(() => {
-        navigate("/school-login");
-      }, 3000);
+      if (response.ok) {
+        const data = await response.json();
+        notification.success({
+          message: "Thành công",
+          description: data.message,
+          placement: "topRight",
+        });
+
+        setTimeout(() => {
+          navigate("/school-login");
+        }, 3000);
+      } else {
+        throw new Error("OTP verification failed");
+      }
     } catch (error) {
       notification.error({
         message: "Lỗi",
-        description: error.response?.data?.message || "Xác thực OTP thất bại",
+        description: error.message || "Xác thực OTP thất bại",
         placement: "topRight",
       });
     }
@@ -199,25 +213,32 @@ function SchoolRegister() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://localhost:7057/api/accounts/schoolowner/signup",
-        formData
-      );
-
-      notification.success({
-        message: "Đăng ký thành công",
-        description: response.data.message,
-        placement: "topRight",
+      const response = await apiFetch("accounts/schoolowner/signup", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-      setRegisteredEmail(formData.email);
-      setShowOtpVerification(true);
-      setCountdown(60);
+      if (response.ok) {
+        const data = await response.json();
+        notification.success({
+          message: "Đăng ký thành công",
+          description: data.message,
+          placement: "topRight",
+        });
+
+        setRegisteredEmail(formData.email);
+        setShowOtpVerification(true);
+        setCountdown(60);
+      } else {
+        throw new Error("Registration failed");
+      }
     } catch (error) {
       notification.error({
         message: "Đăng ký thất bại",
-        description:
-          error.response?.data?.message || "Có lỗi xảy ra trong quá trình đăng ký",
+        description: error.message || "Có lỗi xảy ra trong quá trình đăng ký",
         placement: "topRight",
       });
     } finally {

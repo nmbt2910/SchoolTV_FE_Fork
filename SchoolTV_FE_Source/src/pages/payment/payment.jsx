@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import api from "../../config/baseAPI";
 import "./payment.css";
 
@@ -31,22 +31,19 @@ const Checkout = () => {
       id: 0,
       name: "Thẻ Visa/Mastercard",
       description: "Thanh toán an toàn qua cổng VNPAY",
-      image:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png",
+      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png",
     },
     {
       id: 1,
       name: "Ví MoMo",
       description: "Quét mã QR để thanh toán",
-      image:
-        "https://homepage.momocdn.net/fileuploads/svg/momo-file-240411162904.svg",
+      image: "https://homepage.momocdn.net/fileuploads/svg/momo-file-240411162904.svg",
     },
     {
       id: 2,
       name: "Chuyển khoản ngân hàng",
       description: "Hỗ trợ +40 ngân hàng tại Việt Nam",
-      image:
-        "https://theme.hstatic.net/200000467803/1000988268/14/cart_pay_2.png?v=815",
+      image: "https://theme.hstatic.net/200000467803/1000988268/14/cart_pay_2.png?v=815",
     },
   ];
 
@@ -69,10 +66,8 @@ const Checkout = () => {
       const returnUrl = "http://localhost:3000/payment/success";
       const cancelUrl = "http://localhost:3000/payment/cancel";
 
-      const response = api(
-        `/api/orders/create?returnUrl=${encodeURIComponent(
-          returnUrl
-        )}&cancelUrl=${encodeURIComponent(cancelUrl)}`,
+      const response = await api(
+        `/api/orders/create?returnUrl=${encodeURIComponent(returnUrl)}&cancelUrl=${encodeURIComponent(cancelUrl)}`,
         {
           method: "POST",
           headers: {
@@ -83,7 +78,6 @@ const Checkout = () => {
       );
 
       const result = await response.json();
-      console.log(result, "resultss");
       setOrderId(result.orderId);
       setPaymentLink(result.paymentLink);
 
@@ -107,8 +101,8 @@ const Checkout = () => {
 
   if (!selectedPackage) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
+      <div className="payment-loading-container">
+        <div className="payment-loading-spinner"></div>
       </div>
     );
   }
@@ -117,64 +111,62 @@ const Checkout = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="checkout-container"
+      className="payment-checkout-container"
     >
       <motion.div
         initial={{ x: -20 }}
         animate={{ x: 0 }}
-        className="checkout-form"
+        className="payment-checkout-form"
       >
-        <h2 className="section-title">Thông tin thanh toán</h2>
+        <h2 className="payment-section-title">Thông tin thanh toán</h2>
 
-        <div className="form-group">
-          <label className="form-label">Họ và tên</label>
+        <div className="payment-form-group">
+          <label className="payment-form-label">Họ và tên</label>
           <motion.input
             whileFocus={{ scale: 1.01 }}
             type="text"
             name="fullName"
-            className="form-input"
+            className="payment-form-input"
             placeholder="Nhập họ và tên"
             value={formData.fullName}
             onChange={handleInputChange}
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Email</label>
+        <div className="payment-form-group">
+          <label className="payment-form-label">Email</label>
           <motion.input
             whileFocus={{ scale: 1.01 }}
             type="email"
             name="email"
-            className="form-input"
+            className="payment-form-input"
             placeholder="example@email.com"
             value={formData.email}
             onChange={handleInputChange}
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Số điện thoại</label>
+        <div className="payment-form-group">
+          <label className="payment-form-label">Số điện thoại</label>
           <motion.input
             whileFocus={{ scale: 1.01 }}
             type="tel"
             name="phone"
-            className="form-input"
+            className="payment-form-input"
             placeholder="0xxxxxxxxx"
             value={formData.phone}
             onChange={handleInputChange}
           />
         </div>
 
-        <h2 className="section-title">Phương thức thanh toán</h2>
+        <h2 className="payment-section-title">Phương thức thanh toán</h2>
         <div className="payment-methods">
           {paymentMethods.map((method) => (
             <motion.div
               key={method.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`payment-method ${
-                selectedPayment === method.id ? "selected" : ""
-              }`}
+              className={`payment-method ${selectedPayment === method.id ? "selected" : ""}`}
               onClick={() => setSelectedPayment(method.id)}
             >
               <img src={method.image} alt={method.name} />
@@ -192,11 +184,11 @@ const Checkout = () => {
       <motion.div
         initial={{ x: 20 }}
         animate={{ x: 0 }}
-        className="order-summary"
+        className="payment-order-summary"
       >
-        <h2 className="section-title">Tóm tắt đơn hàng</h2>
+        <h2 className="payment-section-title">Tóm tắt đơn hàng</h2>
 
-        <div className="order-item">
+        <div className="payment-order-item">
           <div>
             <div className="package-name">{selectedPackage.name}</div>
             <div className="package-duration">
@@ -208,14 +200,14 @@ const Checkout = () => {
           </div>
         </div>
 
-        <div className="order-item">
+        <div className="payment-order-item">
           <div className="discount-label">Giảm giá</div>
           <div className="discount-amount">
             -{selectedPackage.discount || 0}₫
           </div>
         </div>
 
-        <div className="order-total">
+        <div className="payment-order-total">
           <div>Tổng cộng</div>
           <div>{selectedPackage.finalPrice}₫</div>
         </div>
@@ -223,7 +215,7 @@ const Checkout = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className={`checkout-button ${loading ? "loading" : ""}`}
+          className={`payment-checkout-button ${loading ? "loading" : ""}`}
           onClick={handleCheckout}
           disabled={loading}
         >
@@ -237,7 +229,7 @@ const Checkout = () => {
           )}
         </motion.button>
 
-        <div className="secure-badge">
+        <div className="payment-secure-badge">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M13 5H3V13H13V5Z" stroke="currentColor" strokeWidth="2" />
             <path
