@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useMemo, useCallback } from 're
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './ChannelList.module.scss';
 import { ThemeContext } from '../../context/ThemeContext';
+import apiFetch from '../../config/baseAPI';
 
 const Toast = ({ message, type, onClose }) => {
     useEffect(() => {
@@ -74,11 +75,10 @@ const ChannelList = () => {
                 }
 
                 const headers = {
-                    'Authorization': `Bearer ${token}`,
                     'accept': '*/*'
                 };
     
-                const schoolResponse = await fetch('https://localhost:7057/api/schoolchannels/active', { headers });
+                const schoolResponse = await apiFetch('schoolchannels/active', { headers });
                 
                 if (!schoolResponse.ok) {
                     throw new Error('Không thể tải danh sách trường học');
@@ -89,7 +89,7 @@ const ChannelList = () => {
                 let followedData = { $values: [] };
                 
                 try {
-                    const followedResponse = await fetch('https://localhost:7057/api/follow/followed', { headers });
+                    const followedResponse = await apiFetch('follow/followed', { headers });
                     
                     if (followedResponse.ok) {
                         followedData = await followedResponse.json();
@@ -152,9 +152,8 @@ const ChannelList = () => {
             [searchType === 'name' ? 'keyword' : 'address']: searchTerm
           });
       
-          const response = await fetch(`https://localhost:7057/api/schoolchannels/search?${params}`, {
+          const response = await apiFetch(`schoolchannels/search?${params}`, {
             headers: {
-              'Authorization': `Bearer ${token}`,
               'accept': '*/*'
             }
           });
@@ -201,10 +200,9 @@ const ChannelList = () => {
             return;
           }
           
-          const response = await fetch(`https://localhost:7057/api/follow/follow/${channelId}`, {
+          const response = await apiFetch(`follow/follow/${channelId}`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${token}`,
               'accept': '*/*'
             }
           });
@@ -247,10 +245,9 @@ const ChannelList = () => {
                 return;
             }
             
-            const response = await fetch(`https://localhost:7057/api/follow/unfollow/${channelId}`, {
+            const response = await apiFetch(`follow/unfollow/${channelId}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'accept': '*/*'
                 }
             });

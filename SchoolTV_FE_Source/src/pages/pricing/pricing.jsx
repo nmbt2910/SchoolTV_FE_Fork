@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import apiFetch from "../../config/baseAPI";
 import "./pricing.css";
 
 const PricingPage = () => {
@@ -30,52 +31,37 @@ const PricingPage = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      console.error("No token found");
-      setError("No token found");
-      setLoading(false);
-      return;
-    }
+    const fetchPackages = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
 
-    setLoading(true);
-    fetch(`https://localhost:7057/api/Package/active`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await apiFetch('/api/Package/active');
+        
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+        
+        if (!data?.$values) {
+          throw new Error("Invalid package data structure");
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Raw API data:", data);
-        if (!data.$values) {
-          console.error("No $values in API response");
-          setError("No packages data available");
-          return;
-        }
-        const formattedPackages = data.$values.map((pkg) => ({
+
+        setPackages(data.$values.map(pkg => ({
           ...pkg,
-          features: featureMapping[pkg.packageID] || [
-            "Tính năng đang cập nhật...",
-          ],
-        }));
-        setPackages(formattedPackages);
-        console.log("Formatted packages:", formattedPackages);
-        setError(null);
-      })
-      .catch((error) => {
-        console.error("Error fetching packages:", error);
-        setError(`Failed to fetch packages: ${error.message}`);
-      })
-      .finally(() => {
+          features: featureMapping[pkg.packageID] || ["Tính năng đang cập nhật..."],
+        })));
+        
+      } catch (err) {
+        setError(err.message);
+        console.error("Package fetch error:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchPackages();
   }, []);
 
   const handlePayment = (selectedPackage) => {
@@ -83,51 +69,80 @@ const PricingPage = () => {
     navigate("/checkout");
   };
 
+  const handleLearnMore = (packageId) => {
+    navigate(`/packages/${packageId}`);
+  };
+
+  if (loading) return <div className="loading-spinner"></div>;
+
   return (
-    <>
-      <div className="pricing-header">
-        <h1>Lựa Chọn Gói Dịch Vụ Phù Hợp</h1>
-        <p>
-          Giải pháp streaming và học trực tuyến toàn diện cho mọi quy mô trường
-          học
+    <div className="prc-container">
+      <div className="prc-hero">
+        <h1 className="prc-title">Lựa Chọn Gói Dịch Vụ Phù Hợp</h1>
+        <p className="prc-subtitle">
+          Giải pháp streaming và học trực tuyến toàn diện cho mọi quy mô trường học
         </p>
       </div>
 
-      <div className="pricing-container">
-        {loading ? (
-          <p>Đang tải dữ liệu...</p>
-        ) : error ? (
-          <p style={{ color: "red" }}>{error}</p>
+      <div className="prc-grid">
+        {error ? (
+          <div className="prc-error">
+            <div className="prc-error-icon">⚠️</div>
+            <div>
+              <h3>Có lỗi xảy ra!</h3>
+              <p>{error}. Vui lòng thử lại sau hoặc <a href="/contact">liên hệ hỗ trợ</a></p>
+            </div>
+          </div>
         ) : packages.length === 0 ? (
-          <p>Không có gói nào để hiển thị</p>
+          <div className="prc-empty">
+            <div className="prc-empty-illustration">🎯</div>
+            <p className="prc-empty-text">Hiện không có gói dịch vụ nào khả dụng</p>
+          </div>
         ) : (
-          packages.map((pkg, index) => (
-            <div key={index} className="pricing-card">
-              <h3>{pkg.name}</h3>
-              <div className="pricing-price">
-                {pkg.price.toLocaleString()} VND
-                <span className="pricing-price-span">/tháng</span>
+          packages.map((pkg) => (
+            <div key={pkg.packageID} className="prc-card">
+              {pkg.packageID === 2 && <div className="prc-badge">Phổ biến</div>}
+              <div className="prc-card-header">
+                <h3 className="prc-plan">{pkg.name}</h3>
+                <div className="prc-price">
+                  <span className="prc-amount">{pkg.price.toLocaleString()}</span>
+                  <span className="prc-currency">VND/tháng</span>
+                </div>
               </div>
-              <div className="pricing-features">
-                {pkg.features.map((feature, index) => (
-                  <div key={index} className="pricing-feature">
-                    <span className="pricing-feature-icon">✓</span>
+
+              <ul className="prc-features">
+                {pkg.features.map((feature, idx) => (
+                  <li key={idx} className="prc-feature">
+                    <svg className="prc-feature-icon" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
                     <span>{feature}</span>
-                  </div>
+                  </li>
                 ))}
+              </ul>
+
+              <div className="prc-actions">
+                <button
+                  onClick={() => handlePayment(pkg)}
+                  className="prc-primary-btn"
+                >
+                  Mua ngay
+                  <svg className="prc-btn-icon" viewBox="0 0 24 24">
+                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={() => handleLearnMore(pkg.packageID)}
+                  className="prc-secondary-btn"
+                >
+                  Khám phá tính năng
+                </button>
               </div>
-              <button
-                onClick={() => handlePayment(pkg)}
-                className="pricing-try-button"
-              >
-                Mua ngay
-              </button>
-              <button className="pricing-secondary-button">Tìm hiểu thêm</button>
             </div>
           ))
         )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -8,8 +8,8 @@ import {
   ArrowLeftOutlined
 } from "@ant-design/icons";
 import { ThemeContext } from "../../context/ThemeContext";
-import axios from "axios";
 import "./forgottenPassword.scss";
+import apiFetch from "../../config/baseAPI";
 
 const { Step } = Steps;
 
@@ -43,11 +43,15 @@ const ForgottenPassword = () => {
   const handleEmailSubmit = async (values) => {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://localhost:7057/api/accounts/forgot-password', {
-        email: values.email
+      const response = await apiFetch('accounts/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: values.email })
       });
-  
-      if (response.status === 200) {
+
+      if (response.ok) {
         setUserEmail(values.email);
         setCurrentStep(1);
         setResendTimer(60);
@@ -57,11 +61,14 @@ const ForgottenPassword = () => {
           placement: "topRight",
           duration: 3,
         });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send email');
       }
     } catch (error) {
       notification.error({
         message: "Gửi email thất bại!",
-        description: "Có lỗi xảy ra. Vui lòng thử lại sau!",
+        description: error.message || "Có lỗi xảy ra. Vui lòng thử lại sau!",
         placement: "topRight",
         duration: 5,
       });
@@ -73,20 +80,30 @@ const ForgottenPassword = () => {
   const handleResendEmail = async () => {
     setIsLoading(true);
     try {
-      await axios.post('https://localhost:7057/api/accounts/forgot-password', {
-        email: userEmail
+      const response = await apiFetch('accounts/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: userEmail })
       });
-      setResendTimer(60);
-      notification.success({
-        message: "Gửi lại email thành công!",
-        description: "Email xác nhận đã được gửi lại thành công!",
-        placement: "topRight",
-        duration: 3,
-      });
+
+      if (response.ok) {
+        setResendTimer(60);
+        notification.success({
+          message: "Gửi lại email thành công!",
+          description: "Email xác nhận đã được gửi lại thành công!",
+          placement: "topRight",
+          duration: 3,
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to resend email');
+      }
     } catch (error) {
       notification.error({
         message: "Gửi lại email thất bại!",
-        description: "Không thể gửi lại email. Vui lòng thử lại sau!",
+        description: error.message || "Không thể gửi lại email. Vui lòng thử lại sau!",
         placement: "topRight",
         duration: 5,
       });
@@ -98,14 +115,20 @@ const ForgottenPassword = () => {
   const handlePasswordReset = async (values) => {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://localhost:7057/api/accounts/reset-password', {
-        email: userEmail,
-        token: values.token,
-        newPassword: values.newPassword,
-        confirmNewPassword: values.confirmNewPassword
+      const response = await apiFetch('accounts/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          token: values.token,
+          newPassword: values.newPassword,
+          confirmNewPassword: values.confirmNewPassword
+        })
       });
-  
-      if (response.status === 200) {
+
+      if (response.ok) {
         setIsResetSuccess(true);
         setCurrentStep(3);
         notification.success({
@@ -114,11 +137,14 @@ const ForgottenPassword = () => {
           placement: "topRight",
           duration: 3,
         });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Reset failed');
       }
     } catch (error) {
       notification.error({
         message: "Đặt lại mật khẩu thất bại!",
-        description: error.response?.data?.message || 'Đặt lại mật khẩu thất bại. Vui lòng thử lại!',
+        description: error.message || 'Đặt lại mật khẩu thất bại. Vui lòng thử lại!',
         placement: "topRight",
         duration: 5,
       });
