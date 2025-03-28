@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Modal, Form, Row, Col, Input, Button, notification, Spin } from 'antd';
 import {
     UserOutlined,
@@ -25,6 +25,7 @@ const UserProfile = () => {
     const [passwordModalVisible, setPasswordModalVisible] = useState(false);
     const [form] = Form.useForm();
     const [passwordForm] = Form.useForm();
+    const initialValuesRef = useRef({});
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -57,12 +58,12 @@ const UserProfile = () => {
 
                 const data = await response.json();
                 const userData = JSON.parse(localStorage.getItem('userData')) || {};
-                
+
                 const updatedUserData = {
                     ...data,
                     roleName: userData.roleName || 'User'
                 };
-                
+
                 setUser(updatedUserData);
                 localStorage.setItem('userData', JSON.stringify(updatedUserData));
             } catch (error) {
@@ -92,50 +93,107 @@ const UserProfile = () => {
 
     const handleUpdateInfo = async (values) => {
         try {
-            const mappedValues = {
-                username: values.profile_username,
-                email: values.profile_email,
-                fullname: values.profile_fullname,
-                phoneNumber: values.profile_phone,
-                address: values.profile_address
-            };
-
-            const response = await apiFetch('accounts/update', {
-                method: 'PATCH',
-                body: JSON.stringify(mappedValues),
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Update failed');
+            // 1. Kiểm tra giá trị ban đầu
+            if (!initialValuesRef.current) {
+                notification.error({
+                    message: 'Lỗi hệ thống!',
+                    description: 'Không thể xác định dữ liệu gốc',
+                    placement: 'topRight'
+                });
+                return;
             }
 
+            // 2. Lọc các trường thay đổi
+            const changedFields = Object.keys(values).reduce((acc, key) => {
+                const currentValue = values[key];
+                const initialValue = initialValuesRef.current[key];
+
+                // So sánh chuỗi đã được trim()
+                if (String(currentValue).trim() !== String(initialValue).trim()) {
+                    acc[key] = currentValue;
+                }
+                return acc;
+            }, {});
+
+            // 3. Kiểm tra thay đổi
+            if (Object.keys(changedFields).length === 0) {
+                notification.info({
+                    message: 'Thông báo',
+                    description: 'Không có thông tin nào được thay đổi',
+                    placement: 'topRight',
+                    duration: 3
+                });
+                return;
+            }
+
+            // 4. Ánh xạ tên trường
+            const fieldMapping = {
+                profile_username: 'username',
+                profile_fullname: 'fullname',
+                profile_phone: 'phoneNumber',
+                profile_address: 'address'
+            };
+
+            // 5. Tạo payload
+            const payload = Object.entries(changedFields).reduce((acc, [formField, value]) => {
+                const apiField = fieldMapping[formField];
+                if (apiField) {
+                    acc[apiField] = value.trim(); // Clean data
+                }
+                return acc;
+            }, {});
+
+            // 6. Gửi request
+            const response = await apiFetch('accounts/update', {
+                method: 'PATCH',
+                body: JSON.stringify(payload),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            // 7. Xử lý response
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Cập nhật thất bại');
+            }
+
+            // 8. Cập nhật state và localStorage
             const updatedUser = await response.json();
             const updatedUserWithRole = {
                 ...updatedUser.account,
-                roleName: user.roleName
+                roleName: user.roleName // Giữ nguyên role
             };
 
             setUser(updatedUserWithRole);
             localStorage.setItem('userData', JSON.stringify(updatedUserWithRole));
 
+            // 9. Thông báo thành công
             notification.success({
                 message: 'Cập nhật thành công!',
-                description: 'Thông tin của bạn đã được cập nhật.',
+                description: 'Thông tin đã được lưu',
                 placement: 'topRight',
-                duration: 3,
+                duration: 3
             });
 
+            // 10. Đóng modal và reset form
             setEditModalVisible(false);
             form.resetFields();
+
         } catch (error) {
             console.error('Update error:', error);
+
+            // 11. Xử lý thông báo lỗi
+            const errorMessage = error.message.includes('unique constraint')
+                ? 'Email hoặc tên đăng nhập đã tồn tại'
+                : error.message || 'Lỗi không xác định';
+
             notification.error({
                 message: 'Cập nhật thất bại!',
-                description: error.message || 'Đã có lỗi xảy ra khi cập nhật thông tin.',
+                description: errorMessage,
                 placement: 'topRight',
-                duration: 4,
+                duration: 4
             });
         }
     };
@@ -161,9 +219,15 @@ const UserProfile = () => {
                 headers: { 'Content-Type': 'application/json' }
             });
 
+            const data = await response.text(); // Đọc response dưới dạng text trước
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Password change failed');
+                // Thử parse JSON nếu có thể, nếu không thì dùng plain text
+                try {
+                    const errorData = JSON.parse(data);
+                    throw new Error(errorData.message || 'Password change failed');
+                } catch {
+                    throw new Error(data || 'Password change failed');
+                }
             }
 
             notification.success({
@@ -177,9 +241,16 @@ const UserProfile = () => {
             passwordForm.resetFields();
         } catch (error) {
             console.error('Password change error:', error);
+            let errorDescription = error.message || 'Đã có lỗi xảy ra khi cập nhật mật khẩu.';
+
+            // Xử lý riêng cho lỗi mật khẩu hiện tại không đúng
+            if (error.message.includes("Current password is incorrect")) {
+                errorDescription = "Mật khẩu hiện tại đã nhập không chính xác.";
+            }
+
             notification.error({
                 message: 'Cập nhật mật khẩu thất bại!',
-                description: error.message || 'Đã có lỗi xảy ra khi cập nhật mật khẩu.',
+                description: errorDescription,
                 placement: 'topRight',
                 duration: 4,
             });
@@ -226,26 +297,31 @@ const UserProfile = () => {
                     </div>
                     <div className="user-profile-main-info">
                         <h1>{user.fullname}</h1>
+                        {user.roleName.toLowerCase() !== 'schoolowner' && (
                         <p className="user-profile-username">@{user.username}</p>
+                        )}
                         <p className="user-profile-bio">Học sinh lớp 12 - THPT Chu Văn An. Đam mê công nghệ và khoa học máy tính. 🚀</p>
                         <div className="user-profile-actions">
                             <Button
                                 type="primary"
                                 icon={<EditOutlined />}
                                 onClick={() => {
-                                    form.setFieldsValue({
+                                    const initialValues = {
                                         profile_username: user.username,
                                         profile_email: user.email,
                                         profile_fullname: user.fullname,
                                         profile_phone: user.phoneNumber || '',
                                         profile_address: user.address || ''
-                                    });
+                                    };
+                                    form.setFieldsValue(initialValues);
+                                    initialValuesRef.current = initialValues; // Cập nhật ref
                                     setEditModalVisible(true);
                                 }}
                                 className="user-profile-edit-btn"
                             >
                                 Chỉnh Sửa Hồ Sơ
                             </Button>
+
                             <Button
                                 icon={<KeyOutlined />}
                                 onClick={() => {
@@ -395,21 +471,6 @@ const UserProfile = () => {
                                 <Input
                                     prefix={<UserOutlined />}
                                     placeholder="Nhập họ và tên đầy đủ"
-                                    className="user-profile-input"
-                                />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="profile_email"
-                                label="Email"
-                                rules={[
-                                    { required: true, message: 'Vui lòng nhập email!' },
-                                    { type: 'email', message: 'Email không hợp lệ!' }
-                                ]}
-                            >
-                                <Input
-                                    prefix={<MailOutlined />}
-                                    placeholder="example@domain.com"
                                     className="user-profile-input"
                                 />
                             </Form.Item>

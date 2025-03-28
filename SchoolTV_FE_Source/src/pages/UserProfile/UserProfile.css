@@ -1,73 +1,179 @@
-/* Base Variables with enhanced blue theme aligned with Header component */
 :root {
-    --user-profile-primary-color: #4a90e2; /* Matched with Header's primary-color */
-    --user-profile-primary-light: #5a9de2; /* Slightly lighter than primary */
-    --user-profile-primary-dark: #357abd; /* Matched with Header's hover-color */
-    --user-profile-secondary-color: #f0f4f8; /* Matched with Header's secondary-color */
-    --user-profile-text-primary: #2c3e50; /* Matched with Header's text-color */
-    --user-profile-text-secondary: #4a5568; /* Similar to Header's secondary-text */
-    --user-profile-success-color: #28a745; /* Matched with Header's success-color */
-    --user-profile-warning-color: #ffc107; /* Matched with Header's warning-color */
-    --user-profile-danger-color: #ff4757; /* Matched with Header's live-color */
-    --user-profile-bg-color: #f8faff; /* Slightly blue-tinted white */
-    --user-profile-card-bg: #FFFFFF; /* Matched with Header's bg-color */
-    --user-profile-border-color: #e1e8ed; /* Matched with Header's border-color */
-    --user-profile-shadow-sm: 0 4px 6px rgba(74, 144, 226, 0.1); /* Blue-tinted shadow */
-    --user-profile-shadow-md: 0 6px 12px rgba(74, 144, 226, 0.15);
-    --user-profile-shadow-lg: 0 15px 25px rgba(74, 144, 226, 0.2);
-    --user-profile-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    --user-profile-input-bg: #FFFFFF;
-    --user-profile-input-border: #e1e8ed; /* Matched with Header's border-color */
-    --user-profile-input-text: #2c3e50; /* Matched with Header's text-color */
-    --user-profile-card-radius: 24px;
-    --user-profile-button-radius: 12px;
-    --user-profile-placeholder-color: #a0aec0;
-    
-    /* Modal specific variables */
-    --user-profile-modal-bg: #FFFFFF;
-    --user-profile-modal-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    --user-profile-modal-border: #f0f4f8; /* Matched with Header's secondary-color */
-    --user-profile-modal-header-bg: linear-gradient(135deg, #f8faff, #f0f4f8);
-    --user-profile-modal-input-bg: #f8faff;
-    --user-profile-modal-input-focus-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
-    --user-profile-modal-button-gradient: linear-gradient(135deg, #4a90e2, #357abd);
-    --user-profile-modal-button-shadow: 0 8px 15px rgba(74, 144, 226, 0.2);
-    --user-profile-icon-color: #ffffff; /* White color for icons */
-  }
+  --user-profile-primary-color: #4a90e2;
+  --user-profile-primary-light: #5a9de2;
+  --user-profile-primary-dark: #357abd;
+  --user-profile-secondary-color: #f0f4f8;
+  --user-profile-text-primary: #2c3e50;
+  --user-profile-text-secondary: #4a5568;
+  --user-profile-success-color: #28a745;
+  --user-profile-warning-color: #ffc107;
+  --user-profile-danger-color: #ff4757;
+  --user-profile-bg-color: #f8faff;
+  --user-profile-card-bg: #FFFFFF;
+  --user-profile-border-color: #e1e8ed;
+  --user-profile-shadow-sm: 0 4px 6px rgba(74, 144, 226, 0.1);
+  --user-profile-shadow-md: 0 6px 12px rgba(74, 144, 226, 0.15);
+  --user-profile-shadow-lg: 0 15px 25px rgba(74, 144, 226, 0.2);
+  --user-profile-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --user-profile-input-bg: #FFFFFF;
+  --user-profile-input-border: #e1e8ed;
+  --user-profile-input-text: #2c3e50;
+  --user-profile-card-radius: 24px;
+  --user-profile-button-radius: 12px;
+  --user-profile-placeholder-color: #a0aec0;
   
-  /* Dark mode theme variables */
-  [data-theme="dark"] {
-    --user-profile-primary-color: #4a90e2; /* Kept consistent with light mode */
-    --user-profile-primary-light: #5a9de2; /* Matched with Header's hover-color in dark mode */
-    --user-profile-primary-dark: #357abd;
-    --user-profile-secondary-color: #1a2634; /* Matched with Header's secondary-color in dark mode */
-    --user-profile-text-primary: #e1e8ed; /* Matched with Header's text-color in dark mode */
-    --user-profile-text-secondary: #cbd5e0; /* Similar to Header's secondary-text in dark mode */
-    --user-profile-success-color: #28a745;
-    --user-profile-warning-color: #ffc107;
-    --user-profile-danger-color: #ff4757;
-    --user-profile-bg-color: #0f172a; /* Matched with Header's bg-color in dark mode */
-    --user-profile-card-bg: #1a2634; /* Matched with Header's card-bg in dark mode */
-    --user-profile-border-color: #2a3f52; /* Matched with Header's border-color in dark mode */
-    --user-profile-shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.2);
-    --user-profile-shadow-md: 0 6px 12px rgba(0, 0, 0, 0.25);
-    --user-profile-shadow-lg: 0 15px 25px rgba(0, 0, 0, 0.3);
-    --user-profile-input-bg: #1e293b; /* Slightly lighter than card-bg */
-    --user-profile-input-border: #2a3f52; /* Matched with Header's border-color in dark mode */
-    --user-profile-input-text: #e2e8f0; /* Matched with Header's primary-text in dark mode */
-    --user-profile-placeholder-color: #718096;
-    
-    /* Modal specific variables for dark mode */
-    --user-profile-modal-bg: #1a2634; /* Matched with Header's card-bg in dark mode */
-    --user-profile-modal-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    --user-profile-modal-border: #2a3f52; /* Matched with Header's border-color in dark mode */
-    --user-profile-modal-header-bg: linear-gradient(135deg, #1a2634, #0f172a);
-    --user-profile-modal-input-bg: #1e293b;
-    --user-profile-modal-input-focus-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
-    --user-profile-modal-button-gradient: linear-gradient(135deg, #4a90e2, #357abd);
-    --user-profile-icon-color: #ffffff; /* White color for icons */
-  }
+  /* Modal specific variables */
+  --user-profile-modal-bg: #FFFFFF;
+  --user-profile-modal-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  --user-profile-modal-border: #f0f4f8;
+  --user-profile-modal-header-bg: linear-gradient(135deg, #f8faff, #f0f4f8);
+  --user-profile-modal-input-bg: #f8faff;
+  --user-profile-modal-input-focus-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+  --user-profile-modal-button-gradient: linear-gradient(135deg, #4a90e2, #357abd);
+  --user-profile-modal-button-shadow: 0 8px 15px rgba(74, 144, 226, 0.2);
+  --user-profile-icon-color: #ffffff;
+
+  --user-profile-info-item-bg: #ffffff;
+  --user-profile-info-item-border: rgba(74,144,226,0.15);
+  --user-profile-info-item-hover-bg: #f8faff;
+  --user-profile-username-bg: rgba(74,144,226,0.08);
+  --user-profile-username-border: rgba(74,144,226,0.2);
+  --user-profile-activity-item-border: rgba(74,144,226,0.2);
+
+  --modal-close-x: #4a90e2;
+}
+
+/* Dark mode theme variables with enhancements */
+[data-theme="dark"] {
+  --user-profile-primary-color: #4a90e2;
+  --user-profile-primary-light: #5a9de2;
+  --user-profile-primary-dark: #357abd;
+  --user-profile-secondary-color: #1a2634;
+  --user-profile-text-primary: #e1e8ed;
+  --user-profile-text-secondary: #cbd5e0;
+  --user-profile-success-color: #28a745;
+  --user-profile-warning-color: #ffc107;
+  --user-profile-danger-color: #ff4757;
+  --user-profile-bg-color: #0f172a;
+  --user-profile-card-bg: #1a2634;
+  --user-profile-border-color: #2a3f52;
+  --user-profile-shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.2);
+  --user-profile-shadow-md: 0 6px 12px rgba(0, 0, 0, 0.25);
+  --user-profile-shadow-lg: 0 15px 25px rgba(0, 0, 0, 0.3);
+  --user-profile-input-bg: #1e293b;
+  --user-profile-input-border: #2a3f52;
+  --user-profile-input-text: #e2e8f0;
+  --user-profile-placeholder-color: #718096;
+  --user-profile-activity-item-bg: #213145;
+  --user-profile-activity-item-border: rgba(74,144,226,0.3);
   
+  /* Modal specific variables for dark mode */
+  --user-profile-modal-bg: #1a2634;
+  --user-profile-modal-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  --user-profile-modal-border: #2a3f52;
+  --user-profile-modal-header-bg: linear-gradient(135deg, #1a2634, #0f172a);
+  --user-profile-modal-input-bg: #1e293b;
+  --user-profile-modal-input-focus-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
+  --user-profile-modal-button-gradient: linear-gradient(135deg, #4a90e2, #357abd);
+  
+  /* Enhanced Dark Mode Additions */
+  --user-profile-info-item-bg: #213145;
+  --user-profile-info-item-hover-bg: #2a3a52;
+  --user-profile-account-icon-bg: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  --user-profile-username-bg: linear-gradient(95deg, rgba(74,144,226,0.15) 0%, rgba(74,144,226,0.05) 100%);
+  --user-profile-info-item-border: rgba(74,144,226,0.3);
+  --user-profile-username-border: rgba(74,144,226,0.4);
+
+  --modal-close-x: #4a90e2;
+}
+
+[data-theme="dark"] .user-profile-info-item {
+  background: var(--user-profile-info-item-bg);
+  border: 1px solid var(--user-profile-info-item-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .user-profile-info-item:hover {
+  background: var(--user-profile-info-item-hover-bg);
+  border-color: var(--user-profile-primary-color);
+}
+
+[data-theme="dark"] .user-profile-username {
+  background: var(--user-profile-username-bg);
+  border: 1px solid var(--user-profile-username-border);
+  padding: 0.3rem 0.8rem !important;
+  border-width: 1px;
+  backdrop-filter: blur(4px);
+}
+
+[data-theme="dark"] .user-profile-account-icon {
+  background: var(--user-profile-account-icon-bg);
+  box-shadow: 0 4px 12px rgba(74,144,226,0.2);
+}
+
+[data-theme="dark"] .user-profile-account-item {
+  border: 1px solid rgba(74,144,226,0.2);
+  background: var(--user-profile-info-item-bg);
+}
+
+[data-theme="dark"] .user-profile-account-item:hover {
+  border-color: var(--user-profile-primary-color);
+  background: var(--user-profile-info-item-hover-bg);
+}
+
+[data-theme="dark"] .user-profile-account-status.connected {
+  background: rgba(40,167,69,0.2);
+  color: #38d16a;
+}
+
+[data-theme="dark"] .user-profile-info-item span,
+[data-theme="dark"] .user-profile-account-info span {
+  color: #e1e8ed;
+}
+
+[data-theme="dark"] .user-profile-info-item label,
+[data-theme="dark"] .user-profile-account-info p {
+  color: #a3b8cc;
+}
+
+[data-theme="dark"] .user-profile-info-item,
+[data-theme="dark"] .user-profile-account-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+[data-theme="dark"] .user-profile-main-info h1 {
+  text-shadow: 0 2px 8px rgba(74,144,226,0.3);
+}
+
+[data-theme="dark"] .user-profile-activity-item {
+  background: var(--user-profile-activity-item-bg);
+  border: 1px solid var(--user-profile-activity-item-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: 
+  all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+  box-shadow 0.2s ease,
+  transform 0.3s ease;
+}
+
+[data-theme="dark"] .user-profile-activity-item:hover {
+  background: var(--user-profile-info-item-hover-bg);
+  border-color: var(--user-profile-primary-color);
+}
+
+[data-theme="dark"] .user-profile-activity-item:hover .user-profile-activity-icon {
+  background: var(--user-profile-primary-color) !important;
+  color: white !important;
+  transform: scale(1.1);
+}
+
+[data-theme="dark"] .user-profile-activity-item.live:hover .user-profile-activity-icon {
+  background: var(--user-profile-danger-color) !important;
+}
+
+[data-theme="dark"] .user-profile-activity-item:nth-child(3):hover .user-profile-activity-icon {
+  background: var(--user-profile-success-color) !important;
+}
+
   /* Base styles for the body and container */
   body {
     background-color: var(--user-profile-bg-color);
@@ -83,9 +189,8 @@
     padding-top: 80px;
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234A90E2' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     position: relative;
-  }
+}
   
-  /* Header Section with improved shadows and rounded corners */
   .user-profile-header {
     background: var(--user-profile-card-bg);
     border-radius: var(--user-profile-card-radius);
@@ -95,7 +200,8 @@
     position: relative;
     overflow: hidden;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  }
+}
+
   
   .user-profile-header-content {
     display: flex;
@@ -203,7 +309,9 @@
     font-size: 1.1rem;
     margin: 0.5rem 0;
     display: inline-block;
-    background: var(--user-profile-secondary-color);
+    background: var(--user-profile-username-bg);
+    border: 1px solid var(--user-profile-username-border);
+    backdrop-filter: blur(2px);
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
     font-weight: 500;
@@ -325,13 +433,15 @@
     padding: 1rem;
     border-radius: 16px;
     transition: var(--user-profile-transition);
-    background: var(--user-profile-card-bg);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    background: var(--user-profile-info-item-bg);
+    border: 1px solid var(--user-profile-info-item-border);
+    box-shadow: 0 2px 12px rgba(74,144,226,0.05);
   }
   
   .user-profile-info-item:hover {
-    background: var(--user-profile-secondary-color);
-    transform: translateX(5px);
+    background: var(--user-profile-info-item-hover-bg);
+    border-color: var(--user-profile-primary-light);
+    transform: translateX(3px);
   }
   
   /* Fixed info icon - adjusted width and ensured white color */
@@ -383,6 +493,14 @@
     font-weight: 600;
     transition: color 0.3s ease;
   }
+
+  .user-profile-info-item,
+.user-profile-account-item,
+.user-profile-activity-item {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.2s ease,
+                transform 0.3s ease;
+}
   
   /* Enhanced Connected Accounts */
   .user-profile-account-item {
@@ -391,16 +509,18 @@
     gap: 1rem;
     padding: 1.2rem;
     border-radius: 16px;
-    background: var(--user-profile-card-bg);
+    background: var(--user-profile-info-item-bg);
     margin-bottom: 1rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    border: 1px solid var(--user-profile-info-item-border);
     transition: var(--user-profile-transition), background-color 0.3s ease;
   }
   
   .user-profile-account-item:hover {
     transform: translateY(-3px);
     box-shadow: var(--user-profile-shadow-md);
-    background: var(--user-profile-secondary-color);
+    border-color: var(--user-profile-primary-light);
+    background: var(--user-profile-info-item-hover-bg);
   }
   
   /* Fixed account icon - ensure white color */
@@ -461,15 +581,17 @@
     gap: 1rem;
     padding: 1.2rem;
     border-radius: 16px;
-    background: var(--user-profile-card-bg);
+    background: var(--user-profile-info-item-bg);
+    border: 1px solid var(--user-profile-activity-item-border);
     transition: var(--user-profile-transition), background-color 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    box-shadow: 0 2px 12px rgba(74,144,226,0.05);
     position: relative;
     overflow: hidden;
   }
   
   .user-profile-activity-item:hover .user-profile-activity-icon {
-    background: linear-gradient(135deg, var(--user-profile-primary-light), var(--user-profile-primary-color));
+    background: var(--user-profile-info-item-hover-bg);
+    border-color: var(--user-profile-primary-light);
     color: var(--user-profile-icon-color) !important; /* Always white on hover */
     transform: rotate(5deg);
   }
@@ -600,9 +722,16 @@
   }
   
   .user-profile-modal .ant-modal-close:hover {
-    color: var(--user-profile-primary-color);
+    color: var(--modal-close-x);
     transform: rotate(90deg);
+    background: none !important;
+    box-shadow: none !important;
   }
+
+  .user-profile-modal .ant-modal-close:hover .ant-modal-close-x {
+    color: var(--modal-close-x);
+    background: transparent !important;
+}
   
   .user-profile-modal .ant-form-item {
     margin-bottom: 24px;
@@ -986,6 +1115,8 @@
   
   .user-profile-activity-item:hover .user-profile-activity-icon {
     transform: scale(1.1);
+    background: linear-gradient(135deg, var(--user-profile-primary-light), var(--user-profile-primary-color)) !important;
+    color: white !important;
   }
   
   /* Live item specific styling */
