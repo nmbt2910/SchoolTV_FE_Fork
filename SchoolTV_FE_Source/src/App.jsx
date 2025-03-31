@@ -1,4 +1,4 @@
-import { React, useEffect } from "react";
+import { useEffect } from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -31,10 +31,12 @@ import Checkout from "./pages/payment/payment";
 import StudioPost from "./components/schooltv-studio/functions/post/StudioPost";
 import AdminPage from "./pages/AdminPage/AdminPage";
 import UserList from "./pages/AdminPage/UserList";
-import SchoolOwner from "./pages/AdminPage/SchoolOwner";
 import StudioVideo from "./components/schooltv-studio/functions/up-video/StudioVideo";
-
-
+import AdminList from "./pages/AdminPage/AdminList";
+import SchoolOwnerPending from "./pages/AdminPage/SchoolOwnerPending";
+import SchoolOwnerAccount from "./pages/AdminPage/SchoolOwnerAccount";
+import { UserProvider } from "./context/UserContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -51,11 +53,11 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/login",
-      element: (
-        <ThemeProvider>
-          <ScrollToTopWrapper />
-          <Login />
-        </ThemeProvider>
+      element: (      
+          <ThemeProvider>
+            <ScrollToTopWrapper />
+            <Login />
+          </ThemeProvider>
       ),
     },
     {
@@ -130,7 +132,9 @@ function App() {
       element: (
         <ThemeProvider>
           <ScrollToTopWrapper />
-          <PageLayout />
+            <UserProvider> {/* Bọc toàn bộ ứng dụng bằng UserProvider */}
+              <PageLayout />
+            </UserProvider>
         </ThemeProvider>
       ),
       children: [
@@ -192,24 +196,52 @@ function App() {
         },
         {
           path: "/adminpage",
-          element: <AdminPage />,
+          element: (
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminPage />
+            </ProtectedRoute>
+          ),  
         },
         {
           path: "/userlist",
-          element: <UserList />,
+          element: (
+            <ProtectedRoute allowedRoles={['admin']}>
+              <UserList />
+            </ProtectedRoute>
+          ), 
         },
         {
-          path: "/schoolowner",
-          element: <SchoolOwner />,
-        }
+          path: "/adminlist",
+          element: (
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminList />
+            </ProtectedRoute>
+          ), 
+        },
+        {
+          path: "/sopending",
+          element: (
+            <ProtectedRoute allowedRoles={['admin']}>
+              <SchoolOwnerPending />
+            </ProtectedRoute>
+          ), 
+        },
+        {
+          path: "/soaccount",
+          element: (
+            <ProtectedRoute allowedRoles={['admin']}>
+              <SchoolOwnerAccount />
+            </ProtectedRoute>
+          ), 
+        },
       ],
     },
   ]);
 
   return (
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
   );
 }
 

@@ -521,3 +521,33 @@
       }
     }
   }
+
+  // Add glow animation
+@keyframes school-register-glow {
+  0% {
+    box-shadow: 0 0 4px rgba(231, 76, 60, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 4px rgba(231, 76, 60, 0.3);
+  }
+}
+
+// Add error class
+.school-register-input-error {
+  border-color: var(--school-register-error) !important;
+  animation: school-register-glow 1.5s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+  
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
+  }
+}
+
+// Remove error message styles (since we're using notifications)
+.school-register-error {
+  display: none;
+}

@@ -152,11 +152,29 @@
       z-index: 2;
     }
   }
+}
 
-  .auth-register-error {
-    color: var(--auth-register-error);
-    font-size: 0.85rem;
-    margin-top: 5px;
+// Input error state
+.auth-register-input-error {
+  border-color: var(--auth-register-error) !important;
+  animation: auth-register-glow 1.5s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+  
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
+  }
+}
+
+@keyframes auth-register-glow {
+  0% {
+    box-shadow: 0 0 4px rgba(231, 76, 60, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 4px rgba(231, 76, 60, 0.3);
   }
 }
 
@@ -393,7 +411,7 @@
   }
 }
 
-/* Add to register.scss */
+// School banner
 .auth-register-school-banner {
   display: flex;
   align-items: center;
@@ -436,8 +454,6 @@
     }
   }
 }
-
-// Add these styles to your existing register.scss file
 
 // OTP card specific styles
 .auth-otp-card {

@@ -1,5 +1,5 @@
-import './UserList.scss';
-import { Layout, Menu, Table, Input, Button, notification, Select, Modal } from 'antd';
+import './SchoolOwnerPending.scss';
+import { Layout, Menu, Table, Input, Button, notification, Select } from 'antd';
 import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';  
 import { useState, useEffect } from 'react';
@@ -10,79 +10,38 @@ const { Sider, Content } = Layout;
 const { Search } = Input;
 const { Option } = Select;
 
-function UserList() {
+function SchoolOwnerPending() {
   const [data, setData] = useState([]); 
   const [statusMap, setStatusMap] = useState({}); 
-  const [isModalVisible, setIsModalVisible] = useState(false);  
-  const [deleteKey, setDeleteKey] = useState(null);  
   const [initialData, setInitialData] = useState([]);  
   const navigate = useNavigate(); 
-
-  const showDeleteModal = (key) => {
-    setDeleteKey(key);
-    setIsModalVisible(true);
-  };
-
-  const handleDelete = async () => {
-    try {
-      const response = await axios.delete(`https://localhost:7057/api/accounts/admin/delete/${deleteKey}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      });
-
-      if (response.status === 200) {
-        const updatedData = data.filter(item => item.key !== deleteKey);
-        setData(updatedData);
-
-        notification.success({
-          message: 'Tài khoản đã được xóa thành công',
-          description: `Tài khoản có ID ${deleteKey} đã được xóa.`,
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting account:', error);
-      notification.error({
-        message: 'Xóa tài khoản thất bại',
-        description: 'Có lỗi xảy ra khi xóa tài khoản.',
-      });
-    }
-
-    setIsModalVisible(false); 
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7057/api/accounts/admin/all', {
+        const response = await axios.get('https://localhost:7057/api/accounts/admin/pending-schoolowners', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         });
-  
-        const filteredData = response.data.$values.filter(item => item.roleID === 1);
-        const fetchedData = filteredData.map(item => ({
+
+        const filteredData = response.data.$values.map(item => ({
           key: item.accountID,
-          username: item.username,
           email: item.email,
           fullname: item.fullname,
           address: item.address,
           phoneNumber: item.phoneNumber,
-          roleName: 'User',
+          roleName: 'School Owner',
           status: item.status,
         }));
-  
-        setInitialData(fetchedData); 
-        setData(fetchedData);  
+
+        setInitialData(filteredData); 
+        setData(filteredData);  
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-  
+
     fetchData();
   }, []);
 
@@ -118,14 +77,16 @@ function UserList() {
     if (value.trim() === '') {
       setData(initialData);
     } else {
-      const filteredData = initialData.filter((user) => 
-        user.username.toLowerCase().startsWith(value.toLowerCase()) ||
-        user.email.toLowerCase().startsWith(value.toLowerCase())
+      const filteredData = initialData.filter((owner) => 
+        owner.fullname.toLowerCase().includes(value.toLowerCase()) ||
+        owner.address.toLowerCase().includes(value.toLowerCase()) ||
+        owner.phoneNumber.toLowerCase().includes(value.toLowerCase()) ||
+        owner.email.toLowerCase().includes(value.toLowerCase())
       );
       setData(filteredData);
     }
   };
-  
+
   const handleLogout = () => {
     localStorage.removeItem("userToken"); 
     sessionStorage.removeItem("userToken");
@@ -136,14 +97,9 @@ function UserList() {
   const columns = [
     {
       title: 'Name',
-      dataIndex: 'username',
-      key: 'username',
-      render: (text, record) => <span>{text} <br /><span style={{ fontSize: '12px', color: 'gray' }}>{record.email}</span></span>,
-    },
-    {
-      title: 'Full Name',
       dataIndex: 'fullname',
       key: 'fullname',
+      render: (text, record) => <span>{text} <br /><span style={{ fontSize: '12px', color: 'gray' }}>{record.email}</span></span>,
     },
     {
       title: 'Address',
@@ -167,6 +123,7 @@ function UserList() {
             style={{ width: 120 }}
           >
             <Option value="Active">Active</Option>
+            <Option value="Pending">Pending</Option>
             <Option value="InActive">Inactive</Option>
           </Select>
         );
@@ -176,25 +133,15 @@ function UserList() {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <>
-          <Button type="primary" onClick={() => handleSaveStatus(record.key)}>
-            Save
-          </Button>
-          <Button 
-            type="primary" 
-            danger  
-            style={{ marginLeft: 10, width: "60px" }} 
-            onClick={() => showDeleteModal(record.key)}
-          >
-            Delete
-          </Button>
-        </>
+        <Button type="primary" onClick={() => handleSaveStatus(record.key)}>
+          Save
+        </Button>
       ),
     },
   ];
-  
+
   return (
-    <div className="userlist-body">
+    <div className="school-owner-pending-body">
       <Layout style={{ minHeight: '90vh' }}>
         <Sider width={225} className="site-layout-background">
         <Menu theme='dark' mode="inline" defaultSelectedKeys={['1']} style={{ height: '100%', borderRight: 0 }}>
@@ -212,7 +159,7 @@ function UserList() {
         <Layout style={{ padding: '0 24px 24px' }}>
           <Content style={{ padding: 24, margin: 0, minHeight: 280 }}>
             <Search
-              placeholder="Search User"
+              placeholder="Search School Owner"
               allowClear
               enterButton="Search"
               size="large"
@@ -228,20 +175,8 @@ function UserList() {
           </Content>
         </Layout>
       </Layout>
-
-      <Modal
-        title="Xác nhận xóa tài khoản"
-        visible={isModalVisible}
-        onOk={handleDelete}
-        onCancel={handleCancel}
-        okText="OK"
-        cancelText="Cancel"
-        okButtonProps={{ danger: true }}
-      >
-        <p>Bạn có chắc chắn muốn xóa tài khoản này?</p>
-      </Modal>
     </div>
   );
 }
 
-export default UserList;
+export default SchoolOwnerPending;

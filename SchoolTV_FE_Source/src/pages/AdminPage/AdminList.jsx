@@ -1,0 +1,164 @@
+import './AdminList.scss';
+import { Layout, Menu, Table, Input } from 'antd';
+import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const { SubMenu } = Menu;
+const { Sider, Content } = Layout;
+const { Search } = Input;
+
+const columns = [
+  {
+    title: 'Name',
+    dataIndex: 'username',
+    key: 'username',
+    render: (text, record) => <span>{text} <br /><span style={{ fontSize: '12px', color: 'gray' }}>{record.email}</span></span>,
+  },
+  {
+    title: 'Role',
+    dataIndex: 'roleName',
+    key: 'roleName',
+    render: () => <span>Admin</span>,  
+  },
+  {
+    title: 'Address',
+    dataIndex: 'address',
+    key: 'address',
+  },
+  {
+    title: 'Phone Number',
+    dataIndex: 'phoneNumber',
+    key: 'phoneNumber',
+  },
+  {
+    title: 'Status',
+    dataIndex: 'status',
+    key: 'status',
+    render: (status) => {
+      let color = '';
+      let displayStatus = '';
+  
+      if (status === 'Active') {
+        displayStatus = 'Active';
+        color = 'green';
+      }
+      if (status === 'Pending') {
+        displayStatus = 'Pending';
+        color = 'blue';
+      }
+      if (status === 'InActive') {
+        displayStatus = 'InActive';
+        color = 'gray';
+      }
+  
+      return <span style={{ color }}>{displayStatus}</span>;
+    },
+  },
+];
+
+function AdminList() {
+  const [data, setData] = useState([]);
+  const [initialData, setInitialData] = useState([]);
+  const navigate = useNavigate(); 
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('https://localhost:7057/api/accounts/admin/all', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        });
+
+        const filteredData = response.data.$values.filter(item => item.roleID === 3);
+
+        const fetchedData = filteredData.map(item => ({
+          key: item.accountID,
+          username: item.username,
+          email: item.email,
+          fullname: item.fullname,
+          address: item.address,
+          phoneNumber: item.phoneNumber,
+          status: item.status,
+        }));
+
+        setInitialData(fetchedData);  
+        setData(fetchedData); 
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSearch = (value) => {
+    if (value.trim() === '') {
+      setData(initialData);
+    } else {
+      const filteredData = initialData.filter((admin) => 
+        admin.username.toLowerCase().includes(value.toLowerCase()) ||
+        admin.email.toLowerCase().includes(value.toLowerCase()) ||
+        admin.fullname.toLowerCase().includes(value.toLowerCase()) ||
+        admin.address.toLowerCase().includes(value.toLowerCase()) ||
+        admin.phoneNumber.toLowerCase().includes(value.toLowerCase())
+      );
+      setData(filteredData);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");  
+    sessionStorage.removeItem("authToken"); 
+
+    navigate("/login"); 
+  };
+
+  return (
+    <div className="schoolowner-body">
+      <Layout style={{ minHeight: '90vh' }}>
+        <Sider width={225} className="site-layout-background">
+          <Menu theme='dark' mode="inline" defaultSelectedKeys={['1']} style={{ height: '100%', borderRight: 0 }}>
+            <Menu.Item key="1" icon={<UnorderedListOutlined />}><Link to="/adminpage">Dashboard</Link></Menu.Item>
+            <Menu.Item key="2" icon={<SettingOutlined />}><Link to="/sopending">School Owner Pending</Link></Menu.Item>
+            <SubMenu key="3" icon={<UserOutlined />} title="User Management">
+              <Menu.Item key="3.1" icon={<UserDeleteOutlined />}><Link to="/userlist">User List</Link></Menu.Item>
+              <Menu.Item key="3.2" icon={<UsergroupDeleteOutlined />}><Link to="/adminlist">Admin List</Link></Menu.Item>
+              <Menu.Item key="3.3" icon={<HomeOutlined />}><Link to="/soaccount">School Owner Account</Link></Menu.Item>
+            </SubMenu>
+            <Menu.Item key="4" icon={<LogoutOutlined />} onClick={handleLogout}>Log out</Menu.Item>
+          </Menu>
+        </Sider>
+
+        <Layout style={{ padding: '0 24px 24px' }}>
+          <Content
+            style={{
+              padding: 24,
+              margin: 0,
+              minHeight: 280,
+            }}
+          >
+            <Search
+              placeholder="Search name of admin"
+              allowClear
+              enterButton="Search"
+              size="large"
+              onSearch={handleSearch}
+              style={{ marginBottom: '20px', width: '300px' }}
+            />
+            <Table
+              columns={columns}
+              dataSource={data}
+              pagination={{ pageSize: 8 }}
+              rowKey="key"
+            />
+          </Content>
+        </Layout>
+      </Layout>
+    </div>
+  );
+}
+
+export default AdminList;

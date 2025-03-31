@@ -3,12 +3,10 @@ import { useState, useContext } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { notification } from "antd";
 import { ThemeContext } from "../../context/ThemeContext";
-import axios from "axios";
 import "./schoolLogin.scss";
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../redux/features/userData/userLoginSlice';
-
-const API_URL = "https://localhost:7057/api/accounts/login";
+import apiFetch from '../../config/baseAPI';
 
 function SchoolLogin() {
   const { theme } = useContext(ThemeContext);
@@ -38,20 +36,20 @@ function SchoolLogin() {
     setLoading(true);
     
     try {
-      const response = await axios.post(API_URL, 
-        { email, password, remember: rememberMe }, 
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await apiFetch("accounts/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password, remember: rememberMe }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      if (response.status === 200 && response.data) {
-        console.log('Login response:', response.data);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Login response:', data);
 
         // Extract token and accountID from the correct structure
-        const { token, account } = response.data;
+        const { token, account } = data;
 
         if (token && account?.accountID) {
           localStorage.setItem("authToken", token);
@@ -64,9 +62,11 @@ function SchoolLogin() {
             fullname: account.fullname,
             roleName: account.roleName
           }));
+          
           console.log("dispatching login action with account", account);
           dispatch(login(account));
           console.log("Redux state after login:", user);
+          
           notification.success({
             message: "Đăng nhập thành công!",
             description: "Chào mừng đơn vị trường học quay trở lại!",
@@ -79,13 +79,15 @@ function SchoolLogin() {
         } else {
           throw new Error('Invalid response format');
         }
+      } else {
+        throw { status: response.status };
       }
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
 
       notification.error({
         message: "Đăng nhập thất bại!",
-        description: error.response?.status === 401
+        description: error?.status === 401
           ? "Email hoặc mật khẩu của bạn đã sai! Hãy kiểm tra lại."
           : "Có lỗi xảy ra trong quá trình đăng nhập, vui lòng thử lại.",
         placement: "topRight",
@@ -96,6 +98,7 @@ function SchoolLogin() {
     }
   };
 
+  // The rest of the component remains the same...
   return (
     <div className="school-login-container" data-theme={theme}>
       <div className="school-login-card">

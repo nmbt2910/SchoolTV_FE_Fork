@@ -8,8 +8,8 @@ import {
   ArrowLeftOutlined
 } from "@ant-design/icons";
 import { ThemeContext } from "../../context/ThemeContext";
-import axios from "axios";
 import "./forgottenPassword.scss";
+import apiFetch from "../../config/baseAPI";
 
 const { Step } = Steps;
 
@@ -20,6 +20,7 @@ const ForgottenPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
   const [isResetSuccess, setIsResetSuccess] = useState(false);
+  const [errors, setErrors] = useState({});
   const timerRef = useRef(null);
   const { theme: currentTheme } = useContext(ThemeContext);
 
@@ -32,6 +33,26 @@ const ForgottenPassword = () => {
   };
 
   useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const urlEmail = queryParams.get('email');
+    const urlToken = queryParams.get('token');
+
+    if (urlEmail && urlToken) {
+      localStorage.setItem('resetPasswordEmail', urlEmail);
+      localStorage.setItem('resetPasswordToken', urlToken);
+      setUserEmail(urlEmail);
+      form.setFieldsValue({ token: urlToken });
+      setCurrentStep(2);
+    } else {
+      localStorage.removeItem('resetPasswordEmail');
+      localStorage.removeItem('resetPasswordToken');
+      setUserEmail('');
+      form.resetFields();
+      setCurrentStep(0);
+    }
+  }, []);
+
+  useEffect(() => {
     if (resendTimer > 0) {
       timerRef.current = setTimeout(() => {
         setResendTimer(prev => prev - 1);
@@ -40,14 +61,80 @@ const ForgottenPassword = () => {
     return () => clearTimeout(timerRef.current);
   }, [resendTimer]);
 
+  useEffect(() => {
+    setErrors({});
+  }, [currentStep]);
+
+  const validateStep = (values) => {
+    const newErrors = {};
+    if (currentStep === 0) {
+      if (!values.email) {
+        newErrors.email = "Vui lòng nhập email";
+      } else if (!/\S+@\S+\.\S+/.test(values.email)) {
+        newErrors.email = "Email không hợp lệ";
+      }
+    } else if (currentStep === 2) {
+      if (!values.token) newErrors.token = "Vui lòng nhập mã xác nhận";
+      if (!values.newPassword) {
+        newErrors.newPassword = "Vui lòng nhập mật khẩu mới";
+      } else if (values.newPassword.includes(".")) {
+        newErrors.newPassword = "Mật khẩu không được chứa dấu chấm (.)";
+      } else if (
+        !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/.test(values.newPassword)
+      ) {
+        newErrors.newPassword =
+          "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt";
+      }
+      if (values.confirmNewPassword !== values.newPassword) {
+        newErrors.confirmNewPassword = "Mật khẩu xác nhận không khớp";
+      }
+    }
+    return newErrors;
+  };
+
+  const highlightErrorFields = (errorFields) => {
+    Object.keys(errorFields).forEach((fieldName) => {
+      const input = document.querySelector(`[name="${fieldName}"]`);
+      if (input) {
+        input.classList.add("fp-input-error");
+        setTimeout(() => {
+          input.classList.remove("fp-input-error");
+        }, 3000);
+      }
+    });
+  };
+
   const handleEmailSubmit = async (values) => {
+    const validationErrors = validateStep(values);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      highlightErrorFields(validationErrors);
+      notification.error({
+        message: "Lỗi",
+        description: (
+          <div>
+            {Object.values(validationErrors).map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        ),
+        placement: "topRight",
+        duration: 5,
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await axios.post('https://localhost:7057/api/accounts/forgot-password', {
-        email: values.email
+      const response = await apiFetch('accounts/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: values.email })
       });
-  
-      if (response.status === 200) {
+
+      if (response.ok) {
         setUserEmail(values.email);
         setCurrentStep(1);
         setResendTimer(60);
@@ -57,11 +144,14 @@ const ForgottenPassword = () => {
           placement: "topRight",
           duration: 3,
         });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send email');
       }
     } catch (error) {
       notification.error({
         message: "Gửi email thất bại!",
-        description: "Có lỗi xảy ra. Vui lòng thử lại sau!",
+        description: error.message || "Có lỗi xảy ra. Vui lòng thử lại sau!",
         placement: "topRight",
         duration: 5,
       });
@@ -73,20 +163,30 @@ const ForgottenPassword = () => {
   const handleResendEmail = async () => {
     setIsLoading(true);
     try {
-      await axios.post('https://localhost:7057/api/accounts/forgot-password', {
-        email: userEmail
+      const response = await apiFetch('accounts/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: userEmail })
       });
-      setResendTimer(60);
-      notification.success({
-        message: "Gửi lại email thành công!",
-        description: "Email xác nhận đã được gửi lại thành công!",
-        placement: "topRight",
-        duration: 3,
-      });
+
+      if (response.ok) {
+        setResendTimer(60);
+        notification.success({
+          message: "Gửi lại email thành công!",
+          description: "Email xác nhận đã được gửi lại thành công!",
+          placement: "topRight",
+          duration: 3,
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to resend email');
+      }
     } catch (error) {
       notification.error({
         message: "Gửi lại email thất bại!",
-        description: "Không thể gửi lại email. Vui lòng thử lại sau!",
+        description: error.message || "Không thể gửi lại email. Vui lòng thử lại sau!",
         placement: "topRight",
         duration: 5,
       });
@@ -96,50 +196,65 @@ const ForgottenPassword = () => {
   };
 
   const handlePasswordReset = async (values) => {
+    const validationErrors = validateStep(values);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      highlightErrorFields(validationErrors);
+      notification.error({
+        message: "Lỗi",
+        description: (
+          <div>
+            {Object.values(validationErrors).map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        ),
+        placement: "topRight",
+        duration: 5,
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await axios.post('https://localhost:7057/api/accounts/reset-password', {
-        email: userEmail,
-        token: values.token,
-        newPassword: values.newPassword,
-        confirmNewPassword: values.confirmNewPassword
+      const response = await apiFetch('accounts/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          token: values.token,
+          newPassword: values.newPassword,
+          confirmNewPassword: values.confirmNewPassword
+        })
       });
-  
-      if (response.status === 200) {
+
+      if (response.ok) {
         setIsResetSuccess(true);
         setCurrentStep(3);
+        localStorage.removeItem('resetPasswordEmail');
+        localStorage.removeItem('resetPasswordToken');
         notification.success({
           message: "Đặt lại mật khẩu thành công!",
           description: "Bạn có thể đăng nhập bằng mật khẩu mới của mình.",
           placement: "topRight",
           duration: 3,
         });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Reset failed');
       }
     } catch (error) {
       notification.error({
         message: "Đặt lại mật khẩu thất bại!",
-        description: error.response?.data?.message || 'Đặt lại mật khẩu thất bại. Vui lòng thử lại!',
+        description: error.message || 'Đặt lại mật khẩu thất bại. Vui lòng thử lại!',
         placement: "topRight",
         duration: 5,
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const passwordValidation = (_, value) => {
-    if (!value) {
-      return Promise.reject('Vui lòng nhập mật khẩu');
-    }
-    if (value.includes('.')) {
-      return Promise.reject('Mật khẩu không được chứa dấu chấm (.)');
-    }
-    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$/.test(value)) {
-      return Promise.reject(
-        'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt'
-      );
-    }
-    return Promise.resolve();
   };
 
   const renderStepContent = () => {
@@ -150,16 +265,12 @@ const ForgottenPassword = () => {
             <Form.Item
               name="email"
               label="Địa chỉ email"
-              rules={[
-                { required: true, message: 'Vui lòng nhập email' },
-                { type: 'email', message: 'Email không hợp lệ' }
-              ]}
               className="fp-form-item"
             >
               <Input
                 prefix={<MailOutlined />}
                 placeholder="Nhập email đã đăng ký"
-                className="fp-input"
+                className={`fp-input ${errors.email ? "fp-input-error" : ""}`}
                 size="large"
               />
             </Form.Item>
@@ -187,7 +298,7 @@ const ForgottenPassword = () => {
               <br />Vui lòng kiểm tra hộp thư của bạn (bao gồm thư rác).
             </p>
 
-            <div className="fp-resend">
+            <div className="fp-resend" data-timer-active={resendTimer > 0}>
               {resendTimer > 0 ? (
                 <p>Có thể gửi lại sau: {Math.floor(resendTimer / 60)}:{(resendTimer % 60).toString().padStart(2, '0')}</p>
               ) : (
@@ -200,15 +311,6 @@ const ForgottenPassword = () => {
                 </Button>
               )}
             </div>
-
-            <Button
-              type="primary"
-              onClick={() => setCurrentStep(2)}
-              block
-              className="fp-button"
-            >
-              Tiếp Tục Đặt Lại Mật Khẩu
-            </Button>
           </div>
         );
 
@@ -218,50 +320,37 @@ const ForgottenPassword = () => {
             <Form.Item
               name="token"
               label="Mã xác nhận"
-              rules={[{ required: true, message: 'Vui lòng nhập mã xác nhận' }]}
               className="fp-form-item"
             >
               <Input
                 prefix={<SecurityScanOutlined />}
                 placeholder="Nhập mã xác nhận từ email"
-                className="fp-input"
+                className={`fp-input ${errors.token ? "fp-input-error" : ""}`}
+                readOnly
               />
             </Form.Item>
 
             <Form.Item
               name="newPassword"
               label="Mật khẩu mới"
-              rules={[{ validator: passwordValidation }]}
               className="fp-form-item"
             >
               <Input.Password
                 prefix={<LockOutlined />}
                 placeholder="Nhập mật khẩu mới"
-                className="fp-input"
+                className={`fp-input ${errors.newPassword ? "fp-input-error" : ""}`}
               />
             </Form.Item>
 
             <Form.Item
               name="confirmNewPassword"
               label="Xác nhận mật khẩu"
-              dependencies={['newPassword']}
-              rules={[
-                { required: true, message: 'Vui lòng xác nhận mật khẩu' },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue('newPassword') === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject('Mật khẩu xác nhận không khớp');
-                  },
-                }),
-              ]}
               className="fp-form-item"
             >
               <Input.Password
                 prefix={<LockOutlined />}
                 placeholder="Nhập lại mật khẩu mới"
-                className="fp-input"
+                className={`fp-input ${errors.confirmNewPassword ? "fp-input-error" : ""}`}
               />
             </Form.Item>
 
@@ -314,6 +403,7 @@ const ForgottenPassword = () => {
           <Steps
             current={currentStep}
             className="fp-steps"
+            responsive={false}
             items={[
               { title: 'Email' },
               { title: 'Xác nhận' },

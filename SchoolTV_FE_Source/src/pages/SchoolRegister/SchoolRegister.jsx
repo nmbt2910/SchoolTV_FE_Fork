@@ -1,11 +1,9 @@
-
-            // SchoolRegister.jsx
 import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { notification } from "antd";
 import { ThemeContext } from "../../context/ThemeContext";
-import axios from "axios";
 import "./schoolRegister.scss";
+import apiFetch from "../../config/baseAPI";
 
 function SchoolRegister() {
   const { theme } = useContext(ThemeContext);
@@ -54,10 +52,9 @@ function SchoolRegister() {
     });
 
     if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: "",
-      });
+      const newErrors = {...errors};
+      delete newErrors[name];
+      setErrors(newErrors);
     }
   };
 
@@ -66,6 +63,10 @@ function SchoolRegister() {
 
     if (!formData.username) {
       newErrors.username = "Vui lòng nhập tên đăng nhập";
+    }
+
+    if (!formData.phoneNumber) {
+      newErrors.phoneNumber = "Vui lòng nhập số điện thoại liên hệ";
     }
 
     if (!formData.email) {
@@ -90,30 +91,52 @@ function SchoolRegister() {
       newErrors.fullname = "Vui lòng nhập tên trường học";
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    if (!formData.address) {
+      newErrors.address = "Vui lòng nhập địa chỉ trường học";
+    }
+    
+    return newErrors;
+  };
+
+  const highlightErrorFields = (errorFields) => {
+    Object.keys(errorFields).forEach((fieldName) => {
+      const input = document.querySelector(`[name="${fieldName}"]`);
+      if (input) {
+        input.classList.add("school-register-input-error");
+        setTimeout(() => {
+          input.classList.remove("school-register-input-error");
+        }, 3000);
+      }
+    });
   };
 
   const handleResendOtp = async () => {
     if (countdown > 0) return;
 
     try {
-      const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/resend",
-        { email: registeredEmail }
-      );
-
-      notification.success({
-        message: "Đã gửi lại mã OTP",
-        description: response.data.message,
-        placement: "topRight",
+      const response = await apiFetch("accounts/otp/resend", {
+        method: "POST",
+        body: JSON.stringify({ email: registeredEmail }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-      setCountdown(60);
+      if (response.ok) {
+        const data = await response.json();
+        notification.success({
+          message: "Đã gửi lại mã OTP",
+          description: data.message,
+          placement: "topRight",
+        });
+        setCountdown(60);
+      } else {
+        throw new Error("Failed to resend OTP");
+      }
     } catch (error) {
       notification.error({
         message: "Lỗi",
-        description: error.response?.data?.message || "Không thể gửi lại mã OTP",
+        description: error.message || "Không thể gửi lại mã OTP",
         placement: "topRight",
       });
     }
@@ -131,27 +154,35 @@ function SchoolRegister() {
     }
 
     try {
-      const response = await axios.post(
-        "https://localhost:7057/api/accounts/otp/schoolowner/verify",
-        {
+      const response = await apiFetch("accounts/otp/schoolowner/verify", {
+        method: "POST",
+        body: JSON.stringify({
           email: registeredEmail,
           otpCode: otpCode,
-        }
-      );
-
-      notification.success({
-        message: "Thành công",
-        description: response.data.message,
-        placement: "topRight",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
-      setTimeout(() => {
-        navigate("/school-login");
-      }, 3000);
+      if (response.ok) {
+        const data = await response.json();
+        notification.success({
+          message: "Thành công",
+          description: data.message,
+          placement: "topRight",
+        });
+
+        setTimeout(() => {
+          navigate("/school-login");
+        }, 3000);
+      } else {
+        throw new Error("OTP verification failed");
+      }
     } catch (error) {
       notification.error({
         message: "Lỗi",
-        description: error.response?.data?.message || "Xác thực OTP thất bại",
+        description: error.message || "Xác thực OTP thất bại",
         placement: "topRight",
       });
     }
@@ -184,9 +215,28 @@ function SchoolRegister() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) return;
-
+  
+    const newErrors = validateForm();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      
+      notification.error({
+        message: "Lỗi đăng ký",
+        description: (
+          <div>
+            {Object.values(newErrors).map((error, index) => (
+              <div key={index}>{error}</div>
+            ))}
+          </div>
+        ),
+        placement: "topRight",
+        duration: 5,
+      });
+      
+      highlightErrorFields(newErrors);
+      return;
+    }
+  
     if (!agreeTerms) {
       notification.error({
         message: "Chưa đồng ý điều khoản",
@@ -195,29 +245,41 @@ function SchoolRegister() {
       });
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
-      const response = await axios.post(
-        "https://localhost:7057/api/accounts/schoolowner/signup",
-        formData
-      );
-
-      notification.success({
-        message: "Đăng ký thành công",
-        description: response.data.message,
-        placement: "topRight",
+      const response = await apiFetch("accounts/schoolowner/signup", {
+        method: "POST",
+        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-
-      setRegisteredEmail(formData.email);
-      setShowOtpVerification(true);
-      setCountdown(60);
+  
+      if (response.ok) {
+        const data = await response.json();
+        notification.success({
+          message: "Đăng ký thành công",
+          description: data.message,
+          placement: "topRight",
+        });
+  
+        setRegisteredEmail(formData.email);
+        setShowOtpVerification(true);
+        setCountdown(60);
+      } else {
+        if (response.status === 409) {
+          throw new Error("Tên đăng nhập hoặc Email đã được đăng ký.");
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Có lỗi xảy ra trong quá trình đăng ký");
+        }
+      }
     } catch (error) {
       notification.error({
         message: "Đăng ký thất bại",
-        description:
-          error.response?.data?.message || "Có lỗi xảy ra trong quá trình đăng ký",
+        description: error.message,
         placement: "topRight",
       });
     } finally {
@@ -266,13 +328,12 @@ function SchoolRegister() {
                       <input 
                         type="text" 
                         name="username"
-                        className="school-register-input" 
+                        className={`school-register-input ${errors.username ? "school-register-input-error" : ""}`}
                         placeholder="Tên đăng nhập của trường" 
                         value={formData.username}
                         onChange={handleChange}
                       />
                     </div>
-                    {errors.username && <div className="school-register-error">{errors.username}</div>}
                   </div>
                   
                   <div className="school-register-field">
@@ -285,13 +346,12 @@ function SchoolRegister() {
                       <input 
                         type="email" 
                         name="email"
-                        className="school-register-input" 
+                        className={`school-register-input ${errors.email ? "school-register-input-error" : ""}`}
                         placeholder="Email liên hệ chính thức" 
                         value={formData.email}
                         onChange={handleChange}
                       />
                     </div>
-                    {errors.email && <div className="school-register-error">{errors.email}</div>}
                   </div>
                   
                   <div className="school-register-field">
@@ -304,7 +364,7 @@ function SchoolRegister() {
                       <input 
                         type={showPassword ? "text" : "password"} 
                         name="password"
-                        className="school-register-input school-register-password" 
+                        className={`school-register-input school-register-password ${errors.password ? "school-register-input-error" : ""}`}
                         placeholder="Tạo mật khẩu (ít nhất 6 ký tự)" 
                         value={formData.password}
                         onChange={handleChange}
@@ -336,7 +396,6 @@ function SchoolRegister() {
                         )}
                       </svg>
                     </div>
-                    {errors.password && <div className="school-register-error">{errors.password}</div>}
                   </div>
                 </div>
                 
@@ -351,17 +410,16 @@ function SchoolRegister() {
                       <input 
                         type="text" 
                         name="fullname"
-                        className="school-register-input" 
+                        className={`school-register-input ${errors.fullname ? "school-register-input-error" : ""}`}
                         placeholder="Tên đầy đủ của trường học" 
                         value={formData.fullname}
                         onChange={handleChange}
                       />
                     </div>
-                    {errors.fullname && <div className="school-register-error">{errors.fullname}</div>}
                   </div>
                   
                   <div className="school-register-field">
-                    <label className="school-register-label">Số điện thoại</label>
+                    <label className="school-register-label">Số điện thoại <span className="required">*</span></label>
                     <div className="school-register-input-wrapper">
                       <svg className="school-register-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
@@ -369,13 +427,12 @@ function SchoolRegister() {
                       <input 
                         type="tel" 
                         name="phoneNumber"
-                        className="school-register-input" 
+                        className={`school-register-input ${errors.phoneNumber ? "school-register-input-error" : ""}`}
                         placeholder="Số điện thoại liên hệ" 
                         value={formData.phoneNumber}
                         onChange={handleChange}
                       />
                     </div>
-                    {errors.phoneNumber && <div className="school-register-error">{errors.phoneNumber}</div>}
                   </div>
                   
                   <div className="school-register-field">
@@ -388,7 +445,7 @@ function SchoolRegister() {
                       <input 
                         type={showConfirmPassword ? "text" : "password"} 
                         name="confirmPassword"
-                        className="school-register-input school-register-password" 
+                        className={`school-register-input school-register-password ${errors.confirmPassword ? "school-register-input-error" : ""}`}
                         placeholder="Nhập lại mật khẩu" 
                         value={formData.confirmPassword}
                         onChange={handleChange}
@@ -420,13 +477,12 @@ function SchoolRegister() {
                         )}
                       </svg>
                     </div>
-                    {errors.confirmPassword && <div className="school-register-error">{errors.confirmPassword}</div>}
                   </div>
                 </div>
               </div>
               
               <div className="school-register-field">
-                <label className="school-register-label">Địa chỉ</label>
+                <label className="school-register-label">Địa chỉ <span className="required">*</span></label>
                 <div className="school-register-input-wrapper">
                   <svg className="school-register-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -435,13 +491,12 @@ function SchoolRegister() {
                   <input 
                     type="text" 
                     name="address"
-                    className="school-register-input" 
+                    className={`school-register-input ${errors.address ? "school-register-input-error" : ""}`}
                     placeholder="Địa chỉ của trường học" 
                     value={formData.address}
                     onChange={handleChange}
                   />
                 </div>
-                {errors.address && <div className="school-register-error">{errors.address}</div>}
               </div>
               
               <div className="school-register-terms">

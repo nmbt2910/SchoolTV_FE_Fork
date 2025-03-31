@@ -10,6 +10,7 @@ export default function apiFetch(request, requestInit) {
 
   const token = localStorage.getItem("authToken")?.replaceAll('"', "");
   const headers = {
+    'Accept': 'application/json',
     ...requestInit?.headers,
     Authorization: `Bearer ${token}`
   };

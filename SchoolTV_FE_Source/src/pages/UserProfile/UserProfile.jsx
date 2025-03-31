@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useRef } from 'react';
 import { Modal, Form, Row, Col, Input, Button, notification, Spin } from 'antd';
 import {
     UserOutlined,
@@ -17,6 +16,7 @@ import {
     GoogleOutlined
 } from '@ant-design/icons';
 import './UserProfile.css';
+import apiFetch from '../../config/baseAPI';
 
 const UserProfile = () => {
     const [user, setUser] = useState(null);
@@ -25,54 +25,50 @@ const UserProfile = () => {
     const [passwordModalVisible, setPasswordModalVisible] = useState(false);
     const [form] = Form.useForm();
     const [passwordForm] = Form.useForm();
+    const initialValuesRef = useRef({});
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        const storedUserData = localStorage.getItem('userData');
+        const fetchUserData = async () => {
+            const token = localStorage.getItem('authToken');
+            const storedUserData = localStorage.getItem('userData');
 
-        if (!token) {
-            setLoading(false);
-            notification.error({
-                message: 'Lỗi xác thực!',
-                description: 'Bạn cần đăng nhập để xem thông tin người dùng.',
-                placement: 'topRight'
-            });
-            return;
-        }
+            if (!token) {
+                setLoading(false);
+                notification.error({
+                    message: 'Lỗi xác thực!',
+                    description: 'Bạn cần đăng nhập để xem thông tin người dùng.',
+                    placement: 'topRight'
+                });
+                return;
+            }
 
-        // Set initial user data from localStorage if available
-        if (storedUserData) {
-            setUser(JSON.parse(storedUserData));
-        }
+            if (storedUserData) {
+                setUser(JSON.parse(storedUserData));
+            }
 
-        // Fetch updated user info from the new API endpoint
-        axios.get('https://localhost:7057/api/accounts/info', {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(response => {
-                if (response.data) {
-                    console.log('User data from API:', response.data);
-                    
-                    // Get the roleName from localStorage as it's not in the new API response
-                    const userData = JSON.parse(localStorage.getItem('userData')) || {};
-                    
-                    // Combine the API response with roleName from localStorage
-                    const updatedUserData = {
-                        ...response.data,
-                        roleName: userData.roleName || 'User' // Default to 'User' if not found
-                    };
-                    
-                    setUser(updatedUserData);
-                    
-                    // Update localStorage with the latest data including roleName
-                    localStorage.setItem('userData', JSON.stringify(updatedUserData));
-                } else {
-                    throw new Error('No user data received');
+            try {
+                const response = await apiFetch('accounts/info', {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch user data');
                 }
-            })
-            .catch(error => {
+
+                const data = await response.json();
+                const userData = JSON.parse(localStorage.getItem('userData')) || {};
+
+                const updatedUserData = {
+                    ...data,
+                    roleName: userData.roleName || 'User'
+                };
+
+                setUser(updatedUserData);
+                localStorage.setItem('userData', JSON.stringify(updatedUserData));
+            } catch (error) {
                 console.error('Error fetching user data:', error);
-                if (error.response?.status === 401) {
+                if (error.message.includes('401')) {
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('userData');
                     notification.error({
@@ -87,65 +83,117 @@ const UserProfile = () => {
                         placement: 'topRight'
                     });
                 }
-            })
-            .finally(() => {
+            } finally {
                 setLoading(false);
-            });
+            }
+        };
+
+        fetchUserData();
     }, []);
 
     const handleUpdateInfo = async (values) => {
         try {
-            // Format the data according to the API expectations
-            const mappedValues = {
-                username: values.profile_username,
-                email: values.profile_email,
-                fullname: values.profile_fullname,
-                phoneNumber: values.profile_phone,
-                address: values.profile_address
-            };
-            
-            const token = localStorage.getItem('authToken');
+            // 1. Kiểm tra giá trị ban đầu
+            if (!initialValuesRef.current) {
+                notification.error({
+                    message: 'Lỗi hệ thống!',
+                    description: 'Không thể xác định dữ liệu gốc',
+                    placement: 'topRight'
+                });
+                return;
+            }
 
-            const response = await axios({
+            // 2. Lọc các trường thay đổi
+            const changedFields = Object.keys(values).reduce((acc, key) => {
+                const currentValue = values[key];
+                const initialValue = initialValuesRef.current[key];
+
+                // So sánh chuỗi đã được trim()
+                if (String(currentValue).trim() !== String(initialValue).trim()) {
+                    acc[key] = currentValue;
+                }
+                return acc;
+            }, {});
+
+            // 3. Kiểm tra thay đổi
+            if (Object.keys(changedFields).length === 0) {
+                notification.info({
+                    message: 'Thông báo',
+                    description: 'Không có thông tin nào được thay đổi',
+                    placement: 'topRight',
+                    duration: 3
+                });
+                return;
+            }
+
+            // 4. Ánh xạ tên trường
+            const fieldMapping = {
+                profile_username: 'username',
+                profile_fullname: 'fullname',
+                profile_phone: 'phoneNumber',
+                profile_address: 'address'
+            };
+
+            // 5. Tạo payload
+            const payload = Object.entries(changedFields).reduce((acc, [formField, value]) => {
+                const apiField = fieldMapping[formField];
+                if (apiField) {
+                    acc[apiField] = value.trim(); // Clean data
+                }
+                return acc;
+            }, {});
+
+            // 6. Gửi request
+            const response = await apiFetch('accounts/update', {
                 method: 'PATCH',
-                url: 'https://localhost:7057/api/accounts/update',
-                data: mappedValues,
+                body: JSON.stringify(payload),
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
             });
 
-            if (response.status === 200) {
-                // Get updated user data
-                const updatedUser = response.data.account || response.data;
-                
-                // Preserve the roleName from the current user state
-                const updatedUserWithRole = {
-                    ...updatedUser,
-                    roleName: user.roleName
-                };
-                
-                setUser(updatedUserWithRole);
-                localStorage.setItem('userData', JSON.stringify(updatedUserWithRole));
-
-                notification.success({
-                    message: 'Cập nhật thành công!',
-                    description: 'Thông tin của bạn đã được cập nhật.',
-                    placement: 'topRight',
-                    duration: 3,
-                });
-
-                setEditModalVisible(false);
-                form.resetFields();
+            // 7. Xử lý response
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Cập nhật thất bại');
             }
+
+            // 8. Cập nhật state và localStorage
+            const updatedUser = await response.json();
+            const updatedUserWithRole = {
+                ...updatedUser.account,
+                roleName: user.roleName // Giữ nguyên role
+            };
+
+            setUser(updatedUserWithRole);
+            localStorage.setItem('userData', JSON.stringify(updatedUserWithRole));
+
+            // 9. Thông báo thành công
+            notification.success({
+                message: 'Cập nhật thành công!',
+                description: 'Thông tin đã được lưu',
+                placement: 'topRight',
+                duration: 3
+            });
+
+            // 10. Đóng modal và reset form
+            setEditModalVisible(false);
+            form.resetFields();
+
         } catch (error) {
             console.error('Update error:', error);
+
+            // 11. Xử lý thông báo lỗi
+            const errorMessage = error.message.includes('unique constraint')
+                ? 'Email hoặc tên đăng nhập đã tồn tại'
+                : error.message || 'Lỗi không xác định';
+
             notification.error({
                 message: 'Cập nhật thất bại!',
-                description: error.response?.data?.message || 'Đã có lỗi xảy ra khi cập nhật thông tin.',
+                description: errorMessage,
                 placement: 'topRight',
-                duration: 4,
+                duration: 4
             });
         }
     };
@@ -161,38 +209,48 @@ const UserProfile = () => {
         }
 
         try {
-            const token = localStorage.getItem('authToken');
-
-            const response = await axios({
+            const response = await apiFetch('accounts/change-password', {
                 method: 'PATCH',
-                url: 'https://localhost:7057/api/accounts/change-password',
-                data: {
+                body: JSON.stringify({
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword,
                     confirmNewPassword: values.confirmNewPassword
-                },
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                }),
+                headers: { 'Content-Type': 'application/json' }
             });
 
-            if (response.status === 200) {
-                notification.success({
-                    message: 'Thành công!',
-                    description: 'Mật khẩu của bạn đã được cập nhật.',
-                    placement: 'topRight',
-                    duration: 3,
-                });
-
-                setPasswordModalVisible(false);
-                passwordForm.resetFields();
+            const data = await response.text(); // Đọc response dưới dạng text trước
+            if (!response.ok) {
+                // Thử parse JSON nếu có thể, nếu không thì dùng plain text
+                try {
+                    const errorData = JSON.parse(data);
+                    throw new Error(errorData.message || 'Password change failed');
+                } catch {
+                    throw new Error(data || 'Password change failed');
+                }
             }
+
+            notification.success({
+                message: 'Thành công!',
+                description: 'Mật khẩu của bạn đã được cập nhật.',
+                placement: 'topRight',
+                duration: 3,
+            });
+
+            setPasswordModalVisible(false);
+            passwordForm.resetFields();
         } catch (error) {
             console.error('Password change error:', error);
+            let errorDescription = error.message || 'Đã có lỗi xảy ra khi cập nhật mật khẩu.';
+
+            // Xử lý riêng cho lỗi mật khẩu hiện tại không đúng
+            if (error.message.includes("Current password is incorrect")) {
+                errorDescription = "Mật khẩu hiện tại đã nhập không chính xác.";
+            }
+
             notification.error({
                 message: 'Cập nhật mật khẩu thất bại!',
-                description: error.response?.data?.message || 'Đã có lỗi xảy ra khi cập nhật mật khẩu.',
+                description: errorDescription,
                 placement: 'topRight',
                 duration: 4,
             });
@@ -239,26 +297,31 @@ const UserProfile = () => {
                     </div>
                     <div className="user-profile-main-info">
                         <h1>{user.fullname}</h1>
+                        {user.roleName.toLowerCase() !== 'schoolowner' && (
                         <p className="user-profile-username">@{user.username}</p>
+                        )}
                         <p className="user-profile-bio">Học sinh lớp 12 - THPT Chu Văn An. Đam mê công nghệ và khoa học máy tính. 🚀</p>
                         <div className="user-profile-actions">
                             <Button
                                 type="primary"
                                 icon={<EditOutlined />}
                                 onClick={() => {
-                                    form.setFieldsValue({
+                                    const initialValues = {
                                         profile_username: user.username,
                                         profile_email: user.email,
                                         profile_fullname: user.fullname,
                                         profile_phone: user.phoneNumber || '',
                                         profile_address: user.address || ''
-                                    });
+                                    };
+                                    form.setFieldsValue(initialValues);
+                                    initialValuesRef.current = initialValues; // Cập nhật ref
                                     setEditModalVisible(true);
                                 }}
                                 className="user-profile-edit-btn"
                             >
                                 Chỉnh Sửa Hồ Sơ
                             </Button>
+
                             <Button
                                 icon={<KeyOutlined />}
                                 onClick={() => {
@@ -408,21 +471,6 @@ const UserProfile = () => {
                                 <Input
                                     prefix={<UserOutlined />}
                                     placeholder="Nhập họ và tên đầy đủ"
-                                    className="user-profile-input"
-                                />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="profile_email"
-                                label="Email"
-                                rules={[
-                                    { required: true, message: 'Vui lòng nhập email!' },
-                                    { type: 'email', message: 'Email không hợp lệ!' }
-                                ]}
-                            >
-                                <Input
-                                    prefix={<MailOutlined />}
-                                    placeholder="example@domain.com"
                                     className="user-profile-input"
                                 />
                             </Form.Item>
