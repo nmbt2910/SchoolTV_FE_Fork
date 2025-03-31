@@ -3,7 +3,7 @@ import { Layout, Menu, Table, Input } from 'antd';
 import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiFetch from '../../config/baseAPI';
 
 const { SubMenu } = Menu;
 const { Sider, Content } = Layout;
@@ -61,18 +61,23 @@ const columns = [
 function AdminList() {
   const [data, setData] = useState([]);
   const [initialData, setInitialData] = useState([]);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7057/api/accounts/admin/all', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        });
+        const headers = {
+          'accept': '*/*'
+        };
 
-        const filteredData = response.data.$values.filter(item => item.roleID === 3);
+        const response = await apiFetch('accounts/admin/all', { headers });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        const filteredData = responseData.$values.filter(item => item.roleID === 3);
 
         const fetchedData = filteredData.map(item => ({
           key: item.accountID,
@@ -84,15 +89,19 @@ function AdminList() {
           status: item.status,
         }));
 
-        setInitialData(fetchedData);  
-        setData(fetchedData); 
+        setInitialData(fetchedData);
+        setData(fetchedData);
       } catch (error) {
         console.error('Error fetching data:', error);
+        if (error.message.includes('Failed to fetch user data')) {
+          localStorage.removeItem('authToken');
+          navigate('/login');
+        }
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleSearch = (value) => {
     if (value.trim() === '') {
@@ -112,7 +121,6 @@ function AdminList() {
   const handleLogout = () => {
     localStorage.removeItem("authToken");  
     sessionStorage.removeItem("authToken"); 
-
     navigate("/login"); 
   };
 

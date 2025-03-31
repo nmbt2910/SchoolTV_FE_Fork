@@ -3,7 +3,7 @@ import { Layout, Menu, Table, Input, Button, notification, Select } from 'antd';
 import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';  
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiFetch from '../../config/baseAPI';
 
 const { SubMenu } = Menu;
 const { Sider, Content } = Layout;
@@ -19,13 +19,18 @@ function SchoolOwnerPending() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7057/api/accounts/admin/pending-schoolowners', {
+        const response = await apiFetch('accounts/admin/pending-schoolowners', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
+            'accept': '*/*'
+          }
         });
 
-        const filteredData = response.data.$values.map(item => ({
+        if (!response.ok) {
+          throw new Error(`Failed to fetch data: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        const filteredData = responseData.$values.map(item => ({
           key: item.accountID,
           email: item.email,
           fullname: item.fullname,
@@ -39,11 +44,15 @@ function SchoolOwnerPending() {
         setData(filteredData);  
       } catch (error) {
         console.error('Error fetching data:', error);
+        if (error.message.includes('Failed to fetch data')) {
+          localStorage.removeItem('authToken');
+          navigate('/login');
+        }
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleStatusChange = (value, key) => {
     setStatusMap(prevState => ({ ...prevState, [key]: value }));
@@ -52,18 +61,22 @@ function SchoolOwnerPending() {
   const handleSaveStatus = async (key) => {
     const newStatus = statusMap[key]; 
     try {
-      const response = await axios.patch(`https://localhost:7057/api/accounts/admin/update-status/${key}`, { status: newStatus }, {
+      const response = await apiFetch(`accounts/admin/update-status/${key}`, {
+        method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ status: newStatus })
       });
 
-      if (response.status === 200) {
-        notification.success({
-          message: 'Tài khoản đã được cập nhật trạng thái thành công',
-          description: `Tài khoản có ID ${key} đã được thay đổi trạng thái thành ${newStatus}`,
-        });
+      if (!response.ok) {
+        throw new Error(`Failed to update status: ${response.status}`);
       }
+
+      notification.success({
+        message: 'Tài khoản đã được cập nhật trạng thái thành công',
+        description: `Tài khoản có ID ${key} đã được thay đổi trạng thái thành ${newStatus}`,
+      });
     } catch (error) {
       console.error('Error updating status:', error);
       notification.error({
@@ -88,9 +101,8 @@ function SchoolOwnerPending() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userToken"); 
-    sessionStorage.removeItem("userToken");
-
+    localStorage.removeItem("authToken"); 
+    sessionStorage.removeItem("authToken");
     navigate("/login");  
   };
 
@@ -144,7 +156,7 @@ function SchoolOwnerPending() {
     <div className="school-owner-pending-body">
       <Layout style={{ minHeight: '90vh' }}>
         <Sider width={225} className="site-layout-background">
-        <Menu theme='dark' mode="inline" defaultSelectedKeys={['1']} style={{ height: '100%', borderRight: 0 }}>
+          <Menu theme='dark' mode="inline" defaultSelectedKeys={['1']} style={{ height: '100%', borderRight: 0 }}>
             <Menu.Item key="1" icon={<UnorderedListOutlined />}><Link to="/adminpage">Dashboard</Link></Menu.Item>
             <Menu.Item key="2" icon={<SettingOutlined />}><Link to="/sopending">School Owner Pending</Link></Menu.Item>
             <SubMenu key="3" icon={<UserOutlined />} title="User Management">

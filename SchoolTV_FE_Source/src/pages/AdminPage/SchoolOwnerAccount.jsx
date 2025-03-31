@@ -3,7 +3,7 @@ import { Layout, Menu, Table, Input, Button, notification, Select, Modal } from 
 import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';  
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiFetch from '../../config/baseAPI';
 
 const { SubMenu } = Menu;
 const { Sider, Content } = Layout;
@@ -25,40 +25,49 @@ function SchoolOwnerAccount() {
 
   const handleDelete = async () => {
     try {
-      const response = await axios.delete(`https://localhost:7057/api/accounts/admin/delete/${deleteKey}`, {
+      const response = await apiFetch(`accounts/admin/delete/${deleteKey}`, {
+        method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
+          'Content-Type': 'application/json',
+        }
       });
-  
-      if (response.status === 200) {
-        const fetchData = await axios.get('https://localhost:7057/api/accounts/admin/all', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        });
-  
-        const filteredData = fetchData.data.$values
-          .filter(item => item.roleID === 2) 
-          .map(item => ({
-            key: item.accountID,
-            username: item.username,
-            email: item.email,
-            fullname: item.fullname,
-            address: item.address,
-            phoneNumber: item.phoneNumber,
-            roleName: item.role.roleName,
-            status: item.status,
-          }));
-  
-        setData(filteredData); 
-        setInitialData(filteredData);
-  
-        notification.success({
-          message: 'Tài khoản đã được xóa thành công',
-          description: `Tài khoản có ID ${deleteKey} đã được xóa.`,
-        });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete account: ${response.status}`);
       }
+
+      // Refresh data after deletion
+      const refreshResponse = await apiFetch('accounts/admin/all', {
+        headers: {
+          'accept': '*/*'
+        }
+      });
+
+      if (!refreshResponse.ok) {
+        throw new Error('Failed to refresh data');
+      }
+
+      const responseData = await refreshResponse.json();
+      const filteredData = responseData.$values
+        .filter(item => item.roleID === 2)
+        .map(item => ({
+          key: item.accountID,
+          username: item.username,
+          email: item.email,
+          fullname: item.fullname,
+          address: item.address,
+          phoneNumber: item.phoneNumber,
+          roleName: item.role?.roleName,
+          status: item.status,
+        }));
+
+      setData(filteredData);
+      setInitialData(filteredData);
+
+      notification.success({
+        message: 'Tài khoản đã được xóa thành công',
+        description: `Tài khoản có ID ${deleteKey} đã được xóa.`,
+      });
     } catch (error) {
       console.error('Error deleting account:', error);
       notification.error({
@@ -66,7 +75,7 @@ function SchoolOwnerAccount() {
         description: 'Có lỗi xảy ra khi xóa tài khoản.',
       });
     }
-  
+    
     setIsModalVisible(false);
   };
 
@@ -77,40 +86,49 @@ function SchoolOwnerAccount() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7057/api/accounts/admin/all', {
+        const response = await apiFetch('accounts/admin/all', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
+            'accept': '*/*'
+          }
         });
-  
-        const filteredData = response.data.$values
-          .filter(item => item.roleID === 2) 
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch data: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        const filteredData = responseData.$values
+          .filter(item => item.roleID === 2)
           .map(item => ({
             key: item.accountID,
             username: item.username,
             email: item.email,
             fullname: item.fullname,
             address: item.address,
-            phoneNumber: item.phoneNumber, 
-            roleName: item.role.roleName, 
+            phoneNumber: item.phoneNumber,
+            roleName: item.role?.roleName,
             status: item.status,
           }));
-  
+
         const initialStatusMap = filteredData.reduce((map, item) => {
           map[item.key] = item.status;
           return map;
         }, {});
-  
+
         setInitialData(filteredData);  
         setData(filteredData);  
         setStatusMap(initialStatusMap);
       } catch (error) {
         console.error('Error fetching data:', error);
+        if (error.message.includes('Failed to fetch data')) {
+          localStorage.removeItem('authToken');
+          navigate('/login');
+        }
       }
     };
   
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleStatusChange = (value, key) => {
     setStatusMap(prevState => ({ ...prevState, [key]: value }));
@@ -119,18 +137,22 @@ function SchoolOwnerAccount() {
   const handleSaveStatus = async (key) => {
     const newStatus = statusMap[key]; 
     try {
-      const response = await axios.patch(`https://localhost:7057/api/accounts/admin/update-status/${key}`, { status: newStatus }, {
+      const response = await apiFetch(`accounts/admin/update-status/${key}`, {
+        method: 'PATCH',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ status: newStatus })
       });
 
-      if (response.status === 200) {
-        notification.success({
-          message: 'Tài khoản đã được cập nhật trạng thái thành công',
-          description: `Tài khoản có ID ${key} đã được thay đổi trạng thái thành ${newStatus}`,
-        });
+      if (!response.ok) {
+        throw new Error(`Failed to update status: ${response.status}`);
       }
+
+      notification.success({
+        message: 'Tài khoản đã được cập nhật trạng thái thành công',
+        description: `Tài khoản có ID ${key} đã được thay đổi trạng thái thành ${newStatus}`,
+      });
     } catch (error) {
       console.error('Error updating status:', error);
       notification.error({
@@ -155,9 +177,8 @@ function SchoolOwnerAccount() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userToken"); 
-    sessionStorage.removeItem("userToken");
-
+    localStorage.removeItem("authToken"); 
+    sessionStorage.removeItem("authToken");
     navigate("/login");  
   };
 
