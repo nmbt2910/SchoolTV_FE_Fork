@@ -1,0 +1,135 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Menu } from 'antd';
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  UserOutlined, LogoutOutlined, SettingOutlined, 
+  HomeOutlined, UserDeleteOutlined, 
+  UsergroupDeleteOutlined, UnorderedListOutlined 
+} from '@ant-design/icons';
+import './AdminMenu.scss';
+
+const AdminMenu = ({ onLogout }) => {
+  const location = useLocation();
+  const [openKeys, setOpenKeys] = useState([]);
+  const [selectedKeys, setSelectedKeys] = useState([]);
+  const [lastOpenKeys, setLastOpenKeys] = useState([]);
+
+  // Map paths to menu keys
+  const pathToKeyMap = useMemo(() => ({
+    '/adminpage': '1',
+    '/sopending': '2',
+    '/userlist': '3.1',
+    '/adminlist': '3.2',
+    '/soaccount': '3.3'
+  }), []);
+
+  // Initialize menu state
+  useEffect(() => {
+    const savedState = localStorage.getItem('adminMenuState');
+    const currentPathKey = pathToKeyMap[location.pathname] || '';
+    
+    let newOpenKeys = [];
+    let newSelectedKeys = [];
+
+    if (savedState) {
+      const parsedState = JSON.parse(savedState);
+      newOpenKeys = parsedState.openKeys;
+      newSelectedKeys = parsedState.selectedKeys;
+    }
+
+    // If current path is in a submenu, ensure parent is open
+    if (currentPathKey.includes('.') && !newOpenKeys.includes('3')) {
+      newOpenKeys = ['3', ...newOpenKeys];
+    }
+
+    // Set current path as selected if it exists in our map
+    if (currentPathKey) {
+      newSelectedKeys = [currentPathKey];
+    }
+
+    setOpenKeys(newOpenKeys);
+    setSelectedKeys(newSelectedKeys);
+    setLastOpenKeys(newOpenKeys);
+  }, [location.pathname, pathToKeyMap]);
+
+  // Handle submenu open/close
+  const handleOpenChange = (keys) => {
+    const latestOpenKey = keys.find(key => !openKeys.includes(key));
+    const newOpenKeys = latestOpenKey ? [latestOpenKey] : [];
+    
+    setOpenKeys(newOpenKeys);
+    setLastOpenKeys(newOpenKeys);
+    persistMenuState(newOpenKeys, selectedKeys);
+  };
+
+  // Persist state to localStorage
+  const persistMenuState = (currentOpenKeys, currentSelectedKeys) => {
+    localStorage.setItem('adminMenuState', JSON.stringify({
+      openKeys: currentOpenKeys,
+      selectedKeys: currentSelectedKeys
+    }));
+  };
+
+  // Menu items configuration
+  const items = [
+    {
+      key: '1',
+      icon: <UnorderedListOutlined />,
+      label: <Link to="/adminpage">Dashboard</Link>,
+    },
+    {
+      key: '2',
+      icon: <SettingOutlined />,
+      label: <Link to="/sopending">School Owner Pending</Link>,
+    },
+    {
+      key: '3',
+      icon: <UserOutlined />,
+      label: "User Management",
+      children: [
+        {
+          key: '3.1',
+          icon: <UserDeleteOutlined />,
+          label: <Link to="/userlist">User List</Link>,
+        },
+        {
+          key: '3.2',
+          icon: <UsergroupDeleteOutlined />,
+          label: <Link to="/adminlist">Admin List</Link>,
+        },
+        {
+          key: '3.3',
+          icon: <HomeOutlined />,
+          label: <Link to="/soaccount">School Owner Account</Link>,
+        },
+      ],
+    },
+    {
+      key: '4',
+      icon: <LogoutOutlined />,
+      label: 'Log out',
+      onClick: onLogout,
+    },
+  ];
+
+  return (
+    <Menu
+      theme="dark"
+      mode="inline"
+      openKeys={openKeys}
+      selectedKeys={selectedKeys}
+      onOpenChange={handleOpenChange}
+      onSelect={({ selectedKeys: newSelectedKeys }) => {
+        // Keep the submenu open when selecting items
+        setSelectedKeys(newSelectedKeys);
+        setOpenKeys(lastOpenKeys);
+        persistMenuState(lastOpenKeys, newSelectedKeys);
+      }}
+      items={items}
+      className="admin-menu"
+      forceSubMenuRender={true} // Important for smooth transitions
+    />
+  );
+};
+
+export default AdminMenu;

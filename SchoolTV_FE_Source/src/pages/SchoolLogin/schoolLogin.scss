@@ -159,6 +159,10 @@
       
       .school-login-password {
         padding-right: 40px;
+        &::-ms-reveal,
+        &::-webkit-reveal-password-button {
+          display: none;
+        }
       }
       
       .school-login-eye-icon {

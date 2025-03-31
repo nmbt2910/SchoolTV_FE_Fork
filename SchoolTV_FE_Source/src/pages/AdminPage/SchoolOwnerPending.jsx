@@ -4,6 +4,7 @@ import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDelete
 import { Link, useNavigate } from 'react-router-dom';  
 import { useState, useEffect } from 'react';
 import apiFetch from '../../config/baseAPI';
+import AdminMenu from './AdminMenu';
 
 const { Sider, Content } = Layout;
 const { Search } = Input;
@@ -155,46 +156,7 @@ function SchoolOwnerPending() {
     <div className="school-owner-pending-body">
       <Layout style={{ minHeight: '90vh' }}>
         <Sider width={225} className="site-layout-background">
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} items={[
-            {
-              key: '1',
-              icon: <UnorderedListOutlined />,
-              label: <Link to="/adminpage">Dashboard</Link>,
-            },
-            {
-              key: '2',
-              icon: <SettingOutlined />,
-              label: <Link to="/sopending">School Owner Pending</Link>,
-            },
-            {
-              key: '3',
-              icon: <UserOutlined />,
-              label: "User Management",
-              children: [
-                {
-                  key: '3.1',
-                  icon: <UserDeleteOutlined />,
-                  label: <Link to="/userlist">User List</Link>,
-                },
-                {
-                  key: '3.2',
-                  icon: <UsergroupDeleteOutlined />,
-                  label: <Link to="/adminlist">Admin List</Link>,
-                },
-                {
-                  key: '3.3',
-                  icon: <HomeOutlined />,
-                  label: <Link to="/soaccount">School Owner Account</Link>,
-                },
-              ],
-            },
-            {
-              key: '4',
-              icon: <LogoutOutlined />,
-              label: 'Log out',
-              onClick: handleLogout,
-            },
-          ]} />
+        <AdminMenu onLogout={handleLogout} />
         </Sider>
 
         <Layout style={{ padding: '0 24px 24px' }}>
