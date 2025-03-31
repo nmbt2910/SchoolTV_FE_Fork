@@ -1,9 +1,9 @@
 import './SchoolOwnerAccount.scss';
-import { Layout, Menu, Table, Input, Button, notification, Select, Modal } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';  
+import { Layout,  Table, Input, Button, notification, Select, Modal } from 'antd';
+import { useNavigate } from 'react-router-dom';  
 import { useState, useEffect } from 'react';
 import apiFetch from '../../config/baseAPI';
+import AdminMenu from './AdminMenu';
 
 const { Sider, Content } = Layout;
 const { Search } = Input;
@@ -229,7 +229,7 @@ function SchoolOwnerAccount() {
             style={{ marginLeft: 10, width: "60px" }} 
             onClick={() => showDeleteModal(record.key)}
           >
-            Delete
+            Ban
           </Button>
         </>
       ),
@@ -240,46 +240,7 @@ function SchoolOwnerAccount() {
     <div className="schoolowneraccount-body">
       <Layout style={{ minHeight: '90vh' }}>
         <Sider width={225} className="site-layout-background">
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} items={[
-            {
-              key: '1',
-              icon: <UnorderedListOutlined />,
-              label: <Link to="/adminpage">Dashboard</Link>,
-            },
-            {
-              key: '2',
-              icon: <SettingOutlined />,
-              label: <Link to="/sopending">School Owner Pending</Link>,
-            },
-            {
-              key: '3',
-              icon: <UserOutlined />,
-              label: "User Management",
-              children: [
-                {
-                  key: '3.1',
-                  icon: <UserDeleteOutlined />,
-                  label: <Link to="/userlist">User List</Link>,
-                },
-                {
-                  key: '3.2',
-                  icon: <UsergroupDeleteOutlined />,
-                  label: <Link to="/adminlist">Admin List</Link>,
-                },
-                {
-                  key: '3.3',
-                  icon: <HomeOutlined />,
-                  label: <Link to="/soaccount">School Owner Account</Link>,
-                },
-              ],
-            },
-            {
-              key: '4',
-              icon: <LogoutOutlined />,
-              label: 'Log out',
-              onClick: handleLogout,
-            },
-          ]} />
+        <AdminMenu onLogout={handleLogout} />
         </Sider>
 
         <Layout style={{ padding: '0 24px 24px' }}>
@@ -311,7 +272,7 @@ function SchoolOwnerAccount() {
         cancelText="Cancel"
         okButtonProps={{ danger: true }}
       >
-        <p>Bạn có chắc chắn muốn xóa tài khoản này?</p>
+        <p>Bạn có chắc chắn muốn cấm tài khoản này?</p>
       </Modal>
     </div>
   );

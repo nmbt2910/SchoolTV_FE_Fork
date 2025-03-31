@@ -140,6 +140,10 @@
     
     .auth-register-password {
       padding-right: 40px;
+      &::-ms-reveal,
+      &::-webkit-reveal-password-button {
+        display: none;
+      }
     }
     
     .auth-register-eye-icon {

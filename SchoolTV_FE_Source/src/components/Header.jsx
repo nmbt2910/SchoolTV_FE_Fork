@@ -139,7 +139,7 @@ const Header = () => {
         {user ? (
           <div className="user-profile" onClick={() => setShowDropdown(!showDropdown)}>
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}&background=random`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}&background=random&size=256&font-size=0.37`}
               alt="Profile"
               className="profile-pic"
             />
