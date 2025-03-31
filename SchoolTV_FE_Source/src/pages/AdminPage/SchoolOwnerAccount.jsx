@@ -1,7 +1,6 @@
 import './SchoolOwnerAccount.scss';
-import { Layout, Menu, Table, Input, Button, notification, Select, Modal } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';  
+import { Layout,  Table, Input, Button, notification, Select, Modal } from 'antd';
+import { useNavigate } from 'react-router-dom';  
 import { useState, useEffect } from 'react';
 import apiFetch from '../../config/baseAPI';
 import AdminMenu from './AdminMenu';
@@ -230,7 +229,7 @@ function SchoolOwnerAccount() {
             style={{ marginLeft: 10, width: "60px" }} 
             onClick={() => showDeleteModal(record.key)}
           >
-            Delete
+            Ban
           </Button>
         </>
       ),
@@ -273,7 +272,7 @@ function SchoolOwnerAccount() {
         cancelText="Cancel"
         okButtonProps={{ danger: true }}
       >
-        <p>Bạn có chắc chắn muốn xóa tài khoản này?</p>
+        <p>Bạn có chắc chắn muốn cấm tài khoản này?</p>
       </Modal>
     </div>
   );

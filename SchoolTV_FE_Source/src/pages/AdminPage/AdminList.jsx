@@ -1,7 +1,6 @@
 import './AdminList.scss';
-import { Layout, Menu, Table, Input } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Layout, Table, Input } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import apiFetch from '../../config/baseAPI';
 import AdminMenu from './AdminMenu';
