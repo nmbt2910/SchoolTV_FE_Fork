@@ -15,14 +15,11 @@ import PlayFeaturedVideo from "./pages/featuredVideo/PlayFeaturedVideo";
 import UserProfile from "./pages/UserProfile/UserProfile";
 import PageLayout from "./components/layout/PageLayout";
 import SchoolChannelStudio from "./pages/school-channel/SchoolChannelStudio";
-import StudioVideo from "./components/schooltv-studio/functions/up-video/StudioVideo";
 import StudioLiveStream from "./components/schooltv-studio/functions/live-stream/StudioLiveStream";
 import UpComingList from "./pages/upcomingList/upcomingList";
 import UpComingDetail from "./pages/upcomingDetail/upcomingDetail";
 import ForgottenPassword from "./pages/forgottenPassword/forgottenPassword";
 import StatisticsPage from "./pages/StatisticsPage/StatisticsPage";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
 import Login from "./pages/login/login";
 import Register from "./pages/register/register";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -35,6 +32,9 @@ import StudioPost from "./components/schooltv-studio/functions/post/StudioPost";
 import AdminPage from "./pages/AdminPage/AdminPage";
 import UserList from "./pages/AdminPage/UserList";
 import SchoolOwner from "./pages/AdminPage/SchoolOwner";
+import StudioVideo from "./components/schooltv-studio/functions/up-video/StudioVideo";
+
+
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -47,6 +47,7 @@ const ScrollToTopWrapper = () => {
 };
 
 function App() {
+  console.log("StudioVideo:", StudioVideo);
   const router = createBrowserRouter([
     {
       path: "/login",
@@ -103,7 +104,7 @@ function App() {
       ),
       children: [
         {
-          index: true, // ✅ Route mặc định khi vào /school-studio
+          index: true,
           element: <StatisticsPage />,
         },
         {
