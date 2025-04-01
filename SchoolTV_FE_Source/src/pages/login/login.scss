@@ -154,7 +154,10 @@
     }
     
     .auth-login-password {
-      padding-right: 40px;
+      &::-webkit-reveal-password-button,
+      &::-ms-reveal {
+        display: none !important;
+      }
     }
     
     .auth-login-eye-icon {

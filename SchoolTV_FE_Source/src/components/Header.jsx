@@ -5,6 +5,8 @@ import './Header.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import apiFetch from '../config/baseAPI';
+import darkLogo from '../assets/dark-tv-logo.png';
+import lightLogo from '../assets/light-tv-logo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -94,6 +96,15 @@ const Header = () => {
     navigate('/login');
   };
 
+  useEffect(() => {
+    const favicon = document.getElementById('favicon');
+    if (favicon) {
+      favicon.href = theme === 'dark' 
+        ? '/img/dark-tv-logo.png' 
+        : '/img/light-tv-logo.png';
+    }
+  }, [theme]);
+
   // Check for roles in user object
   const isSchoolOwner = user && user.roleName === "SchoolOwner";
   const isAdmin = user && user.roleName === "Admin";
@@ -101,7 +112,12 @@ const Header = () => {
   return (
     <header className="header">
       <a href="/" className="logo">
-        <i className="fas fa-tv"></i> SchoolTV
+        <img 
+          src={theme === 'dark' ? darkLogo : lightLogo} 
+          alt="SchoolTV Logo" 
+          className="logo-img" 
+        />
+        SchoolTV
       </a>
 
       <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -123,7 +139,7 @@ const Header = () => {
         {user ? (
           <div className="user-profile" onClick={() => setShowDropdown(!showDropdown)}>
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}&background=random`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}&background=random&size=256&font-size=0.37`}
               alt="Profile"
               className="profile-pic"
             />

@@ -1,11 +1,10 @@
 import './AdminList.scss';
-import { Layout, Menu, Table, Input } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Layout, Table, Input } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiFetch from '../../config/baseAPI';
+import AdminMenu from './AdminMenu';
 
-const { SubMenu } = Menu;
 const { Sider, Content } = Layout;
 const { Search } = Input;
 
@@ -61,18 +60,23 @@ const columns = [
 function AdminList() {
   const [data, setData] = useState([]);
   const [initialData, setInitialData] = useState([]);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7057/api/accounts/admin/all', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        });
+        const headers = {
+          'accept': '*/*'
+        };
 
-        const filteredData = response.data.$values.filter(item => item.roleID === 3);
+        const response = await apiFetch('accounts/admin/all', { headers });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user data: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        const filteredData = responseData.$values.filter(item => item.roleID === 3);
 
         const fetchedData = filteredData.map(item => ({
           key: item.accountID,
@@ -84,15 +88,19 @@ function AdminList() {
           status: item.status,
         }));
 
-        setInitialData(fetchedData);  
-        setData(fetchedData); 
+        setInitialData(fetchedData);
+        setData(fetchedData);
       } catch (error) {
         console.error('Error fetching data:', error);
+        if (error.message.includes('Failed to fetch user data')) {
+          localStorage.removeItem('authToken');
+          navigate('/login');
+        }
       }
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleSearch = (value) => {
     if (value.trim() === '') {
@@ -112,7 +120,6 @@ function AdminList() {
   const handleLogout = () => {
     localStorage.removeItem("authToken");  
     sessionStorage.removeItem("authToken"); 
-
     navigate("/login"); 
   };
 
@@ -120,16 +127,7 @@ function AdminList() {
     <div className="schoolowner-body">
       <Layout style={{ minHeight: '90vh' }}>
         <Sider width={225} className="site-layout-background">
-          <Menu theme='dark' mode="inline" defaultSelectedKeys={['1']} style={{ height: '100%', borderRight: 0 }}>
-            <Menu.Item key="1" icon={<UnorderedListOutlined />}><Link to="/adminpage">Dashboard</Link></Menu.Item>
-            <Menu.Item key="2" icon={<SettingOutlined />}><Link to="/sopending">School Owner Pending</Link></Menu.Item>
-            <SubMenu key="3" icon={<UserOutlined />} title="User Management">
-              <Menu.Item key="3.1" icon={<UserDeleteOutlined />}><Link to="/userlist">User List</Link></Menu.Item>
-              <Menu.Item key="3.2" icon={<UsergroupDeleteOutlined />}><Link to="/adminlist">Admin List</Link></Menu.Item>
-              <Menu.Item key="3.3" icon={<HomeOutlined />}><Link to="/soaccount">School Owner Account</Link></Menu.Item>
-            </SubMenu>
-            <Menu.Item key="4" icon={<LogoutOutlined />} onClick={handleLogout}>Log out</Menu.Item>
-          </Menu>
+        <AdminMenu onLogout={handleLogout} />
         </Sider>
 
         <Layout style={{ padding: '0 24px 24px' }}>
