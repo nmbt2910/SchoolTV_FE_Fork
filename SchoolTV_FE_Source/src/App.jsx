@@ -37,6 +37,7 @@ import SchoolOwnerPending from "./pages/AdminPage/SchoolOwnerPending";
 import SchoolOwnerAccount from "./pages/AdminPage/SchoolOwnerAccount";
 import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CreateSchoolChannel from "./pages/school-channel/create/CreateSchoolChannel";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -49,7 +50,6 @@ const ScrollToTopWrapper = () => {
 };
 
 function App() {
-  console.log("StudioVideo:", StudioVideo);
   const router = createBrowserRouter([
     {
       path: "/login",
@@ -95,6 +95,11 @@ function App() {
           <ForgottenPassword />
         </ThemeProvider>
       ),
+    },
+
+    {
+      path: "/create-channel",
+      element: <CreateSchoolChannel />,
     },
     {
       path: "school-studio",
