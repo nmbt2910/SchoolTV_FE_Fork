@@ -17,7 +17,7 @@ function CreateSchoolChannel() {
       setIsSendingData(true);
       value.website = value.website || "";
 
-      const response = await apiFetch("/api/schoolchannels", {
+      const response = await apiFetch("schoolchannels", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
