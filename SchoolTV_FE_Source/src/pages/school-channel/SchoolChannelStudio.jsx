@@ -10,6 +10,7 @@ import { checkExistChannel } from "./check-channel/CheckExistChannel";
 function SchoolChannelStudio() {
   const user = useSelector((state) => state.userData.user);
   const navigate = useNavigate();
+  const [schoolChannel, setSchoolChannel] = React.useState(null);
 
   const fetchChannel = async () => {
     try {
@@ -18,6 +19,8 @@ function SchoolChannelStudio() {
       if(!data) {
         navigate("/create-channel");
       }
+
+      setSchoolChannel(data);
     } catch (error) {
       toast.error("Có lỗi xảy ra, vui lòng thử lại sau!");
     }
@@ -26,9 +29,15 @@ function SchoolChannelStudio() {
   useEffect(() => {
     fetchChannel();
   }, [user.accountID, navigate]);
+
+  useEffect(() => {
+    if(schoolChannel) {
+      toast.success(`Bạn đang đăng nhập kênh ${schoolChannel.$values[0].name}!`)
+    }
+  }, [schoolChannel])
   return (
     <>
-      <StudioHeader />
+      <StudioHeader channel={schoolChannel} />
       <div className="studio-function-container">
         <StudioNavbar />
         <Outlet />

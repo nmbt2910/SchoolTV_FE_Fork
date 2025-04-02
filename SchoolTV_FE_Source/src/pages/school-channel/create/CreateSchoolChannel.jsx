@@ -2,16 +2,51 @@ import React from "react";
 import "./CreateSchoolChannel.scss";
 import { useSelector } from "react-redux";
 import { Avatar, Button, Form, Input } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import apiFetch from "../../../config/baseAPI";
+import { useNavigate } from "react-router-dom";
 
 function CreateSchoolChannel() {
   const user = useSelector((state) => state.userData.user);
+  const [form] = Form.useForm();
+  const [isSendingData, setIsSendingData] = React.useState(false);
   const navigate = useNavigate();
+
+  const handleSubmitChannel = async (value) => {
+    try {
+      setIsSendingData(true);
+      value.website = value.website || "";
+
+      const response = await apiFetch("/api/schoolchannels", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(value),
+      });
+
+      if (!response.ok) {
+        toast.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      form.resetFields();
+      toast.success("Tạo kênh thành công, hãy trải nghiệm thôi nào!");
+      navigate("/school-studio/statistics");
+      
+    } catch(error) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại sau!");
+    } finally {
+      setIsSendingData(false);
+    }
+  };
+
   return (
     <div className="create-channel-container">
       <div className="create-channel-table">
         <div className="create-channel-marginBottom">
-          <p style={{ fontWeight: 400 }}>{user.email || "Not found email."}</p>
+          <p style={{ fontWeight: 400 }}>{user?.email ?? "Not found email."}</p>
         </div>
 
         <div className="create-channel-marginBottom">
@@ -33,11 +68,8 @@ function CreateSchoolChannel() {
           </p>
         </div>
 
-        <div className="create-channel-back-btn create-channel-marginBottom" onClick={() => {
-            navigate("/");
-            window.location.reload();
-        }}>
-          <p>Trở về trang chủ</p>
+        <div className="create-channel-back-btn create-channel-marginBottom">
+          <a href="/">Trở về trang chủ</a>
         </div>
 
         <div className="create-channel-signup-range">
@@ -51,7 +83,11 @@ function CreateSchoolChannel() {
           </div>
 
           <div className="create-channel">
-            <Form className="create-channel__form">
+            <Form
+              className="create-channel__form"
+              onFinish={handleSubmitChannel}
+              form={form}
+            >
               <div className="create-channel__form-row">
                 <Form.Item
                   className="create-channel__form-item"
@@ -134,6 +170,7 @@ function CreateSchoolChannel() {
                     type="primary"
                     htmlType="submit"
                     className="create-channel__submit-btn"
+                    loading={isSendingData}
                   >
                     Tạo kênh
                   </Button>

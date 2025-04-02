@@ -2,7 +2,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid green;
   padding: 80px 0px;
   .create-channel-table {
     border: 1px solid #d3d3d3;
@@ -23,8 +22,9 @@
       border-radius: 500px;
       cursor: pointer;
       transition: transform 0.2s ease, opacity 0.2s ease;
-      p {
+      a {
         color: #4681f4;
+        text-decoration: none;
       }
 
       &:hover {
@@ -35,7 +35,7 @@
       &:active {
         background-color: #3a6fc2;
         border-color: #3a6fc2;
-        p {
+        a {
           color: white;
         }
       }
@@ -117,11 +117,10 @@
       .create-channel {
         $self: &;
         width: 100%;
-        margin: 0 auto;
         padding: 24px;
 
         &__form {
-          background-color: #fff;
+          background-color: var(--all-video-card-bg);
           padding: 32px;
           border-radius: 8px;
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -134,10 +133,7 @@
               grid-template-columns: 1fr 1fr;
               gap: 24px;
 
-              @media (max-width: 768px) {
-                grid-template-columns: 1fr;
-                gap: 16px;
-              }
+             
             }
           }
 
@@ -149,7 +145,7 @@
 
               label {
                 font-weight: 500;
-                color: #2c3e50;
+                color: var(--text-color);
               }
             }
 
@@ -157,11 +153,22 @@
             .ant-input-textarea {
               border-radius: 6px;
               border-color: #e2e8f0;
+              background-color: var(--form-input-bg);
+
+              &::placeholder {
+                color: var(--form-input-placeholder);
+              }
+
+              color: var(--text-color);
 
               &:hover,
               &:focus {
                 border-color: #4096ff;
                 box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.1);
+              }
+
+              &:focus::placeholder {
+                color: transparent;
               }
             }
 
@@ -188,6 +195,18 @@
           }
         }
       }
+    }
+
+    @media (max-width: 1024px) {
+      width: 75%;
+    }
+
+    @media (max-width: 768px) {
+      width: 80%;
+    }
+
+    @media (max-width: 480px) {
+      width: 90%;
     }
   }
 
