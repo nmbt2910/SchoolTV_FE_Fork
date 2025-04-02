@@ -89,7 +89,7 @@ const ChannelList = () => {
                 let followedData = { $values: [] };
                 
                 try {
-                    const followedResponse = await apiFetch('follow/followed', { headers });
+                    const followedResponse = await apiFetch('schoolchannelfollow/followed', { headers });
                     
                     if (followedResponse.ok) {
                         followedData = await followedResponse.json();
@@ -200,7 +200,7 @@ const ChannelList = () => {
             return;
           }
           
-          const response = await apiFetch(`follow/follow/${channelId}`, {
+          const response = await apiFetch(`schoolchannelfollow/follow/${channelId}`, {
             method: 'POST',
             headers: {
               'accept': '*/*'
@@ -245,7 +245,7 @@ const ChannelList = () => {
                 return;
             }
             
-            const response = await apiFetch(`follow/unfollow/${channelId}`, {
+            const response = await apiFetch(`schoolchannelfollow/unfollow/${channelId}`, {
                 method: 'PUT',
                 headers: {
                     'accept': '*/*'

@@ -37,6 +37,12 @@ export const GlobalStyle = createGlobalStyle`
     ::-webkit-scrollbar-thumb:hover {
         background: var(--hover-color);
     }
+
+    img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
 `;
 
 export const MainContainer = styled.main`
@@ -108,6 +114,110 @@ export const FilterGroup = styled.div`
     @media (max-width: 768px) {
         flex-wrap: wrap;
     }
+`;
+
+export const ModalContent = styled.div`
+    background: var(--bg-color);
+    border-radius: 15px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 400px;
+    transform-origin: center;
+    animation: scaleUp 0.3s ease;
+
+    @keyframes scaleUp {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    @media (max-width: 480px) {
+        width: 95%;
+        padding: 1.5rem;
+    }
+`;
+
+export const ContentGrid = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+`;
+
+export const StreamCard = styled.div`
+    background: var(--card-bg);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px var(--shadow-color);
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid var(--card-border);
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px var(--shadow-hover);
+        background: var(--card-hover);
+    }
+`;
+
+export const StreamThumbnail = styled.div`
+    position: relative;
+    padding-top: 56.25%;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+
+    img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    ${StreamCard}:hover & img {
+        transform: scale(1.05);
+    }
+`;
+
+export const ProgramModalContent = styled(ModalContent)`
+  max-width: 800px;
+  padding: 2.5rem 2rem 2rem; // Increased top padding
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  overflow: visible; // Ensure content can overflow the container
+  
+  ${ContentGrid} {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 0;
+    padding-top: 10px; // Add some padding to prevent cut-off
+  }
+
+  ${StreamCard} {
+    margin-bottom: 0;
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px var(--shadow-hover);
+      background: var(--card-hover);
+    }
+  }
+
+  ${StreamThumbnail} {
+    img {
+      transition: transform 0.3s ease;
+    }
+    &:hover img {
+      transform: scale(1.05);
+    }
+  }
 `;
 
 export const SearchBox = styled.div`
@@ -225,56 +335,12 @@ export const CancelButton = styled.button`
     }
 `;
 
-export const ContentGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-
-    @media (max-width: 768px) {
-        grid-template-columns: 1fr;
-    }
-`;
-
-export const StreamCard = styled.div`
-    background: var(--card-bg);
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px var(--shadow-color);
-    transition: all 0.3s ease;
-
-    &:hover {
-        transform: translateY(-5px);
-        background: var(--card-hover);
-        box-shadow: 0 8px 25px var(--shadow-color);
-    }
-`;
-
-export const StreamThumbnail = styled.div`
-    position: relative;
-    padding-top: 56.25%;
-    overflow: hidden;
-
-    img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    ${StreamCard}:hover & img {
-        transform: scale(1.05);
-    }
-`;
-
+// Add this to your existing styles
 export const LiveBadge = styled.div`
     position: absolute;
     top: 1rem;
     left: 1rem;
-    background: var(--live-color);
+    background: ${props => props.$bg || 'var(--live-color)'};
     color: white;
     padding: 0.3rem 0.8rem;
     border-radius: 20px;
@@ -288,11 +354,13 @@ export const LiveBadge = styled.div`
         content: '';
         width: 8px;
         height: 8px;
-        background: white;
+        background: ${props => props.$bg === 'var(--live-color)' ? 'white' : 'transparent'};
         border-radius: 50%;
-        animation: pulse 1.5s infinite;
+        animation: ${props => props.$bg === 'var(--live-color)' ? 'pulse 1.5s infinite' : 'none'};
     }
 `;
+
+
 
 export const RecordedBadge = styled.div`
     position: absolute;
@@ -319,36 +387,63 @@ export const StreamDuration = styled.div`
 
 export const StreamInfo = styled.div`
     padding: 1.5rem;
+    background: var(--card-info-bg);
 `;
 
 export const StreamTitle = styled.h3`
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
     color: var(--text-color);
+    font-weight: 600;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 `;
 
+
 export const StreamMeta = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: var(--text-color);
-    opacity: 0.8;
-    font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+  color: var(--text-color);
+  opacity: 0.8;
+  font-size: 0.9rem;
 `;
 
 export const StreamStats = styled.div`
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
+`;
+
+export const StreamScheduleCounter = styled.div`
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
 `;
 
 export const StreamUniversity = styled.div`
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+
+    ${ProgramModalContent} & {
+    min-width: 0;
+    flex: 1;
+    
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 `;
 
 export const UniversityAvatar = styled.img`
@@ -356,6 +451,13 @@ export const UniversityAvatar = styled.img`
     height: 24px;
     border-radius: 50%;
     object-fit: cover;
+    flex-shrink: 0;
+
+    ${ProgramModalContent} & {
+    width: 32px;
+    height: 32px;
+    margin-right: 0.5rem;
+  }
 `;
 
 export const SectionHeader = styled.div`
@@ -371,6 +473,11 @@ export const SectionTitle = styled.h2`
     align-items: center;
     gap: 1rem;
 `;
+
+export const UniversityModalContent = styled(ModalContent)`
+    max-width: 500px;
+`;
+
 
 export const StreamCount = styled.span`
     font-size: 1rem;
@@ -425,30 +532,6 @@ export const ModalOverlay = styled.div`
         from { opacity: 0; }
         to { opacity: 1; }
     }
-`;
-
-export const ModalContent = styled.div`
-    background: var(--bg-color);
-    border-radius: 15px;
-    padding: 2rem;
-    width: 90%;
-    max-width: 400px;
-    transform-origin: center;
-    animation: scaleUp 0.3s ease;
-
-    @keyframes scaleUp {
-        from { transform: scale(0.9); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-
-    @media (max-width: 480px) {
-        width: 95%;
-        padding: 1.5rem;
-    }
-`;
-
-export const UniversityModalContent = styled(ModalContent)`
-    max-width: 500px;
 `;
 
 export const ModalHeader = styled.div`
