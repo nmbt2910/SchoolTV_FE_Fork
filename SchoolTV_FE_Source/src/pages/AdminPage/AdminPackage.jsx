@@ -101,8 +101,9 @@ function AdminPackage() {
 
   const handleUpdate = (values) => {
     const token = localStorage.getItem("authToken");
-    const currentDate = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-
+  
+    const updatedAt = selectedPackage.updatedAt;
+  
     setPackages(prevPackages =>
       prevPackages.map(pkg =>
         pkg.packageID === selectedPackage.packageID ? {
@@ -112,11 +113,11 @@ function AdminPackage() {
           price: values.price,
           duration: values.duration,
           status: values.status === "Active",
-          updatedAt: currentDate
+          updatedAt: updatedAt 
         } : pkg
       )
     );
-
+  
     setFilteredPackages(prevFilteredPackages =>
       prevFilteredPackages.map(pkg =>
         pkg.packageID === selectedPackage.packageID ? {
@@ -126,7 +127,7 @@ function AdminPackage() {
           price: values.price,
           duration: values.duration,
           status: values.status === "Active",
-          updatedAt: currentDate
+          updatedAt: updatedAt 
         } : pkg
       )
     );
@@ -158,6 +159,21 @@ function AdminPackage() {
         if (data) {
           console.log('Package updated successfully', data);
         }
+        const token = localStorage.getItem("authToken");
+        apiFetch("/api/Package", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setPackages(data.$values);
+            setFilteredPackages(data.$values);
+          })
+          .catch((error) => console.error("Error fetching updated packages:", error));
+        
         setIsModalVisible(false);
       })
       .catch((error) => {
