@@ -272,6 +272,9 @@ const ForgottenPassword = () => {
                 placeholder="Nhập email đã đăng ký"
                 className={`fp-input ${errors.email ? "fp-input-error" : ""}`}
                 size="large"
+                inputMode="email"
+                autoComplete="email"
+                spellCheck={false}
               />
             </Form.Item>
             <Button
@@ -314,57 +317,55 @@ const ForgottenPassword = () => {
           </div>
         );
 
-      case 2:
-        return (
-          <Form form={form} onFinish={handlePasswordReset} layout="vertical">
-            <Form.Item
-              name="token"
-              label="Mã xác nhận"
-              className="fp-form-item"
-            >
-              <Input
-                prefix={<SecurityScanOutlined />}
-                placeholder="Nhập mã xác nhận từ email"
-                className={`fp-input ${errors.token ? "fp-input-error" : ""}`}
-                readOnly
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="newPassword"
-              label="Mật khẩu mới"
-              className="fp-form-item"
-            >
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="Nhập mật khẩu mới"
-                className={`fp-input ${errors.newPassword ? "fp-input-error" : ""}`}
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="confirmNewPassword"
-              label="Xác nhận mật khẩu"
-              className="fp-form-item"
-            >
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="Nhập lại mật khẩu mới"
-                className={`fp-input ${errors.confirmNewPassword ? "fp-input-error" : ""}`}
-              />
-            </Form.Item>
-
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              loading={isLoading}
-              className="fp-button"
-            >
-              Xác Nhận Đặt Lại Mật Khẩu
-            </Button>
-          </Form>
-        );
+        case 2:
+          return (
+            <Form form={form} onFinish={handlePasswordReset} layout="vertical">
+              {/* Hidden token field - kept in form but not visible to user */}
+              <Form.Item name="token" noStyle>
+                <Input type="hidden" />
+              </Form.Item>
+  
+              <Form.Item
+                name="newPassword"
+                label="Mật khẩu mới"
+                className="fp-form-item"
+              >
+                <Input.Password
+                  prefix={<LockOutlined />}
+                  placeholder="Nhập mật khẩu mới"
+                  className={`fp-input ${errors.newPassword ? "fp-input-error" : ""}`}
+                  inputMode="text"
+                  autoComplete="new-password"
+                  spellCheck={false}
+                />
+              </Form.Item>
+  
+              <Form.Item
+                name="confirmNewPassword"
+                label="Xác nhận mật khẩu"
+                className="fp-form-item"
+              >
+                <Input.Password
+                  prefix={<LockOutlined />}
+                  placeholder="Nhập lại mật khẩu mới"
+                  className={`fp-input ${errors.confirmNewPassword ? "fp-input-error" : ""}`}
+                  inputMode="text"
+                  autoComplete="new-password"
+                  spellCheck={false}
+                />
+              </Form.Item>
+  
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={isLoading}
+                className="fp-button"
+              >
+                Xác Nhận Đặt Lại Mật Khẩu
+              </Button>
+            </Form>
+          );
 
       case 3:
         return (

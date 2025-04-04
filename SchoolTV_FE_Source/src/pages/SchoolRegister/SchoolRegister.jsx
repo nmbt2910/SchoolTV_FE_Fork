@@ -52,7 +52,7 @@ function SchoolRegister() {
     });
 
     if (errors[name]) {
-      const newErrors = {...errors};
+      const newErrors = { ...errors };
       delete newErrors[name];
       setErrors(newErrors);
     }
@@ -94,7 +94,7 @@ function SchoolRegister() {
     if (!formData.address) {
       newErrors.address = "Vui lòng nhập địa chỉ trường học";
     }
-    
+
     return newErrors;
   };
 
@@ -189,18 +189,86 @@ function SchoolRegister() {
   };
 
   const handleOtpChange = (index, value) => {
-    if (value.length <= 1 && /^[0-9]*$/.test(value)) {
-      const newOtpValues = [...otpValues];
-      newOtpValues[index] = value;
-      setOtpValues(newOtpValues);
+    // Allow only numbers and empty string
+    if (!/^[0-9]*$/.test(value) && value !== '') {
+      return;
+    }
 
-      // Auto-focus to the next input
-      if (value && index < 5) {
+    const newOtpValues = [...otpValues];
+    newOtpValues[index] = value;
+    setOtpValues(newOtpValues);
+
+    // Auto-focus next input or submit if all filled
+    if (value !== '') {
+      if (index < 5) {
         const nextInput = document.querySelector(
           `input[name=otp-${index + 1}]`
         );
         if (nextInput) nextInput.focus();
+      } else if (index === 5) {
+        // If this is the last input and all values are filled, auto-submit
+        const isAllFilled = newOtpValues.every(val => val !== '');
+        if (isAllFilled) {
+          handleVerifyOtp();
+        }
       }
+    }
+  };
+
+  const handleOtpContainerKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      const isAllFilled = otpValues.every(value => value !== '');
+      if (isAllFilled) {
+        handleVerifyOtp();
+      }
+    }
+  };
+
+  // Add this new function to handle keydown events
+  const handleOtpKeyDown = (index, e) => {
+    // Handle Enter key when all digits are filled
+    if (e.key === 'Enter') {
+      const isAllFilled = otpValues.every(value => value !== '');
+      if (isAllFilled) {
+        handleVerifyOtp();
+        return;
+      }
+    }
+
+    // Handle backspace with chain deletion
+    if (e.key === 'Backspace') {
+      if (!otpValues[index]) {
+        // If current field is empty, move to previous field and clear it
+        if (index > 0) {
+          const newOtpValues = [...otpValues];
+          newOtpValues[index - 1] = '';
+          setOtpValues(newOtpValues);
+
+          const prevInput = document.querySelector(
+            `input[name=otp-${index - 1}]`
+          );
+          if (prevInput) {
+            prevInput.focus();
+            e.preventDefault();
+          }
+        }
+      }
+    }
+
+    // Handle left arrow
+    if (e.key === 'ArrowLeft' && index > 0) {
+      const prevInput = document.querySelector(
+        `input[name=otp-${index - 1}]`
+      );
+      if (prevInput) prevInput.focus();
+    }
+
+    // Handle right arrow
+    if (e.key === 'ArrowRight' && index < 5) {
+      const nextInput = document.querySelector(
+        `input[name=otp-${index + 1}]`
+      );
+      if (nextInput) nextInput.focus();
     }
   };
 
@@ -215,11 +283,11 @@ function SchoolRegister() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      
+
       notification.error({
         message: "Lỗi đăng ký",
         description: (
@@ -232,11 +300,11 @@ function SchoolRegister() {
         placement: "topRight",
         duration: 5,
       });
-      
+
       highlightErrorFields(newErrors);
       return;
     }
-  
+
     if (!agreeTerms) {
       notification.error({
         message: "Chưa đồng ý điều khoản",
@@ -245,9 +313,9 @@ function SchoolRegister() {
       });
       return;
     }
-  
+
     setLoading(true);
-  
+
     try {
       const response = await apiFetch("accounts/schoolowner/signup", {
         method: "POST",
@@ -256,7 +324,7 @@ function SchoolRegister() {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         notification.success({
@@ -264,7 +332,7 @@ function SchoolRegister() {
           description: data.message,
           placement: "topRight",
         });
-  
+
         setRegisteredEmail(formData.email);
         setShowOtpVerification(true);
         setCountdown(60);
@@ -299,11 +367,11 @@ function SchoolRegister() {
               </svg>
               <h1>Đăng ký tài khoản Trường học</h1>
             </div>
-            
+
             <p className="school-register-description">
               Tạo tài khoản đơn vị trường học để cung cấp dịch vụ nội dung giáo dục và tương tác với sinh viên trên nền tảng SchoolTV
             </p>
-            
+
             <div className="school-register-info-box">
               <svg className="school-register-info-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -314,7 +382,7 @@ function SchoolRegister() {
                 Sau khi đăng ký, tài khoản của bạn sẽ được gửi đến quản trị viên để xem xét và phê duyệt. Bạn sẽ nhận được thông báo qua email khi tài khoản được kích hoạt.
               </p>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="school-register-form">
               <div className="school-register-columns">
                 <div className="school-register-column">
@@ -325,17 +393,17 @@ function SchoolRegister() {
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                       </svg>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         name="username"
                         className={`school-register-input ${errors.username ? "school-register-input-error" : ""}`}
-                        placeholder="Tên đăng nhập của trường" 
+                        placeholder="Tên đăng nhập của trường"
                         value={formData.username}
                         onChange={handleChange}
                       />
                     </div>
                   </div>
-                  
+
                   <div className="school-register-field">
                     <label className="school-register-label">Email <span className="required">*</span></label>
                     <div className="school-register-input-wrapper">
@@ -343,17 +411,17 @@ function SchoolRegister() {
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                         <polyline points="22,6 12,13 2,6"></polyline>
                       </svg>
-                      <input 
-                        type="email" 
+                      <input
+                        type="email"
                         name="email"
                         className={`school-register-input ${errors.email ? "school-register-input-error" : ""}`}
-                        placeholder="Email liên hệ chính thức" 
+                        placeholder="Email liên hệ chính thức"
                         value={formData.email}
                         onChange={handleChange}
                       />
                     </div>
                   </div>
-                  
+
                   <div className="school-register-field">
                     <label className="school-register-label">Mật khẩu <span className="required">*</span></label>
                     <div className="school-register-input-wrapper">
@@ -361,25 +429,25 @@ function SchoolRegister() {
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                       </svg>
-                      <input 
-                        type={showPassword ? "text" : "password"} 
+                      <input
+                        type={showPassword ? "text" : "password"}
                         name="password"
                         className={`school-register-input school-register-password ${errors.password ? "school-register-input-error" : ""}`}
-                        placeholder="Tạo mật khẩu (ít nhất 6 ký tự)" 
+                        placeholder="Tạo mật khẩu (ít nhất 6 ký tự)"
                         value={formData.password}
                         onChange={handleChange}
                       />
-                      <svg 
+                      <svg
                         onClick={() => setShowPassword(!showPassword)}
-                        className="school-register-eye-icon" 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        width="20" 
-                        height="20" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
-                        strokeLinecap="round" 
+                        className="school-register-eye-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
                         strokeLinejoin="round"
                       >
                         {showPassword ? (
@@ -398,7 +466,7 @@ function SchoolRegister() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="school-register-column">
                   <div className="school-register-field">
                     <label className="school-register-label">Tên trường học <span className="required">*</span></label>
@@ -407,34 +475,34 @@ function SchoolRegister() {
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                         <polyline points="9 22 9 12 15 12 15 22"></polyline>
                       </svg>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         name="fullname"
                         className={`school-register-input ${errors.fullname ? "school-register-input-error" : ""}`}
-                        placeholder="Tên đầy đủ của trường học" 
+                        placeholder="Tên đầy đủ của trường học"
                         value={formData.fullname}
                         onChange={handleChange}
                       />
                     </div>
                   </div>
-                  
+
                   <div className="school-register-field">
                     <label className="school-register-label">Số điện thoại <span className="required">*</span></label>
                     <div className="school-register-input-wrapper">
                       <svg className="school-register-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                       </svg>
-                      <input 
-                        type="tel" 
+                      <input
+                        type="tel"
                         name="phoneNumber"
                         className={`school-register-input ${errors.phoneNumber ? "school-register-input-error" : ""}`}
-                        placeholder="Số điện thoại liên hệ" 
+                        placeholder="Số điện thoại liên hệ"
                         value={formData.phoneNumber}
                         onChange={handleChange}
                       />
                     </div>
                   </div>
-                  
+
                   <div className="school-register-field">
                     <label className="school-register-label">Xác nhận mật khẩu <span className="required">*</span></label>
                     <div className="school-register-input-wrapper">
@@ -442,25 +510,25 @@ function SchoolRegister() {
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                       </svg>
-                      <input 
-                        type={showConfirmPassword ? "text" : "password"} 
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
                         name="confirmPassword"
                         className={`school-register-input school-register-password ${errors.confirmPassword ? "school-register-input-error" : ""}`}
-                        placeholder="Nhập lại mật khẩu" 
+                        placeholder="Nhập lại mật khẩu"
                         value={formData.confirmPassword}
                         onChange={handleChange}
                       />
-                      <svg 
+                      <svg
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="school-register-eye-icon" 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        width="20" 
-                        height="20" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
-                        strokeLinecap="round" 
+                        className="school-register-eye-icon"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
                         strokeLinejoin="round"
                       >
                         {showConfirmPassword ? (
@@ -480,7 +548,7 @@ function SchoolRegister() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="school-register-field">
                 <label className="school-register-label">Địa chỉ <span className="required">*</span></label>
                 <div className="school-register-input-wrapper">
@@ -488,21 +556,21 @@ function SchoolRegister() {
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                     <circle cx="12" cy="10" r="3"></circle>
                   </svg>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="address"
                     className={`school-register-input ${errors.address ? "school-register-input-error" : ""}`}
-                    placeholder="Địa chỉ của trường học" 
+                    placeholder="Địa chỉ của trường học"
                     value={formData.address}
                     onChange={handleChange}
                   />
                 </div>
               </div>
-              
+
               <div className="school-register-terms">
                 <label className="school-register-terms-checkbox">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={agreeTerms}
                     onChange={(e) => setAgreeTerms(e.target.checked)}
                   />
@@ -511,21 +579,21 @@ function SchoolRegister() {
                   </span>
                 </label>
               </div>
-              
-              <button 
-                type="submit" 
+
+              <button
+                type="submit"
                 className="school-register-submit"
                 disabled={loading}
               >
                 {loading ? "Đang xử lý..." : "Đăng ký tài khoản trường học"}
               </button>
-              
+
               <div className="school-register-footer">
                 <div className="school-register-login">
                   <span>Đã có tài khoản trường học?</span>
                   <Link to="/school-login" className="school-register-login-link">Đăng nhập</Link>
                 </div>
-                
+
                 <div className="school-register-back">
                   <Link to="/register" className="school-register-back-link">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -542,21 +610,28 @@ function SchoolRegister() {
           <div className="otp-verification-container">
             <h1>Xác thực tài khoản</h1>
             <p>
-            Vui lòng nhập mã OTP đã được gửi đến {registeredEmail}<br/>
-            Vui lòng kiểm tra cả hộp thư spam nếu bạn không nhận được email.
+              Vui lòng nhập mã OTP đã được gửi đến {registeredEmail}<br />
+              Vui lòng kiểm tra cả hộp thư spam nếu bạn không nhận được email.
             </p>
-
-            <div className="auth-otp-inputs">
+            <div
+              className="auth-otp-inputs"
+              onKeyDown={handleOtpContainerKeyDown}
+              tabIndex="-1" // This makes the div focusable
+            >
               {otpValues.map((value, index) => (
                 <input
                   key={index}
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   name={`otp-${index}`}
                   value={value}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
                   onPaste={handleOtpPaste}
                   maxLength={1}
                   className="auth-otp-input"
+                  autoComplete="off"
                 />
               ))}
             </div>

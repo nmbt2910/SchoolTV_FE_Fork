@@ -38,6 +38,8 @@ import SchoolOwnerAccount from "./pages/AdminPage/SchoolOwnerAccount";
 import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CreateSchoolChannel from "./pages/school-channel/create/CreateSchoolChannel";
+import AdminPackage from "./pages/AdminPage/AdminPackage";
+import CreatePackage from "./pages/AdminPage/CreatePackage";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -137,7 +139,7 @@ function App() {
       element: (
         <ThemeProvider>
           <ScrollToTopWrapper />
-            <UserProvider> {/* Bọc toàn bộ ứng dụng bằng UserProvider */}
+            <UserProvider> 
               <PageLayout />
             </UserProvider>
         </ThemeProvider>
@@ -236,6 +238,22 @@ function App() {
           element: (
             <ProtectedRoute allowedRoles={['admin']}>
               <SchoolOwnerAccount />
+            </ProtectedRoute>
+          ), 
+        },
+        {
+          path: "/adminpackage",
+          element: (
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminPackage />
+            </ProtectedRoute>
+          ), 
+        },
+        {
+          path: "/createpackage",
+          element: (
+            <ProtectedRoute allowedRoles={['admin']}>
+              <CreatePackage />
             </ProtectedRoute>
           ), 
         },
