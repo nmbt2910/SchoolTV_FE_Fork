@@ -15,14 +15,11 @@ import PlayFeaturedVideo from "./pages/featuredVideo/PlayFeaturedVideo";
 import UserProfile from "./pages/UserProfile/UserProfile";
 import PageLayout from "./components/layout/PageLayout";
 import SchoolChannelStudio from "./pages/school-channel/SchoolChannelStudio";
-import StudioVideo from "./components/schooltv-studio/functions/up-video/StudioVideo";
 import StudioLiveStream from "./components/schooltv-studio/functions/live-stream/StudioLiveStream";
 import UpComingList from "./pages/upcomingList/upcomingList";
 import UpComingDetail from "./pages/upcomingDetail/upcomingDetail";
 import ForgottenPassword from "./pages/forgottenPassword/forgottenPassword";
 import StatisticsPage from "./pages/StatisticsPage/StatisticsPage";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
 import Login from "./pages/login/login";
 import Register from "./pages/register/register";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -34,11 +31,13 @@ import Checkout from "./pages/payment/payment";
 import StudioPost from "./components/schooltv-studio/functions/post/StudioPost";
 import AdminPage from "./pages/AdminPage/AdminPage";
 import UserList from "./pages/AdminPage/UserList";
+import StudioVideo from "./components/schooltv-studio/functions/up-video/StudioVideo";
 import AdminList from "./pages/AdminPage/AdminList";
 import SchoolOwnerPending from "./pages/AdminPage/SchoolOwnerPending";
 import SchoolOwnerAccount from "./pages/AdminPage/SchoolOwnerAccount";
 import { UserProvider } from "./context/UserContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CreateSchoolChannel from "./pages/school-channel/create/CreateSchoolChannel";
 import AdminPackage from "./pages/AdminPage/AdminPackage";
 import CreatePackage from "./pages/AdminPage/CreatePackage";
 
@@ -99,6 +98,11 @@ function App() {
         </ThemeProvider>
       ),
     },
+
+    {
+      path: "/create-channel",
+      element: <CreateSchoolChannel />,
+    },
     {
       path: "school-studio",
       element: (
@@ -109,7 +113,7 @@ function App() {
       ),
       children: [
         {
-          index: true, // ✅ Route mặc định khi vào /school-studio
+          index: true,
           element: <StatisticsPage />,
         },
         {

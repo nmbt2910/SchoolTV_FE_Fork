@@ -480,7 +480,8 @@
   gap: 12px;
   justify-content: center;
   margin-bottom: 30px;
-}
+  ime-mode: disabled;
+  }
 
 // Individual OTP input
 .auth-otp-input {
@@ -539,3 +540,4 @@
     font-size: 20px;
   }
 }
+

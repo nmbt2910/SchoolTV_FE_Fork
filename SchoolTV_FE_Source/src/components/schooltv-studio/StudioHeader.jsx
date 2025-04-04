@@ -7,7 +7,7 @@ import { IoMenu, IoNotifications } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-function StudioHeader() {
+function StudioHeader(props) {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [countNotification, setCountNotification] = useState(0);
   const [openSmallMenu, setOpenSmallMenu] = useState(false);
@@ -15,6 +15,21 @@ function StudioHeader() {
   const navigate = useNavigate();
 
   const user = useSelector((state) => state.userData.user);
+  const { channel } = props;
+  // const avatarSrc =
+  //   channel.$values && channel.$values[0] && channel.$values[0].name
+  //     ? `https://ui-avatars.com/api/?name=${encodeURIComponent(
+  //         channel.$values[0].name
+  //       )}&background=random`
+  //     : `https://ui-avatars.com/api/?name=User&background=random`;
+
+  const avatarScr = channel
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        channel.$values[0].name
+      )}&background=random`
+    : `https://ui-avatars.com/api/?name=User&background=random`;
+
+  console.log("check channel:", channel);
 
   const items = [
     {
@@ -123,9 +138,7 @@ function StudioHeader() {
             height={50}
             style={{ borderRadius: "50%" }}
             preview={false}
-            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-              user?.fullname || "User"
-            )}&background=random`}
+            src={avatarScr}
           />
         </Flex>
 
@@ -177,9 +190,7 @@ function StudioHeader() {
               height={50}
               style={{ borderRadius: "50%" }}
               preview={false}
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                user?.fullname || "User"
-              )}&background=random`}
+              src={avatarScr}
             />
           </Flex>
         </Drawer>
