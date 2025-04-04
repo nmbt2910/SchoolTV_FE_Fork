@@ -22,6 +22,7 @@
     "aos": "^2.3.4",
     "axios": "^1.8.3",
     "framer-motion": "^12.4.1",
+    "input-otp": "^1.4.2",
     "isomorphic-dompurify": "^2.22.0",
     "lucide-react": "^0.475.0",
     "mdast-util-to-string": "^4.0.0",
