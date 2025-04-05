@@ -1,202 +1,180 @@
-import React, { useContext, useEffect, useState } from "react";
-import "./StudioHeader.scss";
-import { Badge, Drawer, Flex, Image } from "antd";
-import { ThemeContext } from "../../context/ThemeContext";
-import { Dropdown } from "antd";
-import { IoMenu, IoNotifications } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ThemeContext } from '../../context/ThemeContext';
+import './StudioHeader.scss';
+import darkLogo from '../../assets/dark-tv-logo.png';
+import lightLogo from '../../assets/light-tv-logo.png';
 
-function StudioHeader(props) {
-  const { theme, toggleTheme } = useContext(ThemeContext);
-  const [countNotification, setCountNotification] = useState(0);
-  const [openSmallMenu, setOpenSmallMenu] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState(theme);
+const StudioHeader = ({ channel }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showNotiDropdown, setShowNotiDropdown] = useState(false);
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
-  const user = useSelector((state) => state.userData.user);
-  const { channel } = props;
-  // const avatarSrc =
-  //   channel.$values && channel.$values[0] && channel.$values[0].name
-  //     ? `https://ui-avatars.com/api/?name=${encodeURIComponent(
-  //         channel.$values[0].name
-  //       )}&background=random`
-  //     : `https://ui-avatars.com/api/?name=User&background=random`;
-
-  const avatarScr = channel
-    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(
-        channel.$values[0].name
-      )}&background=random`
-    : `https://ui-avatars.com/api/?name=User&background=random`;
-
-  console.log("check channel:", channel);
-
-  const items = [
-    {
-      label: "First notification",
-      key: "0",
-    },
-    {
-      label: "Second notification",
-      key: "1",
-    },
-    {
-      label: "Third notification",
-      key: "2",
-    },
+  const notifications = [
+    { id: 1, text: "New subscriber to your channel", time: "1 giờ trước" },
+    { id: 2, text: "Stream quality alert", time: "2 giờ trước" },
+    { id: 3, text: "Upcoming schedule reminder", time: "3 giờ trước" }
   ];
 
-  const handleSmallMenu = () => {
-    setOpenSmallMenu(!openSmallMenu);
-  };
+  const avatarSrc = channel?.$values?.[0]?.name
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(channel.$values[0].name)}&background=random`
+    : `https://ui-avatars.com/api/?name=SchoolTV&background=random`;
 
-  const onCloseSmallMenu = () => {
-    setOpenSmallMenu(false);
-  };
-
-  const handleCloseMenuResize = () => {
-    if (window.innerWidth > 1023) {
-      setOpenSmallMenu(false);
+  const handleOutsideClick = (e, dropdownSetter) => {
+    if (!e.target.closest('.notification-wrapper') && 
+        !e.target.closest('.studio-user-profile')) {
+      dropdownSetter(false);
     }
   };
 
-  useEffect(() => {
-    setCountNotification(items.length);
-  }, [items]);
+  React.useEffect(() => {
+    if (showProfileDropdown || showNotiDropdown) {
+      document.addEventListener('click', (e) => {
+        handleOutsideClick(e, showProfileDropdown ? setShowProfileDropdown : setShowNotiDropdown);
+      });
+    }
 
-  useEffect(() => {
-    handleCloseMenuResize();
-    window.addEventListener("resize", handleCloseMenuResize);
-
-    // Cleanup khi component unmount
     return () => {
-      window.removeEventListener("resize", handleCloseMenuResize);
+      document.removeEventListener('click', handleOutsideClick);
     };
-  }, []);
-
-  useEffect(() => {
-    // Update currentTheme when theme changes
-    setCurrentTheme(theme);
-
-    // Update body's data-theme attribute
-    document.body.setAttribute("data-theme", theme);
-  }, [theme]);
-
-  const handleThemeToggle = () => {
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    setCurrentTheme(newTheme);
-    toggleTheme();
-    document.body.setAttribute("data-theme", newTheme);
-  };
+  }, [showProfileDropdown, showNotiDropdown]);
 
   return (
-    <div className="studio-header-container">
-      <Flex justify="space-between" align="center">
-        <div>
-          <a href="#" className="logo">
-            <i className="fas fa-tv"></i> SchoolTV Studio
-          </a>
-        </div>
+    <header className="studio-header">
+      <a href="/studio" className="studio-logo">
+        <img 
+          src={theme === 'dark' ? darkLogo : lightLogo} 
+          alt="SchoolTV Studio Logo" 
+          className="studio-logo-img" 
+        />
+        SchoolTV Studio
+      </a>
 
-        <Flex align="center" className="responsive-large-menu">
-          <button
-            style={{ marginRight: "35px" }}
-            className="schoolStudio-switch-button"
-            onClick={() => navigate("/")}
-          >
-            Chuyển đến SchoolTV
-          </button>
+      <button 
+        className="studio-mobile-menu-btn" 
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      >
+        <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+      </button>
 
-          <button
-            onClick={handleThemeToggle}
-            className="theme-toggle studio-header-icon"
-            aria-label={`Switch to ${
-              currentTheme === "light" ? "dark" : "light"
-            } mode`}
-          >
-            <i
-              className={`fas ${
-                currentTheme === "light" ? "fa-moon" : "fa-sun"
-              }`}
-            ></i>
-          </button>
-
-          <Dropdown
-            menu={{
-              items,
-            }}
-            trigger={["click"]}
-            className="studio-header-icon"
-          >
-            <Badge count={countNotification} overflowCount={99}>
-              <IoNotifications />
-            </Badge>
-          </Dropdown>
-
-          <Image
-            width={50}
-            height={50}
-            style={{ borderRadius: "50%" }}
-            preview={false}
-            src={avatarScr}
-          />
-        </Flex>
-
-        <div className="responsive-small-menu" onClick={handleSmallMenu}>
-          <IoMenu />
-        </div>
-
-        <Drawer
-          placement={"right"}
-          closable={false}
-          open={openSmallMenu}
-          onClose={onCloseSmallMenu}
-          width={200}
-          style={{ backgroundColor: "var(--card-bg)" }}
+      <nav className={`studio-nav-links ${isMenuOpen ? 'active' : ''}`}>
+        <button
+          className="studio-switch-button"
+          onClick={() => navigate("/")}
         >
-          <Flex vertical align="center" justify="center" gap={16}>
-            <button
-              className="schoolStudio-switch-button"
-              onClick={() => navigate("/")}
-            >
-              Chuyển đến SchoolTV
-            </button>
+          <i className="fas fa-external-link-alt"></i>
+          Trở về SchoolTV
+        </button>
 
-            <button
-              onClick={toggleTheme}
-              className="theme-toggle studio-header-icon"
-            >
-              {theme === "light" ? (
-                <i className="fas fa-moon"></i>
-              ) : (
-                <i className="fas fa-sun"></i>
-              )}
-            </button>
+        <div className="notification-wrapper">
+          <button 
+            className="notification-toggle"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowNotiDropdown(!showNotiDropdown);
+              setShowProfileDropdown(false);
+            }}
+          >
+            <i className="fas fa-bell"></i>
+            {notifications.length > 0 && (
+              <span className="notification-badge">{notifications.length}</span>
+            )}
+          </button>
+          
+          {showNotiDropdown && (
+            <div className="notification-dropdown">
+              <div className="dropdown-header">
+                <h3 className="user-name">Thông báo</h3>
+                <button
+                  className="mobile-dropdown-close"
+                  onClick={() => setShowNotiDropdown(false)}
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+              <div className="dropdown-divider"></div>
+              {notifications.map(notification => (
+                <div key={notification.id} className="notification-item">
+                  <div className="notification-icon">
+                    <i className="fas fa-info-circle"></i>
+                  </div>
+                  <div className="notification-content">
+                    <p className="notification-text">{notification.text}</p>
+                    <p className="notification-time">{notification.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-            <Dropdown
-              menu={{
-                items,
-              }}
-              trigger={["click"]}
-              className="studio-header-icon"
-            >
-              <Badge count={countNotification} overflowCount={99}>
-                <IoNotifications />
-              </Badge>
-            </Dropdown>
+        <button
+          className="studio-theme-toggle"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        >
+          <i className={`fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
+        </button>
 
-            <Image
-              width={50}
-              height={50}
-              style={{ borderRadius: "50%" }}
-              preview={false}
-              src={avatarScr}
-            />
-          </Flex>
-        </Drawer>
-      </Flex>
-    </div>
+        <div 
+          className="studio-user-profile" 
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowProfileDropdown(!showProfileDropdown);
+            setShowNotiDropdown(false);
+          }}
+        >
+          <img
+            src={avatarSrc}
+            alt="Profile"
+            className="studio-profile-pic"
+          />
+          {showProfileDropdown && (
+            <div className="studio-profile-dropdown">
+              <div className="dropdown-header">
+                <p className="user-name">{channel?.$values?.[0]?.name || "Quản trị viên"}</p>
+                <button
+                  className="mobile-dropdown-close"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowProfileDropdown(false);
+                  }}
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+              <div className="dropdown-divider"></div>
+              <a href="/studio/settings" className="dropdown-item">
+                <i className="fas fa-cog"></i> Cài đặt Studio
+              </a>
+              <a href="/user/profile" className="dropdown-item">
+                <i className="fas fa-user-cog"></i> Tài khoản
+              </a>
+              <div className="dropdown-divider"></div>
+              <a href="/studio/analytics" className="dropdown-item">
+                <i className="fas fa-chart-line"></i> Chương trình
+              </a>
+              <a href="/studio/schedule" className="dropdown-item">
+                <i className="fas fa-calendar-alt"></i> Lịch phát
+              </a>
+              <div className="dropdown-divider"></div>
+              <button 
+                className="dropdown-item"
+                onClick={() => {
+                  localStorage.removeItem('studioToken');
+                  navigate('/login');
+                }}
+              >
+                <i className="fas fa-sign-out-alt"></i> Đăng xuất
+              </button>
+            </div>
+          )}
+        </div>
+      </nav>
+    </header>
   );
-}
+};
 
 export default StudioHeader;

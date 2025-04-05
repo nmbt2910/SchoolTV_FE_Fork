@@ -8,7 +8,7 @@ import "./register.scss";
 function Register() {
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
-  
+
   // Form states
   const [formData, setFormData] = useState({
     username: "",
@@ -19,13 +19,13 @@ function Register() {
     phoneNumber: "",
     address: "",
   });
-  
+
   // OTP states 
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [otpValues, setOTPValues] = useState(["", "", "", "", "", ""]);
   const [otpEmail, setOtpEmail] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
-  
+
   // UI states
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,6 +34,9 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // State for composition tracking
+  const [isComposing, setIsComposing] = useState(false);
+
   // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,10 +44,10 @@ function Register() {
       ...formData,
       [name]: value
     });
-    
+
     // Clear error when user types
     if (errors[name]) {
-      const newErrors = {...errors};
+      const newErrors = { ...errors };
       delete newErrors[name];
       setErrors(newErrors);
     }
@@ -53,50 +56,50 @@ function Register() {
   // Form validation
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Username validation
     if (!formData.username) {
       newErrors.username = "Vui lòng nhập tên đăng nhập";
     }
-    
+
     // Email validation
     if (!formData.email) {
       newErrors.email = "Vui lòng nhập email";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email không hợp lệ";
     }
-    
+
     // Password validation
     if (!formData.password) {
       newErrors.password = "Vui lòng nhập mật khẩu";
     } else if (formData.password.length < 8) {
       newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự";
     }
-    
+
     // Confirm password
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Vui lòng nhập lại mật khẩu";
     } else if (formData.confirmPassword !== formData.password) {
       newErrors.confirmPassword = "Mật khẩu không khớp";
     }
-    
+
     // Full name
     if (!formData.fullname) {
       newErrors.fullname = "Vui lòng nhập họ và tên";
     }
-    
+
     // Phone number
     if (!formData.phoneNumber) {
       newErrors.phoneNumber = "Vui lòng nhập số điện thoại";
     } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
       newErrors.phoneNumber = "Số điện thoại không hợp lệ";
     }
-    
+
     // Address
     if (!formData.address) {
       newErrors.address = "Vui lòng nhập địa chỉ";
     }
-    
+
     return newErrors;
   };
 
@@ -115,17 +118,25 @@ function Register() {
 
   // Handle OTP input change
   const handleOTPChange = (index, value) => {
-    if (value.length <= 1 && /^[0-9]*$/.test(value)) {
+    const numericValue = value.replace(/[^0-9]/g, '');
+
+    if (numericValue.length <= 1) {
       const newOTPValues = [...otpValues];
-      newOTPValues[index] = value;
+      newOTPValues[index] = numericValue;
       setOTPValues(newOTPValues);
 
-      // Auto focus next input
-      if (value && index < 5) {
-        const nextInput = document.querySelector(
-          `input[name=otp-${index + 1}]`
-        );
+      // Auto-focus next input if value is entered
+      if (numericValue && index < 5) {
+        const nextInput = document.querySelector(`input[name=otp-${index + 1}]`);
         if (nextInput) nextInput.focus();
+      }
+
+      // Auto-submit if all digits are filled
+      if (index === 5 && numericValue) {
+        const otpCode = newOTPValues.join('');
+        if (otpCode.length === 6) {
+          handleVerifyOTP();
+        }
       }
     }
   };
@@ -134,9 +145,40 @@ function Register() {
   const handleOTPPaste = (e) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text").trim();
-    if (/^\d{6}$/.test(pastedData)) {
-      const newOTPValues = pastedData.split("");
+    const numericData = pastedData.replace(/[^0-9]/g, '');
+    if (numericData.length === 6) {
+      const newOTPValues = numericData.split("");
       setOTPValues(newOTPValues);
+    }
+  };
+
+  const handleOTPKeyDown = (e, index) => {
+    // Handle backspace for chain deletion
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      const newOTPValues = [...otpValues];
+
+      if (newOTPValues[index] === '') {
+        // If current field is empty, move to previous field and clear it
+        if (index > 0) {
+          newOTPValues[index - 1] = '';
+          setOTPValues(newOTPValues);
+          const prevInput = document.querySelector(`input[name=otp-${index - 1}]`);
+          if (prevInput) prevInput.focus();
+        }
+      } else {
+        // Clear current field
+        newOTPValues[index] = '';
+        setOTPValues(newOTPValues);
+      }
+    }
+
+    // Handle enter key for submission
+    if (e.key === 'Enter') {
+      const otpCode = otpValues.join('');
+      if (otpCode.length === 6) {
+        handleVerifyOTP();
+      }
     }
   };
 
@@ -227,11 +269,11 @@ function Register() {
   // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      
+
       // Show notification with all errors
       notification.error({
         message: "Lỗi đăng ký",
@@ -245,12 +287,12 @@ function Register() {
         placement: "topRight",
         duration: 5,
       });
-      
+
       // Highlight fields with errors
       highlightErrorFields(newErrors);
       return;
     }
-    
+
     if (!agreeTerms) {
       notification.error({
         message: "Chưa đồng ý điều khoản",
@@ -259,16 +301,16 @@ function Register() {
       });
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const response = await apiFetch("accounts/otp/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-  
+
       if (response.ok) {
         notification.success({
           message: "Đăng ký thành công!",
@@ -309,23 +351,31 @@ function Register() {
             Chúng tôi đã gửi mã OTP đến email {otpEmail}.<br />
             Vui lòng kiểm tra cả hộp thư spam nếu bạn không nhận được email.
           </p>
-          
+
           <div className="auth-otp-inputs">
             {otpValues.map((value, index) => (
               <input
                 key={index}
-                type="text"
+                type="tel"
+                inputMode="numeric"
                 name={`otp-${index}`}
                 value={value}
                 onChange={(e) => handleOTPChange(index, e.target.value)}
+                onKeyDown={(e) => handleOTPKeyDown(e, index)}
                 onPaste={handleOTPPaste}
+                onCompositionStart={() => setIsComposing(true)}
+                onCompositionEnd={(e) => {
+                  setIsComposing(false);
+                  handleOTPChange(index, e.target.value);
+                }}
                 maxLength={1}
                 className="auth-otp-input"
+                autoComplete="off"
               />
             ))}
           </div>
 
-          <button 
+          <button
             className="auth-register-submit"
             onClick={handleVerifyOTP}
           >
@@ -336,7 +386,7 @@ function Register() {
             {resendTimer > 0 ? (
               <p>Gửi lại mã sau {resendTimer} giây</p>
             ) : (
-              <button 
+              <button
                 className="auth-otp-resend-button"
                 onClick={handleResendOTP}
               >
@@ -355,7 +405,7 @@ function Register() {
       <div className="auth-register-card">
         <h1>Hãy bắt đầu với Một tài khoản mới</h1>
         <p>Tham gia SchoolTV ngay hôm nay để bắt đầu một hành trình tại đại học của bạn một cách hoàn hảo nhất!</p>
-        
+
         <div className="auth-register-school-banner">
           <svg className="auth-register-school-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -364,7 +414,7 @@ function Register() {
             Bạn muốn đăng ký tài khoản với tư cách là trường học?
           </Link>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="auth-register-columns">
             <div className="auth-register-column">
@@ -375,17 +425,17 @@ function Register() {
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                   </svg>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="username"
                     className={`auth-register-input ${errors.username ? "auth-register-input-error" : ""}`}
-                    placeholder="Chọn tên đăng nhập" 
+                    placeholder="Chọn tên đăng nhập"
                     value={formData.username}
                     onChange={handleChange}
                   />
                 </div>
               </div>
-              
+
               <div className="auth-register-field">
                 <label className="auth-register-label">Email</label>
                 <div className="auth-register-input-wrapper">
@@ -393,17 +443,17 @@ function Register() {
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                     <polyline points="22,6 12,13 2,6"></polyline>
                   </svg>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     name="email"
                     className={`auth-register-input ${errors.email ? "auth-register-input-error" : ""}`}
-                    placeholder="Nhập email của bạn" 
+                    placeholder="Nhập email của bạn"
                     value={formData.email}
                     onChange={handleChange}
                   />
                 </div>
               </div>
-              
+
               <div className="auth-register-field">
                 <label className="auth-register-label">Mật khẩu</label>
                 <div className="auth-register-input-wrapper">
@@ -411,25 +461,25 @@ function Register() {
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                   </svg>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
+                  <input
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     className={`auth-register-input auth-register-password ${errors.password ? "auth-register-input-error" : ""}`}
-                    placeholder="Tạo mật khẩu" 
+                    placeholder="Tạo mật khẩu"
                     value={formData.password}
                     onChange={handleChange}
                   />
-                  <svg 
+                  <svg
                     onClick={() => setShowPassword(!showPassword)}
-                    className="auth-register-eye-icon" 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
+                    className="auth-register-eye-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
                     strokeLinejoin="round"
                   >
                     {showPassword ? (
@@ -448,7 +498,7 @@ function Register() {
                 </div>
               </div>
             </div>
-            
+
             <div className="auth-register-column">
               <div className="auth-register-field">
                 <label className="auth-register-label">Họ và tên</label>
@@ -459,34 +509,34 @@ function Register() {
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     name="fullname"
                     className={`auth-register-input ${errors.fullname ? "auth-register-input-error" : ""}`}
-                    placeholder="Nhập họ và tên của bạn" 
+                    placeholder="Nhập họ và tên của bạn"
                     value={formData.fullname}
                     onChange={handleChange}
                   />
                 </div>
               </div>
-              
+
               <div className="auth-register-field">
                 <label className="auth-register-label">Số điện thoại</label>
                 <div className="auth-register-input-wrapper">
                   <svg className="auth-register-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                   </svg>
-                  <input 
-                    type="tel" 
+                  <input
+                    type="tel"
                     name="phoneNumber"
                     className={`auth-register-input ${errors.phoneNumber ? "auth-register-input-error" : ""}`}
-                    placeholder="Nhập số điện thoại của bạn" 
+                    placeholder="Nhập số điện thoại của bạn"
                     value={formData.phoneNumber}
                     onChange={handleChange}
                   />
                 </div>
               </div>
-              
+
               <div className="auth-register-field">
                 <label className="auth-register-label">Xác nhận mật khẩu</label>
                 <div className="auth-register-input-wrapper">
@@ -494,25 +544,25 @@ function Register() {
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                   </svg>
-                  <input 
-                    type={showConfirmPassword ? "text" : "password"} 
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     className={`auth-register-input auth-register-password ${errors.confirmPassword ? "auth-register-input-error" : ""}`}
-                    placeholder="Nhập lại mật khẩu" 
+                    placeholder="Nhập lại mật khẩu"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                   />
-                  <svg 
+                  <svg
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="auth-register-eye-icon" 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="20" 
-                    height="20" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
+                    className="auth-register-eye-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
                     strokeLinejoin="round"
                   >
                     {showConfirmPassword ? (
@@ -532,7 +582,7 @@ function Register() {
               </div>
             </div>
           </div>
-          
+
           <div className="auth-register-field">
             <label className="auth-register-label">Địa chỉ</label>
             <div className="auth-register-input-wrapper">
@@ -540,21 +590,21 @@ function Register() {
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                 <circle cx="12" cy="10" r="3"></circle>
               </svg>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 name="address"
                 className={`auth-register-input ${errors.address ? "auth-register-input-error" : ""}`}
-                placeholder="Nhập địa chỉ của bạn" 
+                placeholder="Nhập địa chỉ của bạn"
                 value={formData.address}
                 onChange={handleChange}
               />
             </div>
           </div>
-          
+
           <div className="auth-register-terms">
             <label className="auth-register-terms-checkbox">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
               />
@@ -563,28 +613,28 @@ function Register() {
               </span>
             </label>
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             className="auth-register-submit"
             disabled={loading}
           >
             {loading ? "Đang xử lý..." : "Tạo Tài Khoản"}
           </button>
-          
+
           <div className="auth-register-login">
             <span>Bạn đã có tài khoản?</span>
             <Link to="/login" className="auth-register-login-link">Đăng nhập</Link>
           </div>
         </form>
       </div>
-      
+
       {isModalVisible && (
         <div className="auth-register-modal">
           <div className="auth-register-modal-content">
             <div className="auth-register-modal-header">
               <h3>Điều khoản và Điều kiện</h3>
-              <button 
+              <button
                 className="auth-register-modal-close"
                 onClick={() => setIsModalVisible(false)}
               >
@@ -662,7 +712,7 @@ function Register() {
               </p>
             </div>
             <div className="auth-register-modal-footer">
-              <button 
+              <button
                 className="auth-register-modal-button"
                 onClick={() => setIsModalVisible(false)}
               >

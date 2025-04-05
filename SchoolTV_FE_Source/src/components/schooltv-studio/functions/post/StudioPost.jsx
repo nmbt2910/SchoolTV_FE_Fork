@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./StudioPost.scss";
-import { Button, Flex, Form, Input, Switch } from "antd";
+import { Button, Flex, Form, Input, Select, Switch } from "antd";
 import { message, Upload } from "antd";
 import { FaImage, FaUserFriends } from "react-icons/fa";
 import { FaEarthAmericas } from "react-icons/fa6";
@@ -27,18 +27,20 @@ import "@mdxeditor/editor/style.css";
 import StudioPostPreview from "./StudioPostPreview";
 import removeMd from "remove-markdown";
 import apiFetch from "../../../../config/baseAPI";
+import { toast } from "react-toastify";
+import { useOutletContext } from "react-router-dom";
 
 const { Dragger } = Upload;
 
 function StudioPost() {
+  const { channel } = useOutletContext();
   const user = useSelector((state) => state.userData.user);
-  console.log(user);
 
   const [postStatus, setPostStatus] = useState(null);
   const [form] = Form.useForm();
   const [fileUrlList, setFileUrlList] = useState([]);
   const [previewPostData, setPreviewPostData] = useState({
-    owner: user ? user : null,
+    owner: channel? channel.$values[0] : "Not found channel",
     Title: "",
     Content: "",
     FollowerMode: null,
@@ -103,7 +105,7 @@ function StudioPost() {
         },
       ]);
     } else if (text.length < 1200) {
-      form.setFieldsValue({ Content: value });
+      form.setFieldsValue({ Content: value.toString() });
       form.setFields([{ name: "Content", errors: [] }]);
     } else {
       form.setFields([
@@ -145,21 +147,23 @@ function StudioPost() {
   }, [postStatus]);
 
   //Gửi data hoàn chỉnh về API
+  const [loadingUploadBtn, setLoadingUploadBtn] = useState(false);
   const onFinish = async (values) => {
     if (!values.ImageFiles || values.ImageFiles.length === 0) {
       values.ImageFiles = [];
     }
 
     try {
-      
+      setLoadingUploadBtn(true);
       const formData = new FormData();
 
       formData.append("Title", values.Title);
       formData.append("Content", values.Content);
       formData.append("FollowerMode", values.FollowerMode);
+      formData.append("CategoryNewsID", selectedCategory);
 
-      if (user?.accountID) {
-        formData.append("SchoolChannelID", user.accountID);
+      if (channel) {
+        formData.append("SchoolChannelID", channel.$values[0].schoolChannelID);
       }
 
       if (values.ImageFiles && values.ImageFiles.length > 0) {
@@ -172,16 +176,29 @@ function StudioPost() {
         method: "POST",
         body: formData,
       });
-
-      const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || "Có lỗi xảy ra!");
       }
+      const data = await response.json();
 
-      console.log("News created successfully:", data);
+      if(data) {
+        toast.success("Tạo bài viết thành công!");
+        form.resetFields();
+        setFileUrlList([]);
+        setPostStatus(null);
+        setPreviewPostData({
+          owner: channel ? channel.$values[0].name : "Not found channel",
+          Title: "",
+          Content: "",
+          FollowerMode: null,
+          ImageFiles: null,
+        });
+        setIsOpenPreview(false);
+      }
     } catch (error) {
       console.error("Error creating news:", error);
+    } finally {
+      setLoadingUploadBtn(false);
     }
 
     // console.log(values);
@@ -199,6 +216,47 @@ function StudioPost() {
       }
     }
   };
+
+  //Handle category bài viết
+  const [category, setCategory] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const handleSelectCategory = (category) => {
+    setSelectedCategory(category.value);
+  };
+
+  const fetchCategory = async () => {
+    try {
+      const response = await apiFetch("CategoryNews", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error("Không lấy được dữ liệu cho danh mục!");
+      }
+
+      const data = await response.json();
+      if (data) {
+        let convertData = data.$values.map((item) => {
+          return {
+            value: item.categoryNewsID,
+            label: (
+              <span title={item.description || "No description"}>
+                {item.categoryName}
+              </span>
+            ),
+          };
+        });
+        setCategory(convertData);
+      }
+    } catch (error) {
+      toast.error(error.message || "Có lỗi không mong muốn xảy ra!");
+    }
+  };
+
+  useEffect(() => {
+    fetchCategory();
+  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -367,6 +425,18 @@ function StudioPost() {
                 </div>
               </Form.Item>
 
+              <Form.Item label={<h2 className="studio-post-des">Danh mục</h2>}>
+                <Select
+                  labelInValue
+                  defaultValue={{
+                    value: "none",
+                    label: "Chọn danh mục",
+                  }}
+                  onChange={handleSelectCategory}
+                  options={category}
+                />
+              </Form.Item>
+
               <Form.Item
                 label={<h2 className="studio-post-des">Hình ảnh</h2>}
                 name="ImageFiles"
@@ -430,7 +500,7 @@ function StudioPost() {
               </Form.Item>
 
               <Flex align="center">
-                <Button className="studio-post-button" htmlType="submit">
+                <Button loading={loadingUploadBtn} className="studio-post-button" htmlType="submit">
                   Đăng
                 </Button>
 

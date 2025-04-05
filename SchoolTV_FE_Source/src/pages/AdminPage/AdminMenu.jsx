@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Menu } from 'antd';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   UserOutlined, LogoutOutlined, SettingOutlined, 
   HomeOutlined, UserDeleteOutlined, 
-  UsergroupDeleteOutlined, UnorderedListOutlined 
+  UsergroupDeleteOutlined, UnorderedListOutlined, 
+  ProfileOutlined,
+  ScheduleOutlined,
+  MinusSquareOutlined
 } from '@ant-design/icons';
 import './AdminMenu.scss';
 
@@ -20,7 +23,9 @@ const AdminMenu = ({ onLogout }) => {
     '/sopending': '2',
     '/userlist': '3.1',
     '/adminlist': '3.2',
-    '/soaccount': '3.3'
+    '/soaccount': '3.3',
+    '/adminpackage': '4.1',
+    '/createpackage': '4.2',
   }), []);
 
   // Initialize menu state
@@ -106,6 +111,23 @@ const AdminMenu = ({ onLogout }) => {
     },
     {
       key: '4',
+      icon: <ScheduleOutlined />,
+      label: "Package Management",
+      children: [
+        {
+          key: '4.1',
+          icon: <ProfileOutlined/>,
+          label: <Link to="/adminpackage">Admin Package</Link>,
+        },
+        {
+          key: '4.2',
+          icon: <MinusSquareOutlined />,
+          label: <Link to="/createpackage">Create Package</Link>,
+        },
+      ],
+    },
+    {
+      key: '5',
       icon: <LogoutOutlined />,
       label: 'Log out',
       onClick: onLogout,

@@ -555,3 +555,47 @@
 .school-register-error {
   display: none;
 }
+
+// Add these styles to your schoolRegister.scss file
+
+// OTP Input Styles
+.auth-otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 30px 0;
+
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
+}
+
+.auth-otp-input {
+  width: 50px;
+  height: 50px;
+  border: 2px solid var(--school-register-input-border);
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  background: var(--school-register-input-bg);
+  color: var(--school-register-input-text);
+  transition: all 0.3s ease;
+  
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--school-register-primary);
+    box-shadow: 0 0 0 3px rgba(58, 110, 165, 0.2);
+  }
+
+  &.error {
+    border-color: var(--school-register-error);
+    animation: school-register-glow 1.5s ease-in-out infinite;
+  }
+}
