@@ -1,5 +1,5 @@
-import './UserList.scss';
-import { Layout, Table, Input, Button, notification, Select, Modal } from 'antd';
+import './SchoolOwnerAccount.scss';
+import { Layout,  Table, Input, Button, notification, Select, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';  
 import { useState, useEffect } from 'react';
 import apiFetch from '../../config/baseAPI';
@@ -9,12 +9,12 @@ const { Sider, Content } = Layout;
 const { Search } = Input;
 const { Option } = Select;
 
-function UserList() {
+function SchoolOwnerAccount() {
   const [data, setData] = useState([]); 
   const [statusMap, setStatusMap] = useState({}); 
-  const [isModalVisible, setIsModalVisible] = useState(false);  
+  const [isModalVisible, setIsModalVisible] = useState(false); 
   const [deleteKey, setDeleteKey] = useState(null);  
-  const [initialData, setInitialData] = useState([]);  
+  const [initialData, setInitialData] = useState([]); 
   const navigate = useNavigate(); 
 
   const showDeleteModal = (key) => {
@@ -35,8 +35,33 @@ function UserList() {
         throw new Error(`Failed to delete account: ${response.status}`);
       }
 
-      const updatedData = data.filter(item => item.key !== deleteKey);
-      setData(updatedData);
+      // Refresh data after deletion
+      const refreshResponse = await apiFetch('accounts/admin/all', {
+        headers: {
+          'accept': '*/*'
+        }
+      });
+
+      if (!refreshResponse.ok) {
+        throw new Error('Failed to refresh data');
+      }
+
+      const responseData = await refreshResponse.json();
+      const filteredData = responseData.$values
+        .filter(item => item.roleID === 2)
+        .map(item => ({
+          key: item.accountID,
+          username: item.username,
+          email: item.email,
+          fullname: item.fullname,
+          address: item.address,
+          phoneNumber: item.phoneNumber,
+          roleName: item.role?.roleName,
+          status: item.status,
+        }));
+
+      setData(filteredData);
+      setInitialData(filteredData);
 
       notification.success({
         message: 'Tài khoản đã được xóa thành công',
@@ -49,8 +74,8 @@ function UserList() {
         description: 'Có lỗi xảy ra khi xóa tài khoản.',
       });
     }
-
-    setIsModalVisible(false); 
+    
+    setIsModalVisible(false);
   };
 
   const handleCancel = () => {
@@ -71,20 +96,27 @@ function UserList() {
         }
 
         const responseData = await response.json();
-        const filteredData = responseData.$values.filter(item => item.roleID === 1);
-        const fetchedData = filteredData.map(item => ({
-          key: item.accountID,
-          username: item.username,
-          email: item.email,
-          fullname: item.fullname,
-          address: item.address,
-          phoneNumber: item.phoneNumber,
-          roleName: 'User',
-          status: item.status,
-        }));
+        const filteredData = responseData.$values
+          .filter(item => item.roleID === 2)
+          .map(item => ({
+            key: item.accountID,
+            username: item.username,
+            email: item.email,
+            fullname: item.fullname,
+            address: item.address,
+            phoneNumber: item.phoneNumber,
+            roleName: item.role?.roleName,
+            status: item.status,
+          }));
 
-        setInitialData(fetchedData); 
-        setData(fetchedData);  
+        const initialStatusMap = filteredData.reduce((map, item) => {
+          map[item.key] = item.status;
+          return map;
+        }, {});
+
+        setInitialData(filteredData);  
+        setData(filteredData);  
+        setStatusMap(initialStatusMap);
       } catch (error) {
         console.error('Error fetching data:', error);
         if (error.message.includes('Failed to fetch data')) {
@@ -133,14 +165,16 @@ function UserList() {
     if (value.trim() === '') {
       setData(initialData);
     } else {
-      const filteredData = initialData.filter((user) => 
-        user.username.toLowerCase().startsWith(value.toLowerCase()) ||
-        user.email.toLowerCase().startsWith(value.toLowerCase())
+      const filteredData = initialData.filter((owner) => 
+        owner.fullname.toLowerCase().includes(value.toLowerCase()) ||
+        owner.email.toLowerCase().includes(value.toLowerCase()) ||
+        owner.address.toLowerCase().includes(value.toLowerCase()) ||
+        owner.phoneNumber.toLowerCase().includes(value.toLowerCase())
       );
       setData(filteredData);
     }
   };
-  
+
   const handleLogout = () => {
     localStorage.removeItem("authToken"); 
     sessionStorage.removeItem("authToken");
@@ -150,14 +184,9 @@ function UserList() {
   const columns = [
     {
       title: 'Name',
-      dataIndex: 'username',
-      key: 'username',
-      render: (text, record) => <span>{text} <br /><span style={{ fontSize: '12px', color: 'gray' }}>{record.email}</span></span>,
-    },
-    {
-      title: 'Full Name',
       dataIndex: 'fullname',
       key: 'fullname',
+      render: (text, record) => <span>{text} <br /><span style={{ fontSize: '12px', color: 'gray' }}>{record.email}</span></span>,
     },
     {
       title: 'Address',
@@ -196,7 +225,7 @@ function UserList() {
           </Button>
           <Button 
             type="primary" 
-            danger  
+            danger 
             style={{ marginLeft: 10, width: "60px" }} 
             onClick={() => showDeleteModal(record.key)}
           >
@@ -206,9 +235,9 @@ function UserList() {
       ),
     },
   ];
-  
+
   return (
-    <div className="userlist-body">
+    <div className="schoolowneraccount-body">
       <Layout style={{ minHeight: '90vh' }}>
         <Sider width={225} className="site-layout-background">
         <AdminMenu onLogout={handleLogout} />
@@ -217,7 +246,7 @@ function UserList() {
         <Layout style={{ padding: '0 24px 24px' }}>
           <Content style={{ padding: 24, margin: 0, minHeight: 280 }}>
             <Search
-              placeholder="Search User"
+              placeholder="Search School Owner"
               allowClear
               enterButton="Search"
               size="large"
@@ -249,4 +278,4 @@ function UserList() {
   );
 }
 
-export default UserList;
+export default SchoolOwnerAccount;

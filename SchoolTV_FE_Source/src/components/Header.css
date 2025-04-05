@@ -93,6 +93,12 @@
   font-size: 2rem;
 }
 
+.logo-img {
+  width: 2.7rem;
+  height: auto;
+  object-fit: contain;
+}
+
 .nav-links {
   display: flex;
   gap: 2rem;

@@ -1,45 +1,56 @@
+import { useState, useEffect } from 'react';
 import './AdminPage.scss';
-import { Layout, Menu, Card, Row, Col } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined, HomeOutlined, UserDeleteOutlined, UsergroupDeleteOutlined } from '@ant-design/icons';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Link, useNavigate } from 'react-router-dom';  
+import { Layout, Card, Row, Col } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import apiFetch from '../../config/baseAPI';
+import AdminMenu from './AdminMenu';
 
-const { SubMenu } = Menu;
 const { Sider, Content } = Layout;
 
-const data = [
-  { month: 'Jan', users: 4000, revenue: 2400 },
-  { month: 'Feb', users: 3000, revenue: 2210 },
-  { month: 'Mar', users: 2000, revenue: 2290 },
-  { month: 'Apr', users: 2780, revenue: 2000 },
-  { month: 'May', users: 1890, revenue: 2181 },
-  { month: 'Jun', users: 2390, revenue: 2500 },
-  { month: 'Jul', users: 3490, revenue: 2100 },
-];
-
 function AdminPage() {
+  const [schoolOwnerCount, setSchoolOwnerCount] = useState(0);
+  const [registeredUsersCount, setRegisteredUsersCount] = useState(0);
   const navigate = useNavigate();
-  
-  const handleLogout = () => {
-    localStorage.removeItem("userToken"); 
-    sessionStorage.removeItem("userToken"); 
 
-    navigate("/login");  
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const headers = {
+          'accept': '*/*'
+        };
+
+        const response = await apiFetch('accounts/admin/statistics/signup-count', { headers });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch statistics: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setRegisteredUsersCount(data.userCount);
+        setSchoolOwnerCount(data.schoolOwnerCount);
+      } catch (error) {
+        console.error("Error fetching statistics: ", error);
+        if (error.message.includes('Failed to fetch statistics')) {
+          localStorage.removeItem('authToken');
+          navigate('/login');
+        }
+      }
+    };
+
+    fetchStatistics();
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    sessionStorage.removeItem("authToken");
+    navigate("/login");
   };
 
   return (
     <div className="admin_body">
-      <Layout style={{ minHeight: '100vh' }}>
+      <Layout style={{ minHeight: '90vh' }}>
         <Sider width={225} className="site-layout-background">
-          <Menu theme='dark' mode="inline" defaultSelectedKeys={['1']} style={{ height: '100%', borderRight: 0 }}>
-            <Menu.Item key="1" icon={<HomeOutlined />}><Link to="/adminpage">Dashboard</Link></Menu.Item>
-            <Menu.Item key="2" icon={<SettingOutlined />}>Account Settings</Menu.Item>
-            <SubMenu key="3" icon={<UserOutlined />} title="User Management">
-              <Menu.Item key="3.1" icon={<UserDeleteOutlined />}><Link to="/userlist">User List</Link></Menu.Item>
-              <Menu.Item key="3.2" icon={<UsergroupDeleteOutlined />}><Link to="/schoolowner">School Owners</Link></Menu.Item>
-            </SubMenu>
-            <Menu.Item key="4" icon={<LogoutOutlined />} onClick={handleLogout}>Log out</Menu.Item>
-          </Menu>
+        <AdminMenu onLogout={handleLogout} />
         </Sider>
         <Layout style={{ padding: '0 24px 24px' }}>
           <Content
@@ -58,32 +69,17 @@ function AdminPage() {
               </Col>
               <Col span={7}>
                 <Card title="Number of Registered Users" bordered={false}>
-                  <div>45,640</div>
+                  <div>{registeredUsersCount}</div>
                   <div>Increased by 0.5%</div>
                 </Card>
               </Col>
               <Col span={7}>
-                <Card title="School Owners" bordered={false}>
-                  <div>93</div>
+                <Card title="School Owners Active" bordered={false}>
+                  <div>{schoolOwnerCount}</div>
                   <div>Increased 0.002%</div>
                 </Card>
               </Col>
             </Row>
-
-            {/* Chart Layout */}
-            <div style={{ marginTop: 200 }}>
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="users" stroke="#82ca9d" />
-                  <Line type="monotone" dataKey="revenue" stroke="#8884d8" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
           </Content>
         </Layout>
       </Layout>
