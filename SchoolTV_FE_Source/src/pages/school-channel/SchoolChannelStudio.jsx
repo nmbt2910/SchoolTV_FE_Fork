@@ -40,7 +40,7 @@ function SchoolChannelStudio() {
       <StudioHeader channel={schoolChannel} />
       <div className="studio-function-container">
         <StudioNavbar />
-        <Outlet />
+        <Outlet context={{ channel: schoolChannel }} />
       </div>
     </>
   );

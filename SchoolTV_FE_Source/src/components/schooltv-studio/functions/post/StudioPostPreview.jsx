@@ -151,7 +151,7 @@ function StudioPostPreview(props) {
         <Avatar
           size={55}
           src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-            previewPostData.owner?.fullname || "User"
+            previewPostData.owner.name
           )}&background=random`}
         />
         <div className="post-preview-owner-info">
@@ -162,7 +162,7 @@ function StudioPostPreview(props) {
               color: "var(--text-color)",
             }}
           >
-            {previewPostData.owner?.fullname}
+            {previewPostData.owner.name}
           </p>
           <Flex align="center">
             <p
