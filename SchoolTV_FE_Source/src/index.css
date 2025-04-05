@@ -19,3 +19,8 @@
     --toolbar-bg:rgba(0, 0, 0, 0.8);
   }
   
+  @media (min-width: 1024px) {
+    html {
+      font-size: 14.4px; /* 90% of default 16px */
+    }
+  }

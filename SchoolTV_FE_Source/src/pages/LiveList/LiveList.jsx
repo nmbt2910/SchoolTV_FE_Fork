@@ -22,6 +22,7 @@ import { ThemeContext } from '../../context/ThemeContext';
 import apiFetch from '../../config/baseAPI';
 import styles from './live-list.module.scss';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
@@ -73,7 +74,7 @@ const SortModal = ({ isOpen, onClose, currentSort, onSave }) => {
           </button>
         </div>
         <div className={styles.modalOptions}>
-          <label 
+          <label
             className={`${styles.modalOption} ${selectedSort === 'newest' ? styles.selected : ''}`}
             onClick={() => setSelectedSort('newest')}
           >
@@ -85,7 +86,7 @@ const SortModal = ({ isOpen, onClose, currentSort, onSave }) => {
             />
             <span>Mới nhất</span>
           </label>
-          <label 
+          <label
             className={`${styles.modalOption} ${selectedSort === 'viewers' ? styles.selected : ''}`}
             onClick={() => setSelectedSort('viewers')}
           >
@@ -96,6 +97,18 @@ const SortModal = ({ isOpen, onClose, currentSort, onSave }) => {
               readOnly
             />
             <span>Lượt xem cao nhất</span>
+          </label>
+          <label
+            className={`${styles.modalOption} ${selectedSort === 'following' ? styles.selected : ''}`}
+            onClick={() => setSelectedSort('following')}
+          >
+            <input
+              type="radio"
+              name="sort"
+              checked={selectedSort === 'following'}
+              readOnly
+            />
+            <span>Đang theo dõi</span>
           </label>
         </div>
         <div className={styles.modalActions}>
@@ -108,143 +121,144 @@ const SortModal = ({ isOpen, onClose, currentSort, onSave }) => {
 };
 
 const UniversityModal = ({
-    isOpen,
-    onClose,
-    universities,
-    selectedUniversity,
-    onSelect
-  }) => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filteredList, setFilteredList] = useState(universities);
-    const [isLoading, setIsLoading] = useState(false); // Add loading state
-  
-    const handleSearch = useCallback((query) => {
-      setIsLoading(true);
-      try {
-        const filtered = universities.filter(uni =>
-          uni.toLowerCase().includes(query.toLowerCase())
-        );
-        setFilteredList(filtered);
-      } finally {
-        setIsLoading(false);
-      }
-    }, [universities]);
-  
-    const handleInputChange = (e) => {
-      const query = e.target.value;
-      setSearchQuery(query);
-      handleSearch(query);
-    };
-  
-    const handleClose = () => {
-      setSearchQuery('');
-      setFilteredList(universities);
-      onClose();
-    };
-  
-    const handleSelect = (uni) => {
-      onSelect(uni);
-      handleClose();
-    };
-  
-    useEffect(() => {
-      // Reset filtered list when universities prop changes
-      setFilteredList(universities);
-    }, [universities]);
-  
-    if (!isOpen) return null;
-  
-    return (
-      <div className={styles.modalOverlay} onClick={handleClose}>
-        <div 
-          className={`${styles.modalContent} ${styles.universityModalContent}`} 
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className={styles.modalHeader}>
-            <h3>Chọn trường</h3>
-            <button onClick={handleClose}>
+  isOpen,
+  onClose,
+  universities,
+  selectedUniversity,
+  onSelect
+}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredList, setFilteredList] = useState(universities);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
+
+  const handleSearch = useCallback((query) => {
+    setIsLoading(true);
+    try {
+      const filtered = universities.filter(uni =>
+        uni.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredList(filtered);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [universities]);
+
+  const handleInputChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    handleSearch(query);
+  };
+
+  const handleClose = () => {
+    setSearchQuery('');
+    setFilteredList(universities);
+    onClose();
+  };
+
+  const handleSelect = (uni) => {
+    onSelect(uni);
+    handleClose();
+  };
+
+  useEffect(() => {
+    // Reset filtered list when universities prop changes
+    setFilteredList(universities);
+  }, [universities]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className={styles.modalOverlay} onClick={handleClose}>
+      <div
+        className={`${styles.modalContent} ${styles.universityModalContent}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={styles.modalHeader}>
+          <h3>Chọn trường</h3>
+          <button onClick={handleClose}>
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        </div>
+
+        <div className={styles.searchBox}>
+          <FontAwesomeIcon
+            icon={isLoading ? faSpinner : faSearch}
+            className={styles.searchIcon}
+            spin={isLoading}
+          />
+          <input
+            type="text"
+            placeholder="Tìm kiếm trường..."
+            value={searchQuery}
+            onChange={handleInputChange}
+            className={styles.searchInput}
+            disabled={isLoading}
+          />
+          {searchQuery && (
+            <button
+              className={styles.cancelButton}
+              onClick={() => {
+                setSearchQuery('');
+                setFilteredList(universities);
+              }}
+            >
               <FontAwesomeIcon icon={faTimes} />
             </button>
-          </div>
-  
-          <div className={styles.searchBox}>
-            <FontAwesomeIcon 
-              icon={isLoading ? faSpinner : faSearch} 
-              className={styles.searchIcon}
-              spin={isLoading}
-            />
-            <input
-              type="text"
-              placeholder="Tìm kiếm trường..."
-              value={searchQuery}
-              onChange={handleInputChange}
-              className={styles.searchInput}
-              disabled={isLoading}
-            />
-            {searchQuery && (
-              <button 
-                className={styles.cancelButton} 
-                onClick={() => {
-                  setSearchQuery('');
-                  setFilteredList(universities);
-                }}
+          )}
+        </div>
+
+        <div className={styles.universityList}>
+          {isLoading ? (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem',
+              color: 'var(--text-secondary)'
+            }}>
+              <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: '1rem' }} />
+              <span>Đang tải danh sách trường...</span>
+            </div>
+          ) : (
+            <div className={styles.modalOptions}>
+              <label
+                className={`${styles.modalOption} ${selectedUniversity === 'all' ? styles.selected : ''}`}
+                onClick={() => handleSelect('all')}
               >
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-            )}
-          </div>
-  
-          <div className={styles.universityList}>
-            {isLoading ? (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2rem',
-                color: 'var(--text-secondary)'
-              }}>
-                <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: '1rem' }} />
-                <span>Đang tải danh sách trường...</span>
-              </div>
-            ) : (
-              <div className={styles.modalOptions}>
+                <input
+                  type="radio"
+                  name="university"
+                  checked={selectedUniversity === 'all'}
+                  readOnly
+                />
+                <span>Tất cả trường</span>
+              </label>
+
+              {filteredList.map((uni) => (
                 <label
-                  className={`${styles.modalOption} ${selectedUniversity === 'all' ? styles.selected : ''}`}
-                  onClick={() => handleSelect('all')}
+                  key={uni}
+                  className={`${styles.modalOption} ${selectedUniversity === uni ? styles.selected : ''}`}
+                  onClick={() => handleSelect(uni)}
                 >
                   <input
                     type="radio"
                     name="university"
-                    checked={selectedUniversity === 'all'}
+                    checked={selectedUniversity === uni}
                     readOnly
                   />
-                  <span>Tất cả trường</span>
+                  <span>{uni}</span>
                 </label>
-  
-                {filteredList.map((uni) => (
-                  <label
-                    key={uni}
-                    className={`${styles.modalOption} ${selectedUniversity === uni ? styles.selected : ''}`}
-                    onClick={() => handleSelect(uni)}
-                  >
-                    <input
-                      type="radio"
-                      name="university"
-                      checked={selectedUniversity === uni}
-                      readOnly
-                    />
-                    <span>{uni}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 const ProgramModal = ({ program, onClose }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const { theme } = useContext(ThemeContext);
 
@@ -383,7 +397,7 @@ const ProgramModal = ({ program, onClose }) => {
                       src={memoizedImages.programThumbnail}
                       alt={program.programName}
                     />
-                    <div 
+                    <div
                       className={styles.recordedBadge}
                       data-status={status}
                     >
@@ -402,18 +416,18 @@ const ProgramModal = ({ program, onClose }) => {
                   <div className={styles.streamInfo}>
                     <h3 className={styles.streamTitle}>{schedule.mode || program.programName || 'Chương trình phát sóng'}</h3>
                     <div className={styles.streamMeta}>
-                    <div className={styles.timeContainer}>
-                      <div className={styles.streamStats}>
-                        <span>
-                          <FontAwesomeIcon icon={faClock} />
-                          {` ${formatDuration(schedule.startTime, schedule.endTime)} • `}
-                          {schedule.startTime.toLocaleTimeString('vi-VN', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
+                      <div className={styles.timeContainer}>
+                        <div className={styles.streamStats}>
+                          <span>
+                            <FontAwesomeIcon icon={faClock} />
+                            {` ${formatDuration(schedule.startTime, schedule.endTime)} • `}
+                            {schedule.startTime.toLocaleTimeString('vi-VN', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
                       </div>
-                    </div>
                     </div>
                   </div>
                 </div>
@@ -439,10 +453,13 @@ const ProgramModal = ({ program, onClose }) => {
 
         <div className={styles.modalActions}>
           <button
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              navigate(`/program/${program.programID}`);
+            }}
             className={styles.searchButton}
           >
-            Đóng
+            Xem chi tiết
           </button>
         </div>
       </div>
@@ -452,6 +469,7 @@ const ProgramModal = ({ program, onClose }) => {
 
 const LiveList = () => {
   const { theme } = useContext(ThemeContext);
+  const [followedProgramIds, setFollowedProgramIds] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [videos, setVideos] = useState([]);
   const [filters, setFilters] = useState({
@@ -474,6 +492,11 @@ const LiveList = () => {
     type: ''
   });
   const [pendingUniversityModal, setPendingUniversityModal] = useState(false);
+
+  const getAccountId = () => {
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData).accountID : null;
+  };
 
   const showToast = (message, type = 'info') => {
     setToast({
@@ -522,6 +545,51 @@ const LiveList = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchFollowedPrograms = async () => {
+      const accountId = getAccountId();
+
+      if (filters.sort === 'following') {
+        if (!accountId) {
+          showToast('Vui lòng đăng nhập để xem danh sách theo dõi', 'error');
+          setFilters(prev => ({ ...prev, sort: 'newest' }));
+          return;
+        }
+      }
+
+      if (filters.sort === 'following' && accountId) {
+        try {
+          const response = await apiFetch(`ProgramFollow/account/${accountId}`, {
+            headers: { 'accept': 'text/plain' }
+          });
+
+          if (!response.ok) {
+            if (response.status === 500) {
+              const errorData = await response.json();
+              if (errorData.message === 'No follows found for this account.') {
+                showToast('Bạn chưa theo dõi chương trình nào.', 'info');
+                setFollowedProgramIds([]);
+                return;
+              }
+            }
+            throw new Error('Failed to fetch followed programs');
+          }
+
+          const data = await response.json();
+          const ids = data.$values.map(follow => follow.program.programID);
+          setFollowedProgramIds(ids);
+          showToast(`Có ${ids.length} kết quả cho mục Đang theo dõi.`, 'success');
+        } catch (error) {
+          console.error('Fetch error:', error);
+          showToast('Đã có lỗi không xác định xảy ra.', 'error');
+          setFollowedProgramIds([]);
+        }
+      }
+    };
+
+    fetchFollowedPrograms();
+  }, [filters.sort]);
+
   const fetchVideoHistory = async () => {
     try {
       const response = await apiFetch('VideoHistory/active', {
@@ -552,7 +620,7 @@ const LiveList = () => {
 
   const handleSearchInputChange = (value) => {
     setFilters(prev => ({ ...prev, search: value }));
-    
+
     // If search box is cleared, restore original programs
     if (value === '') {
       setPrograms(searchState.originalPrograms);
@@ -562,7 +630,7 @@ const LiveList = () => {
   const executeSearch = useCallback(async (searchTerm) => {
     try {
       setSearchState(prev => ({ ...prev, isLoading: true }));
-      
+
       if (searchTerm.trim() === '') {
         setPrograms(searchState.originalPrograms);
       } else {
@@ -570,7 +638,7 @@ const LiveList = () => {
           program.programName.toLowerCase().includes(searchTerm.toLowerCase())
         );
         setPrograms(results);
-        
+
         // Show appropriate toast message
         if (results.length === 0) {
           showToast('Không tìm thấy chương trình phù hợp', 'info');
@@ -598,7 +666,7 @@ const LiveList = () => {
 
   const handleUniversityFilterClick = useCallback(async () => {
     setShowUniversityModal(true); // Show modal immediately
-    
+
     if (universities.length === 0) {
       try {
         const freshPrograms = await fetchPrograms();
@@ -639,8 +707,19 @@ const LiveList = () => {
 
   const getFilteredPrograms = () => {
     let filteredPrograms = programs;
-    filteredPrograms = sortPrograms(filteredPrograms, filters.sort);
+
+    // Apply university filter first
     filteredPrograms = filterByUniversity(filteredPrograms, filters.university);
+
+    // Then apply sorting/following filter
+    if (filters.sort === 'following') {
+      filteredPrograms = filteredPrograms.filter(program =>
+        followedProgramIds.includes(program.programID)
+      );
+    } else {
+      filteredPrograms = sortPrograms(filteredPrograms, filters.sort);
+    }
+
     return filteredPrograms;
   };
 
@@ -650,7 +729,7 @@ const LiveList = () => {
     const initializeData = async () => {
       await fetchPrograms();
       await fetchVideoHistory();
-      
+
       if (programs.length > 0) {
         const uniqueUnis = [...new Set(
           programs.map(p => p.schoolChannel?.name)
@@ -796,7 +875,7 @@ const LiveList = () => {
             />
           )}
         </AnimatePresence>
-        
+
         <section className={styles.filterSection}>
           <div className={styles.filterButtonGroup}>
             <button className={styles.sortButton} onClick={() => setShowSortModal(true)}>
@@ -804,13 +883,17 @@ const LiveList = () => {
               Sắp xếp
               {filters.sort !== 'newest' && (
                 <span style={{ marginLeft: '0.5rem' }}>
-                  ({filters.sort === 'viewers' ? 'Lượt xem' : ''})
+                  ({filters.sort === 'viewers'
+                    ? 'Lượt xem'
+                    : filters.sort === 'following'
+                      ? 'Theo dõi'
+                      : ''})
                 </span>
               )}
             </button>
 
-            <button 
-              className={styles.filterButton} 
+            <button
+              className={styles.filterButton}
               onClick={handleUniversityFilterClick}
             >
               <FontAwesomeIcon icon={faSchool} />

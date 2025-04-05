@@ -7,7 +7,7 @@ padding-top: 0;
 
 .banner-section {
 position: relative;
-height: 500px;
+height: 400px;
 overflow: hidden;
 }
 
@@ -132,11 +132,11 @@ justify-content: space-between;
 }
 
 .stream-title {
-font-size: 1.2rem;
-margin-bottom: 0.5rem;
+font-size: 1rem;
+margin-bottom: 2rem;
 color: var(--text-color);
 display: -webkit-box;
--webkit-line-clamp: 2;
+-webkit-line-clamp: 1;
 -webkit-box-orient: vertical;
 overflow: hidden;
 text-overflow: ellipsis;
