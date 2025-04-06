@@ -1,3 +1,7 @@
+$modal-bg: var(--user-profile-modal-bg);
+$modal-border-color: var(--user-profile-primary-color);
+$modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), transparent);
+
 @keyframes pulse {
     0% { opacity: 1; }
     50% { opacity: 0.5; }
@@ -25,8 +29,7 @@
       color: var(--text-color);
       min-height: 100vh;
       transition: all 0.3s ease;
-      padding-top: 80px;
-  
+
       &::-webkit-scrollbar {
         width: 8px;
       }
@@ -139,7 +142,7 @@
   }
   
   .modalContent {
-    background: var(--bg-color);
+    background: $modal-bg;
     border-radius: 15px;
     padding: 2rem;
     width: 100%;
@@ -162,7 +165,7 @@
 
   
     .modalContent, .universityModalContent, .programModalContent {
-    background: var(--bg-color);
+    background: $modal-bg;
     border-radius: 15px;
     padding: 2rem;
     width: 100%;
