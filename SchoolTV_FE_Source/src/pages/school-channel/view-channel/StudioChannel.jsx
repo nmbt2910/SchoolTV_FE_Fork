@@ -307,7 +307,6 @@ const StudioChannel = () => {
                             placeholder="Mô tả kênh"
                             className="studio-channel-input"
                             rows={3}
-                            style={{ minHeight: '100px' }}
                         />
                     </Form.Item>
 
