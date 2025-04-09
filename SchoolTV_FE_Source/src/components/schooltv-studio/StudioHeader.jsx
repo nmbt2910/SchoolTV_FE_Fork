@@ -43,7 +43,7 @@ const StudioHeader = ({ channel }) => {
 
   return (
     <header className="studio-header">
-      <a href="/studio" className="studio-logo">
+      <a href="/school-studio/statistics" className="studio-logo">
         <img 
           src={theme === 'dark' ? darkLogo : lightLogo} 
           alt="SchoolTV Studio Logo" 
@@ -149,8 +149,8 @@ const StudioHeader = ({ channel }) => {
               <a href="/studio/settings" className="dropdown-item">
                 <i className="fas fa-cog"></i> Cài đặt Studio
               </a>
-              <a href="/user/profile" className="dropdown-item">
-                <i className="fas fa-user-cog"></i> Tài khoản
+              <a href="/school-studio/your-channel" className="dropdown-item">
+                <i className="fas fa-user-cog"></i> Kênh của bạn
               </a>
               <div className="dropdown-divider"></div>
               <a href="/studio/analytics" className="dropdown-item">

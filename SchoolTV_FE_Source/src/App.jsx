@@ -41,6 +41,7 @@ import CreateSchoolChannel from "./pages/school-channel/create/CreateSchoolChann
 import AdminPackage from "./pages/AdminPage/AdminPackage";
 import CreatePackage from "./pages/AdminPage/CreatePackage";
 import ProgramDetailPage from './pages/ProgramDetail/ProgramDetailPage';
+import StudioChannel from "./pages/school-channel/view-channel/StudioChannel";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -133,6 +134,10 @@ function App() {
           path: "live-stream",
           element: <StudioLiveStream />,
         },
+        {
+          path: "your-channel",
+          element: <StudioChannel />
+        }
       ],
     },
     {

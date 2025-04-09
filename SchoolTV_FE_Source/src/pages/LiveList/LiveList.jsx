@@ -84,7 +84,19 @@ const SortModal = ({ isOpen, onClose, currentSort, onSave }) => {
               checked={selectedSort === 'newest'}
               readOnly
             />
-            <span>Mới nhất</span>
+            <span>Mới thêm</span>
+          </label>
+          <label
+            className={`${styles.modalOption} ${selectedSort === 'newest-updated' ? styles.selected : ''}`}
+            onClick={() => setSelectedSort('newest-updated')}
+          >
+            <input
+              type="radio"
+              name="sort"
+              checked={selectedSort === 'newest-updated'}
+              readOnly
+            />
+            <span>Cập nhật mới nhất</span>
           </label>
           <label
             className={`${styles.modalOption} ${selectedSort === 'viewers' ? styles.selected : ''}`}
@@ -692,7 +704,13 @@ const LiveList = () => {
     const sortedArray = [...programArray];
     switch (criteria) {
       case 'newest':
-        return sortedArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        return sortedArray.sort((a, b) =>
+          new Date(b.createdAt) - new Date(a.createdAt) // Old "Mới nhất" (by creation time)
+        );
+      case 'newest-updated': // New sorting option
+        return sortedArray.sort((a, b) =>
+          new Date(b.updatedAt) - new Date(a.updatedAt) // NEW: Sort by last updated time
+        );
       case 'viewers':
         return sortedArray.sort((a, b) => b.viewers - a.viewers);
       default:
@@ -887,6 +905,8 @@ const LiveList = () => {
                     ? 'Lượt xem'
                     : filters.sort === 'following'
                       ? 'Theo dõi'
+                      : filters.sort === 'newest-updated'
+                      ? 'Cập nhật'
                       : ''})
                 </span>
               )}
@@ -948,7 +968,12 @@ const LiveList = () => {
           onSave={(sort) => {
             setFilters(prev => ({ ...prev, sort }));
             setShowSortModal(false);
-            showToast(`Đã sắp xếp theo ${sort === 'newest' ? 'mới nhất' : 'lượt xem'}`, 'success');
+            showToast(
+              sort === 'newest' ? 'Đã sắp xếp theo mới nhất' :
+                sort === 'newest-updated' ? 'Đã sắp xếp theo cập nhật mới nhất' :
+                  sort === 'viewers' ? 'Đã sắp xếp theo lượt xem' :
+                    'Đã sắp xếp'
+              , 'success');
           }}
         />
 
