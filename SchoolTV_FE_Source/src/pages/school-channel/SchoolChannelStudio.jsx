@@ -17,7 +17,7 @@ function SchoolChannelStudio() {
     try {
       const data = await checkExistChannel(user.accountID);
 
-      if(!data) {
+      if (!data) {
         navigate("/create-channel");
       }
 
@@ -25,23 +25,28 @@ function SchoolChannelStudio() {
     } catch (error) {
       toast.error("Có lỗi xảy ra, vui lòng thử lại sau!");
     }
-  }
+  };
 
   useEffect(() => {
     fetchChannel();
   }, [user.accountID, navigate]);
 
   useEffect(() => {
-    if(schoolChannel) {
-      toast.success(`Bạn đang đăng nhập kênh ${schoolChannel.$values[0].name}!`)
+    if (schoolChannel) {
+      toast.success(`Bạn đang đăng nhập kênh ${schoolChannel.$values[0].name}!`);
     }
-  }, [schoolChannel])
+  }, [schoolChannel]);
+
+  // Consolidated logic
+  const noStylesRoutes = ["/school-studio/your-channel", "/school-studio/program-manage"];
+  const shouldHideNavbar = noStylesRoutes.some((route) => location.pathname.includes(route));
+  const containerClass = `studio-function-container ${shouldHideNavbar ? 'no-styles' : ''}`;
 
   return (
     <>
       <StudioHeader channel={schoolChannel} />
-      <div className={`studio-function-container ${location.pathname.includes('/school-studio/your-channel') ? 'no-styles' : ''}`}>
-        {!location.pathname.includes('/school-studio/your-channel') && <StudioNavbar />}
+      <div className={containerClass}>
+        {!shouldHideNavbar && <StudioNavbar />}
         <Outlet context={{ channel: schoolChannel }} />
       </div>
     </>

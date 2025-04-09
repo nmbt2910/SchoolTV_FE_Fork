@@ -153,8 +153,8 @@ const StudioHeader = ({ channel }) => {
                 <i className="fas fa-user-cog"></i> Kênh của bạn
               </a>
               <div className="dropdown-divider"></div>
-              <a href="/studio/analytics" className="dropdown-item">
-                <i className="fas fa-chart-line"></i> Chương trình
+              <a href="/school-studio/program-manage" className="dropdown-item">
+                <i className="fas fa-tv"></i> Chương trình
               </a>
               <a href="/studio/schedule" className="dropdown-item">
                 <i className="fas fa-calendar-alt"></i> Lịch phát

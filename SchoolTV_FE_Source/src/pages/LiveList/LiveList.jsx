@@ -269,7 +269,7 @@ const UniversityModal = ({
   );
 };
 
-const ProgramModal = ({ program, onClose }) => {
+const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const { theme } = useContext(ThemeContext);
@@ -463,17 +463,32 @@ const ProgramModal = ({ program, onClose }) => {
           </div>
         )}
 
-        <div className={styles.modalActions}>
-          <button
-            onClick={() => {
-              onClose();
-              navigate(`/program/${program.programID}`);
-            }}
-            className={styles.searchButton}
-          >
-            Xem chi tiết
-          </button>
-        </div>
+<div className={styles.modalActions}>
+  <button
+    onClick={() => {
+      onClose();
+      navigate(`/program/${program.programID}`);
+    }}
+    className={styles.followButton} // Use the same class as follow button
+    style={{ background: 'var(--primary-color)' }} // Ensure primary color
+  >
+    <FontAwesomeIcon icon={faInfoCircle} /> Xem chi tiết
+  </button>
+  <button
+    onClick={() => handleFollow(program.programID)}
+    className={`${styles.followButton} ${followedProgramIds.includes(program.programID) ? styles.following : ''}`}
+  >
+    {followedProgramIds.includes(program.programID) ? (
+      <>
+        <FontAwesomeIcon icon={faBell} /> Đang theo dõi
+      </>
+    ) : (
+      <>
+        <FontAwesomeIcon icon={faBell} /> Theo dõi
+      </>
+    )}
+  </button>
+</div>
       </div>
     </div>
   );
@@ -509,6 +524,72 @@ const LiveList = () => {
     const userData = localStorage.getItem('userData');
     return userData ? JSON.parse(userData).accountID : null;
   };
+
+
+useEffect(() => {
+  const fetchInitialFollows = async () => {
+    const accountId = getAccountId();
+    if (accountId) {
+      try {
+        const response = await apiFetch(`ProgramFollow/account/${accountId}`, {
+          headers: { 'accept': 'text/plain' }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const ids = data.$values.map(follow => follow.programID);
+          setFollowedProgramIds(ids);
+        }
+      } catch (error) {
+        console.error('Initial follow fetch error:', error);
+      }
+    }
+  };
+
+  fetchInitialFollows();
+}, []); // Empty dependency array = run on mount
+
+  // Add this function in LiveList component
+const handleFollow = async (programId) => {
+  const accountId = getAccountId();
+
+  if (!accountId) {
+    showToast('Vui lòng đăng nhập để theo dõi chương trình', 'error');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
+
+    const response = await apiFetch('ProgramFollow/follow', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'accept': '*/*'
+      },
+      body: JSON.stringify({
+        accountID: accountId,
+        programID: programId
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to follow program');
+    }
+
+    const data = await response.json();
+
+    // Update followedProgramIds
+    if (data.status === "Followed") {
+      setFollowedProgramIds(prev => [...prev, programId]);
+      showToast('Đã theo dõi chương trình thành công', 'success');
+    }
+  } catch (error) {
+    console.error('Follow error:', error);
+    showToast('Không thể theo dõi chương trình', 'error');
+  }
+};
 
   const showToast = (message, type = 'info') => {
     setToast({
@@ -560,16 +641,14 @@ const LiveList = () => {
   useEffect(() => {
     const fetchFollowedPrograms = async () => {
       const accountId = getAccountId();
-
+  
       if (filters.sort === 'following') {
         if (!accountId) {
           showToast('Vui lòng đăng nhập để xem danh sách theo dõi', 'error');
           setFilters(prev => ({ ...prev, sort: 'newest' }));
           return;
         }
-      }
-
-      if (filters.sort === 'following' && accountId) {
+  
         try {
           const response = await apiFetch(`ProgramFollow/account/${accountId}`, {
             headers: { 'accept': 'text/plain' }
@@ -588,7 +667,7 @@ const LiveList = () => {
           }
 
           const data = await response.json();
-          const ids = data.$values.map(follow => follow.program.programID);
+          const ids = data.$values.map(follow => follow.programID);
           setFollowedProgramIds(ids);
           showToast(`Có ${ids.length} kết quả cho mục Đang theo dõi.`, 'success');
         } catch (error) {
@@ -906,8 +985,8 @@ const LiveList = () => {
                     : filters.sort === 'following'
                       ? 'Theo dõi'
                       : filters.sort === 'newest-updated'
-                      ? 'Cập nhật'
-                      : ''})
+                        ? 'Cập nhật'
+                        : ''})
                 </span>
               )}
             </button>
@@ -994,6 +1073,8 @@ const LiveList = () => {
             key={selectedProgram.id}
             program={selectedProgram}
             onClose={() => setSelectedProgram(null)}
+            followedProgramIds={followedProgramIds}
+            handleFollow={handleFollow}
           />
         )}
       </main>

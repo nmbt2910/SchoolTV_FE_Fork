@@ -54,6 +54,53 @@ $modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), tr
       display: block;
     }
   }
+
+  .followButton {
+    padding: 0.8rem 1.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    &.following {
+      background: var(--success-color);
+      
+      &:hover {
+        background: var(--error-color);
+      }
+    }
+  
+    &:hover {
+      background: var(--hover-color);
+      transform: translateY(-2px);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+  
+    @media (max-width: 768px) {
+      padding: 0.8rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  .modalActions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  
+    @media (max-width: 480px) {
+      flex-direction: column;
+      
+      button {
+        width: 100%;
+      }
+    }
+  }
   
   .mainContainer {
     padding: 2rem 5%;
