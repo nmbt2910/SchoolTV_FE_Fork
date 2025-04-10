@@ -40,9 +40,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CreateSchoolChannel from "./pages/school-channel/create/CreateSchoolChannel";
 import AdminPackage from "./pages/AdminPage/AdminPackage";
 import CreatePackage from "./pages/AdminPage/CreatePackage";
-import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage";
+import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage"; // Keep this one
 import ViewChannelProgram from "./pages/watch-program/ViewChannelProgram";
-import ProgramDetailPage from './pages/ProgramDetail/ProgramDetailPage';
 import StudioChannel from "./pages/school-channel/view-channel/StudioChannel";
 import StudioPrograms from "./pages/school-channel/program-manage/StudioPrograms";
 
@@ -139,7 +138,7 @@ function App() {
         },
         {
           path: "your-channel",
-          element: <StudioChannel />
+          element: <StudioChannel />,
         },
         {
           path: "program-manage",
@@ -147,9 +146,9 @@ function App() {
             {
               index: true,
               element: <StudioPrograms />,
-            }
-          ]
-        }
+            },
+          ],
+        },
       ],
     },
     {
