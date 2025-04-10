@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, Home, FileText } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import apiFetch from "../../../config/baseAPI"; // Đảm bảo đường dẫn đúng
 import "./success.css";
 
@@ -10,7 +10,6 @@ const PaymentSuccess = () => {
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [orders, setOrders] = useState([]);
 
   const dataOrderId = JSON.parse(localStorage.getItem("orderId"));
   const orderId = dataOrderId.orderId;
@@ -38,7 +37,6 @@ const PaymentSuccess = () => {
         }
 
         const data = await response.json();
-        const orderDetails = data.orderDetails.$values;
         console.log("Order details Thanh:", data);
         setOrderDetails(data);
       } catch (err) {
@@ -99,8 +97,8 @@ const PaymentSuccess = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          Cảm ơn bạn đã đăng ký khóa học tại SchoolUI_TV. Thông tin chi tiết đã
-          được gửi vào email của bạn.
+          Cảm ơn bạn đã đăng ký gói tại SchoolUI_TV. Thông tin chi tiết đã được
+          gửi vào email của bạn.
         </motion.p>
 
         <motion.div
