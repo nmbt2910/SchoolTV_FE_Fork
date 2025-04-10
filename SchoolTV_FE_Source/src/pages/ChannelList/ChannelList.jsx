@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import styles from './ChannelList.module.scss';
 import { ThemeContext } from '../../context/ThemeContext';
 import apiFetch from '../../config/baseAPI';
+import { useNavigate } from 'react-router-dom';
 
 const Toast = ({ message, type, onClose }) => {
     useEffect(() => {
@@ -42,6 +43,7 @@ const ChannelList = () => {
     const [searchResults, setSearchResults] = useState(null);
     const [searchError, setSearchError] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
+    const navigate = useNavigate();
     const [toast, setToast] = useState({
         show: false,
         message: '',
@@ -286,6 +288,7 @@ const ChannelList = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            onClick={() => navigate(`/view-channel/${channel.id}`)}
         >
             {channel.isLive && (
                 <div className={styles.chnl_live_badge}>

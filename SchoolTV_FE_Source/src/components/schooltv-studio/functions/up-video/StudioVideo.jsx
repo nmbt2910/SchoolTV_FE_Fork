@@ -1,85 +1,135 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./StudioVideo.scss";
-import { Button, Flex, Form, Input, Space, TimePicker } from "antd";
+import { Button, Flex, Form, Input, Select, Space, TimePicker } from "antd";
 import { MdOutlineOndemandVideo } from "react-icons/md";
-import { FaImage, FaUserFriends } from "react-icons/fa";
-import { FaEarthAmericas } from "react-icons/fa6";
 import { message, Upload } from "antd";
 import { DatePicker } from "antd";
+import { useOutletContext } from "react-router-dom";
+import { toast } from "react-toastify";
+import apiFetch from "../../../../config/baseAPI";
 
 const { Dragger } = Upload;
 const { TextArea } = Input;
 
 function StudioVideo() {
-  const propsVideo = {
-    name: "file",
-    multiple: true,
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    onChange(info) {
-      const { status } = info.file;
-      if (status !== "uploading") {
-        console.log(info.file, info.fileList);
+  const { channel } = useOutletContext();
+  const [program, setProgram] = useState([]);
+  const [programID, setProgramID] = useState(null);
+  const [form] = Form.useForm();
+  const [dateString, setDateString] = useState(null);
+  const [videFileObject, setVideoFileObject] = useState(null);
+  const [isBtnLoading, setIsBtnLoading] = useState(false);
+
+  const fetchProgramByChannel = async () => {
+    console.log("Hello", channel.$values[0].schoolChannelID);
+    try {
+      const response = await apiFetch(
+        `Program/by-channel/${channel.$values[0].schoolChannelID}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Không tìm thấy phiên live nào phù hợp!");
       }
-      if (status === "done") {
-        message.success(`${info.file.name} file uploaded successfully.`);
-      } else if (status === "error") {
-        message.error(`${info.file.name} file upload failed.`);
+
+      const data = await response.json();
+      if (data) {
+        let getProgram = data.$values.map((program) => {
+          return {
+            value: program.programID,
+            label: program.programName,
+          };
+        });
+
+        setProgram(getProgram);
       }
-    },
-    onDrop(e) {
-      console.log("Dropped files", e.dataTransfer.files);
-    },
+    } catch (error) {
+      toast.error("Lỗi khi lấy danh sách chương trình!");
+    }
   };
 
-  const propsThumbnail = {
-    name: "file",
-    multiple: true,
-    action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-    onChange(info) {
-      const { status } = info.file;
-      if (status !== "uploading") {
-        console.log(info.file, info.fileList);
+  const handleChangeProgram = (value) => {
+    setProgramID(value);
+  };
+
+  useEffect(() => {
+    fetchProgramByChannel();
+  }, [channel]);
+
+  const onDateChange = (dateString) => {
+    setDateString(dateString);
+  };
+
+  const handleBeforeUpload = (file) => {
+    const isValidType =
+      file.type === "video/mp4" ||
+      file.type === "video/avi" ||
+      file.type === "video/mkv";
+
+    if (!isValidType) {
+      message.error("Chỉ cho phép upload video định dạng MP4, AVI, MKV!");
+      return Upload.LIST_IGNORE;
+    }
+
+    return false;
+  };
+
+  const handleChangeVideoFile = (info) => {
+    setVideoFileObject(info.fileList[0].originFileObj);
+  }
+
+  const handleCreateVideo = async (values) => {
+    const formData = new FormData();
+    formData.append("VideoFile", videFileObject);
+    formData.append("ProgramID", values.ProgramID);
+    formData.append("Description", values.Description);
+    formData.append("StreamAt", "2100-09-09");
+    formData.append("Type", "Recorded");
+
+    try {
+      setIsBtnLoading(true);
+      const response = await apiFetch("VideoHistory/UploadCloudflare", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Không thể upload video!");
       }
-      if (status === "done") {
-        message.success(`${info.file.name} file uploaded successfully.`);
-      } else if (status === "error") {
-        message.error(`${info.file.name} file upload failed.`);
+
+      const data = await response.json();
+      if (data) {
+        toast.success("Upload video thành công!");
+        form.resetFields();
       }
-    },
-    onDrop(e) {
-      console.log("Dropped files", e.dataTransfer.files);
-    },
+    } catch (error) {
+      toast.error("Lỗi khi upload video!");
+    }finally {
+      setIsBtnLoading(false);
+    }
   };
-
-  const [videoStatus, setVideoStatus] = useState(null);
-
-  const getStatus = (status) => {
-    setVideoStatus(status);
-    console.log(status);
-  };
-
-  const onDateChange = (date, dateString) => {
-    console.log(date, dateString);
-  };
-
-  const onTimeChange = (time, timeString) => {
-    console.log('Selected Time:', time);
-    console.log('Formatted Time:', timeString);
-  };
-  
-  
   return (
     <div className="studio-video-container">
       {/* Class applied from main title of SChoolChannelStudio.scss */}
       <h1 className="studio-function-title">Tuỳ chỉnh video của bạn</h1>
 
       <div className="studio-video-content">
-        <Form layout="vertical">
+        <Form layout="vertical" form={form} onFinish={handleCreateVideo}>
           <Form.Item
             label={<h2 className="studio-video-des">Video</h2>}
-            name="video"
+            name="VideoFile"
+            rules={[
+              { required: true, message: "Vui lòng chọn video!" },
+            ]}
           >
-            <Dragger className="studio-video-dragger" {...propsVideo}>
+            <Dragger
+              className="studio-video-dragger"
+              beforeUpload={handleBeforeUpload}
+              onChange={handleChangeVideoFile}
+              maxCount={1}
+            >
               <p className="ant-upload-drag-icon">
                 <MdOutlineOndemandVideo style={{ fontSize: 50 }} />
               </p>
@@ -103,34 +153,20 @@ function StudioVideo() {
           </Form.Item>
 
           <Form.Item
-            label={<h2 className="studio-video-des">Thumbnail</h2>}
-            name="thumbnail"
+            label={<h2 className="studio-video-des">Chương trình</h2>}
+            name="ProgramID"
+            rules={[{ required: true, message: "Vui lòng chọn chương trình!" }]}
           >
-            <Dragger className="studio-video-dragger" {...propsThumbnail}>
-              <p className="ant-upload-drag-icon">
-                <FaImage style={{ fontSize: 50 }} />
-              </p>
-              <p className="ant-upload-text">Tải thumbnail cho video của bạn</p>
-              <p className="ant-upload-hint">
-                Hỗ trợ tải lên thumbnail, một ảnh đại diện cho nội dung chính
-                video của bạn.
-              </p>
-            </Dragger>
-          </Form.Item>
-
-          <Form.Item
-            label={<h2 className="studio-video-des">Tiêu đề</h2>}
-            name="videoTitle"
-          >
-            <Input
-              className="studio-video-input"
-              placeholder="Nhập tiêu đề video"
+            <Select
+              defaultValue={{ value: null, label: "Chọn phiên live" }}
+              onChange={handleChangeProgram}
+              options={program}
             />
           </Form.Item>
 
           <Form.Item
             label={<h2 className="studio-video-des">Mô tả</h2>}
-            name="videoDescription"
+            name="Description"
             rules={[
               {
                 required: true,
@@ -145,58 +181,9 @@ function StudioVideo() {
             />
           </Form.Item>
 
-          <Form.Item
-            label={<h2 className="studio-video-des">Trạng thái hiển thị</h2>}
-            name="videoStatus"
-            rules={[
-              {
-                required: true,
-                message: "Vui lòng chọn trạng thái hiển thị!",
-              },
-            ]}
-          >
-            <Flex justify="space-between">
-              <div
-                onClick={() => getStatus("public")}
-                className={`studio-video-status ${
-                  videoStatus === "public" ? "studio-video-status__active" : ""
-                }`}
-              >
-                <p>
-                  <FaEarthAmericas />
-                </p>
-                <p style={{ fontWeight: "bold" }}>Công khai</p>
-                <p>Mọi người có thể xem</p>
-              </div>
-
-              <div
-                onClick={() => getStatus("private")}
-                className={`studio-video-status ${
-                  videoStatus === "private" ? "studio-video-status__active" : ""
-                }`}
-              >
-                <p>
-                  <FaUserFriends />
-                </p>
-                <p style={{ fontWeight: "bold" }}>Người theo dõi</p>
-                <p>Chỉ người theo dõi mới xem được</p>
-              </div>
-            </Flex>
-          </Form.Item>
-
-          <Form.Item
-            label={<h2 className="studio-video-des">Thời gian đăng tải</h2>}
-            name="videoTimeUpload"
-          >
-            <Flex justify="space-between">
-              <DatePicker className="video-plan-picker" placeholder="yyyy-mm-dd" style={{ width: "49%" }} onChange={onDateChange} />
-              <TimePicker className="video-plan-picker" placeholder="--:--:--" style={{ width: "49%" }} onChange={onTimeChange} />
-            </Flex>
-          </Form.Item>
-
-          <Button className="studio-video-button" htmlType="submit">
-              Đăng
-            </Button>
+          <Button className="studio-video-button" htmlType="submit" loading={isBtnLoading}>
+            Đăng
+          </Button>
         </Form>
       </div>
     </div>
