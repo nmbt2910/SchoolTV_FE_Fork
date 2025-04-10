@@ -292,10 +292,10 @@ const ChannelList = () => {
     const SchoolCard = useMemo(() => React.memo(({ channel, onCardClick }) => (
         <motion.div
             className={styles.chnl_card}
-            onClick={() => onCardClick(channel.id)}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            onClick={() => navigate(`/view-channel/${channel.id}`)}
         >
             {channel.isLive && (
                 <div className={styles.chnl_live_badge}>
