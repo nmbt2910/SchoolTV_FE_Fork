@@ -136,8 +136,8 @@ const ChannelList = () => {
         fetchInitialData();
     }, []);
 
-    const handleCardClick = useCallback((channelId) => {
-        navigate(`/watchLive/${channelId}`); // Navigate with channel ID
+    const handleCardClick = useCallback(() => {
+        navigate(`/watchLive`); // Navigate with channel ID
       }, [navigate]);
 
     const handleSearch = useCallback(async () => {
