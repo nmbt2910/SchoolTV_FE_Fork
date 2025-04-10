@@ -29,7 +29,7 @@ const Footer = () => {
           <h3>Liên Kết</h3>
           <a href="#">Trang Chủ</a>
           <a href="#">Tính Năng</a>
-          <a href="#">Bảng Giá</a>
+          <a href="/package">Bảng Giá</a>
           <a href="#">Blog</a>
         </div>
         <div className="footer-section">

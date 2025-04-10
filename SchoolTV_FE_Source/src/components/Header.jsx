@@ -185,6 +185,12 @@ const Header = () => {
                     >
                       <i className="fas fa-tv"></i> SchoolTV Studio
                     </a>
+                    <a
+                      href="/package"
+                      className="dropdown-item studio-link"
+                    >
+                      <i className="fas fa-cart-shopping"></i> Mua Gói
+                    </a>
                     <div className="dropdown-divider"></div>
                   </>
                 )}
