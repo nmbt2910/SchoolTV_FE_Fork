@@ -22,10 +22,8 @@ function LiveStreamSchedule() {
   const { channel } = useOutletContext();
   const [program, setProgram] = React.useState([]);
   const [programID, setProgramID] = React.useState(null);
-  const [existingSchedule, setExistingSchedule] = React.useState([]);
+  // const [existingSchedule, setExistingSchedule] = React.useState([]);
   const [selectedRange, setSelectedRange] = React.useState(null);
-  const [utcSelectedRange, setUtcSelectedRange] = React.useState([]);
-  const [rangePickerKey, setRangePickerKey] = React.useState(0);
 
   const handleChangeProgram = (value) => {
     setProgramID(value);
@@ -60,117 +58,58 @@ function LiveStreamSchedule() {
     }
   };
 
-  const fetchExistingSchedule = async () => {
-    try {
-      const response = await apiFetch(`Schedule/by-program/${programID}`, {
-        method: "GET",
-      });
+  // const fetchExistingSchedule = async () => {
+  //   try {
+  //     const response = await apiFetch(`Schedule/by-program/${programID}`, {
+  //       method: "GET",
+  //     });
 
-      if (!response.ok) {
-        throw new Error("Không kiểm tra được thời gian nào phù hợp!");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("Không kiểm tra được thời gian nào phù hợp!");
+  //     }
 
-      const data = await response.json();
+  //     const data = await response.json();
 
-      if (data) {
-        const mapScheduleTime = data.data.$values.map((schedule) => {
-          return {
-            startTime: dayjs
-              .utc(schedule.startTime)
-              .tz("Asia/Ho_Chi_Minh")
-              .format(),
-            endTime: dayjs
-              .utc(schedule.endTime)
-              .tz("Asia/Ho_Chi_Minh")
-              .format(),
-          };
-        });
-        setExistingSchedule(mapScheduleTime);
-      }
-    } catch (error) {
-      toast.error("Lỗi khi kiểm tra thời gian đã có!");
-    }
-  };
+  //     if (data) {
+  //       const mapScheduleTime = data.data.$values.map((schedule) => {
+  //         return {
+  //           startTime: dayjs.utc(schedule.startTime).format(),
+  //           endTime: dayjs.utc(schedule.endTime).format(),
+  //         };
+  //       });
+  //     }
+  //   } catch (error) {
+  //     toast.error("Lỗi khi kiểm tra thời gian đã có!");
+  //   }
+  // };
 
   useEffect(() => {
     fetchProgramByChannel();
   }, []);
 
-  useEffect(() => {
-    if (programID) {
-      fetchExistingSchedule();
-    }
-  }, [programID]);
+  // useEffect(() => {
+  //   if (programID) {
+  //     fetchExistingSchedule();
+  //   }
+  // }, [programID]);
 
   //Handle time and validate time
-  const now = dayjs().tz("Asia/Ho_Chi_Minh");
-  const fiveMinutesLater = now.add(1, "minute");
-
-  const disabledDate = (current) => {
-    return current && current.isBefore(fiveMinutesLater, "day");
-  };
-
-  const disabledTime = (current) => {
-    if (!current) return {};
-
-    const isToday = current.isSame(fiveMinutesLater, "day");
-
-    if (!isToday) {
-      return {};
-    }
-
-    const disabledHours = Array.from({ length: 24 }, (_, h) => h).filter(
-      (hour) => hour < fiveMinutesLater.hour()
-    );
-
-    const disabledMinutes = Array.from({ length: 60 }, (_, m) => m).filter(
-      (minute) =>
-        current.hour() === fiveMinutesLater.hour() &&
-        minute < fiveMinutesLater.minute()
-    );
-
-    return {
-      disabledHours: () => disabledHours,
-      disabledMinutes: () => disabledMinutes,
-    };
-  };
-
   const handleChangeTime = (dates) => {
-    if (!dates || dates.length !== 2) {
-      setSelectedRange(null);
-      return;
+    if (dates && dates.length === 2) {
+      const startDate = dayjs(dates[0])
+        .utc()
+        .tz("Asia/Ho_Chi_Minh")
+        .format("YYYY-MM-DDTHH:mm:ss");
+      const endDate = dayjs(dates[1])
+        .utc()
+        .tz("Asia/Ho_Chi_Minh")
+        .format("YYYY-MM-DDTHH:mm:ss");
+
+      setSelectedRange([startDate, endDate]);
     }
-  
-    const [start, end] = dates;
-  
-    if (start.isSame(end, "second")) {
-      message.error("Thời gian bắt đầu và kết thúc không được trùng nhau.");
-      setSelectedRange(null);
-      
-        console.log("Selected:",selectedRange);
-      
-      return;
-    }
-  
-    const isOverlap = existingSchedule.some(
-      (range) =>
-        start.isBefore(dayjs(range.endTime)) &&
-        end.isAfter(dayjs(range.startTime))
-    );
-  
-    if (isOverlap) {
-      message.error("Thời gian bạn chọn bị trùng với lịch đã có. Vui lòng chọn lại.");
-      setSelectedRange(null);
-      return;
-    }
-  
-    const startISO = start.utc().format("YYYY-MM-DDTHH:mm:ss[Z]");
-    const endISO = end.utc().format("YYYY-MM-DDTHH:mm:ss[Z]");
-  
-    setSelectedRange([start, end]);
-    setUtcSelectedRange([startISO, endISO]);
   };
-  
+
+  console.log("selectedRange", selectedRange);
 
   const handleCreateSchedule = async () => {
     const errors = [];
@@ -210,21 +149,25 @@ function LiveStreamSchedule() {
         },
         body: JSON.stringify(requestBody),
       });
+      if (response.status === 409) {
+        toast.error("Lịch trình đã tồn tại trong khoảng thời gian này!");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error("Không thể tạo lịch trình mới!");
       }
 
       const data = await response.json();
+
       if (data) {
         form.resetFields();
         setSelectedRange([]);
         setProgramID(null);
-        setCalendarRange([]);
-        setExistingSchedule(null);
         toast.success("Tạo lịch trình thành công!");
       }
     } catch (error) {
+      console.error("Error during schedule creation:", error);
       toast.error("Lỗi khi tạo lịch trình!");
     } finally {
       setIsBtnLoading(false);
@@ -259,9 +202,7 @@ function LiveStreamSchedule() {
               showTime={{
                 format: "HH:mm:ss",
               }}
-              disabledDate={disabledDate}
-              disabledTime={disabledTime}
-              disabled={programID == null}
+              disabled={!programID}
             />
           </Form.Item>
           <Form.Item>
