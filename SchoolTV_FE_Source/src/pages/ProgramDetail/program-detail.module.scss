@@ -31,7 +31,6 @@ $max-content-width: 1440px;
     color: var(--text-color);
     animation: fadeIn 0.5s ease-out;
     padding-top: 100px;
-
 }
 
 .heroSection {
@@ -693,6 +692,8 @@ $max-content-width: 1440px;
 }
 
 .errorContainer {
+    padding-top: 200px;
+
     button {
         padding: 1rem 2.5rem;
         background: var(--primary-color);

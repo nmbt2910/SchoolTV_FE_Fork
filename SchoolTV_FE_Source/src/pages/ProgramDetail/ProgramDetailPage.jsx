@@ -282,7 +282,7 @@ const ProgramDetailPage = () => {
             >
                 <FontAwesomeIcon icon={faExclamationCircle} size="3x" />
                 <h2>{error}</h2>
-                <button onClick={() => navigate('/programs')}>
+                <button onClick={() => navigate('/liveList')}>
                     Quay lại danh sách chương trình
                 </button>
             </motion.div>
