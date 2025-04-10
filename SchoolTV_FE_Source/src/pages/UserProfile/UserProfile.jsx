@@ -101,25 +101,32 @@ const UserProfile = () => {
       try {
         const dataOrderId = JSON.parse(localStorage.getItem("orderId"));
         const orderId = dataOrderId?.orderId;
-
+    
         if (!orderId) {
           throw new Error("Không tìm thấy mã đơn hàng");
         }
-
+    
         const response = await apiFetch(`/api/orders/history`);
         const data = await response.json();
         console.log("Order details:", data);
+        
         if (!response.ok) {
           throw new Error(`Lỗi khi lấy thông tin đơn hàng: ${response.status}`);
         }
-
-        setOrders(data); // Lưu thông tin đơn hàng vào state
+    
+        // Add validation for the response structure
+        if (!data || !data.$values) {
+          throw new Error("Dữ liệu đơn hàng không hợp lệ");
+        }
+    
+        setOrders(data);
       } catch (err) {
         setErrorOrders(err.message);
         notification.error({
           message: "Lỗi",
           description: err.message,
         });
+        setOrders({ $values: [] }); // Set empty array if error occurs
       } finally {
         setLoading(false);
       }
@@ -483,19 +490,19 @@ const UserProfile = () => {
           {orders?.$values?.length > 0 ? (
             orders.$values.map((order) => (
               <div key={order.orderID} className="user-profile-order-item">
-                <div className={`order-status ${order.status.toLowerCase()}`}>
+                <div className={`order-status ${order.status?.toLowerCase() || 'pending'}`}>
                   <span className="status-dot"></span>
                   {order.status === "Pending"
                     ? "Đang xử lý"
                     : order.status === "Completed"
-                    ? "Hoàn thành"
-                    : "Đã hủy"}
+                      ? "Hoàn thành"
+                      : "Đã hủy"}
                 </div>
                 <div className="order-details">
                   <div className="order-header">
-                    <h3>Đơn hàng #{order.orderCode}</h3>
+                    <h3>Đơn hàng #{order.orderCode || 'N/A'}</h3>
                     <span className="order-date">
-                      {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString("vi-VN") : 'Không xác định'}
                     </span>
                   </div>
                   <div className="order-products">
@@ -507,7 +514,7 @@ const UserProfile = () => {
                   </div>
                   <div className="order-footer">
                     <span className="order-amount">
-                      {order.totalPrice.toLocaleString()} ₫
+                      {order.totalPrice ? order.totalPrice.toLocaleString() : '0'} ₫
                     </span>
                     <button
                       className="order-detail-btn"
@@ -714,22 +721,22 @@ const UserProfile = () => {
             {/* Header */}
             <div className="order-detail-header">
               <div className="order-detail-id">
-                <h3>Đơn hàng #{selectedOrder.orderCode}</h3>
+                <h3>Đơn hàng #{selectedOrder.orderCode || 'N/A'}</h3>
                 <span
-                  className={`order-detail-status ${selectedOrder.status.toLowerCase()}`}
+                  className={`order-detail-status ${selectedOrder.status?.toLowerCase() || 'pending'}`}
                 >
                   <span className="status-dot"></span>
                   {selectedOrder.status === "Pending"
                     ? "Đang xử lý"
                     : selectedOrder.status === "Completed"
-                    ? "Hoàn thành"
-                    : "Đã hủy"}
+                      ? "Hoàn thành"
+                      : "Đã hủy"}
                 </span>
               </div>
               <div className="order-detail-date">
                 <ClockCircleOutlined />
                 <span>
-                  {new Date(selectedOrder.createdAt).toLocaleDateString(
+                  {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString(
                     "vi-VN",
                     {
                       year: "numeric",
@@ -738,7 +745,7 @@ const UserProfile = () => {
                       hour: "2-digit",
                       minute: "2-digit",
                     }
-                  )}
+                  ) : 'Không xác định'}
                 </span>
               </div>
             </div>
@@ -814,9 +821,8 @@ const UserProfile = () => {
                   <strong>PAYOS</strong>
                 </div>
                 <div
-                  className={`payment-status ${
-                    selectedOrder.status === "Completed" ? "success" : "pending"
-                  }`}
+                  className={`payment-status ${selectedOrder.status === "Completed" ? "success" : "pending"
+                    }`}
                 >
                   <span>Trạng thái thanh toán:</span>
                   <strong>
