@@ -43,6 +43,8 @@ import CreatePackage from "./pages/AdminPage/CreatePackage";
 import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage";
 import PaymentSuccess from "./pages/PaymentComplete/Success/success";
 import PaymentCancel from "./pages/PaymentComplete/Cancel/cancel";
+import StudioChannel from "./pages/school-channel/view-channel/StudioChannel";
+import StudioPrograms from "./pages/school-channel/program-manage/StudioPrograms";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -157,6 +159,19 @@ function App() {
           path: "live-stream",
           element: <StudioLiveStream />,
         },
+        {
+          path: "your-channel",
+          element: <StudioChannel />
+        },
+        {
+          path: "program-manage",
+          children: [
+            {
+              index: true,
+              element: <StudioPrograms />,
+            }
+          ]
+        }
       ],
     },
     {
