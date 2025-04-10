@@ -146,9 +146,6 @@ const StudioHeader = ({ channel }) => {
                 </button>
               </div>
               <div className="dropdown-divider"></div>
-              <a href="/studio/settings" className="dropdown-item">
-                <i className="fas fa-cog"></i> Cài đặt Studio
-              </a>
               <a href="/school-studio/your-channel" className="dropdown-item">
                 <i className="fas fa-user-cog"></i> Kênh của bạn
               </a>

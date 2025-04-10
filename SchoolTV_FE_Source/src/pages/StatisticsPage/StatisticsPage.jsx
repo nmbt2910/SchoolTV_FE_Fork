@@ -222,7 +222,6 @@ const StatisticsPage = () => {
         { key: 'views', label: 'Lượt xem', color: '#4a90e2' },
         { key: 'watchTime', label: 'Thời gian xem', color: '#ff4757' },
         { key: 'likes', label: 'Lượt thích', color: '#28a745' },
-        { key: 'revenue', label: 'Doanh thu', color: '#a55eea' },
     ];
 
     const summaryStats = [
@@ -246,13 +245,6 @@ const StatisticsPage = () => {
             value: '2.5K',
             trend: '-2.1%',
             isPositive: false
-        },
-        {
-            icon: DollarSign,
-            label: 'Doanh thu',
-            value: '2.1M VND',
-            trend: '+18.5%',
-            isPositive: true
         }
     ];
 

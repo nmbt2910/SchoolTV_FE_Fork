@@ -392,7 +392,8 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
             overflowY: 'auto',
             padding: '20px 1rem 1rem',
             marginBottom: '1rem',
-            marginTop: '-10px'
+            marginTop: '-10px',
+            
           }}>
             {filteredSchedules.map((schedule, index) => {
               const status = getStatus(schedule);
