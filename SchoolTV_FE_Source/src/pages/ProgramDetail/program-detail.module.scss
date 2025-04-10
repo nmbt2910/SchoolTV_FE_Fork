@@ -31,7 +31,6 @@ $max-content-width: 1440px;
     color: var(--text-color);
     animation: fadeIn 0.5s ease-out;
     padding-top: 100px;
-
 }
 
 .heroSection {
@@ -149,13 +148,25 @@ $max-content-width: 1440px;
             text-align: center;
             color: white;
             -webkit-text-fill-color: white;
+            max-width: 100%;
             
-    
-            @media (max-width: 768px) {
-                font-size: 2rem;
-                margin: 1rem 0;
+            @media (max-width: 1200px) {
+              font-size: 3rem;
             }
-        }
+            
+            @media (max-width: 1024px) {
+              font-size: 2.5rem;
+            }
+            
+            @media (max-width: 768px) {
+              font-size: 2rem;
+              margin: 1rem 0;
+            }
+            
+            @media (max-width: 480px) {
+              font-size: 1.5rem;
+            }
+          }
     }
 
     .metaInfo {
@@ -182,6 +193,21 @@ $max-content-width: 1440px;
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+
+    span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+        
+        @media (max-width: 768px) {
+          max-width: 150px;
+        }
+        
+        @media (max-width: 480px) {
+          max-width: 100px;
+        }
+      }
 
     &:hover {
         background: rgba(255, 255, 255, 0.2);
@@ -226,6 +252,7 @@ $max-content-width: 1440px;
     border-radius: 50px;
     font-weight: 600;
     font-size: 1.1rem;
+    text-align: center;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -257,6 +284,7 @@ $max-content-width: 1440px;
     color: white;
     backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
 
     &:hover {
         background: rgba(255, 255, 255, 0.2);
@@ -627,6 +655,7 @@ $max-content-width: 1440px;
     background: var(--card-bg);
     border-radius: 16px;
     color: var(--text-secondary);
+    text-align: center;
 
     svg {
         font-size: 2rem;
@@ -663,6 +692,8 @@ $max-content-width: 1440px;
 }
 
 .errorContainer {
+    padding-top: 200px;
+
     button {
         padding: 1rem 2.5rem;
         background: var(--primary-color);
@@ -702,3 +733,44 @@ $max-content-width: 1440px;
         animation: shimmer 1.5s infinite;
     }
 }
+
+.truncateText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    max-width: 100%;
+    
+    // For multi-line truncation (optional)
+    &-multiline {
+      display: -webkit-box;
+      -webkit-line-clamp: 2; // Number of lines
+      line-clamp: 2; // Standard property for compatibility
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+    }
+  }
+
+.truncateContainer {
+    width: 100%;
+    overflow: hidden;
+    
+    .truncateText {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    
+    .multiLineTruncate {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: normal;
+    }
+  }

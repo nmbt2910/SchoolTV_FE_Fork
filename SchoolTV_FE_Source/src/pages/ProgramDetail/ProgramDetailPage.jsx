@@ -38,6 +38,9 @@ const ProgramDetailPage = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [textColor, setTextColor] = useState('light');
     const heroImageRef = useRef(null);
+    const [relatedPrograms, setRelatedPrograms] = useState([]);
+    const [relatedLoading, setRelatedLoading] = useState(false);
+    const [relatedError, setRelatedError] = useState(null);
 
     useEffect(() => {
         if (program?.thumbnail && heroImageRef.current) {
@@ -45,36 +48,69 @@ const ProgramDetailPage = () => {
         }
     }, [program?.thumbnail]);
 
-    const checkImageBrightness = (imgElement) => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 100;
-        canvas.height = 100;
+    // Add this utility function at the top of your file
+    const truncateText = (text, maxLength = 50) => {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
 
-        // Draw image scaled down to 100x100 for performance
-        ctx.drawImage(imgElement, 0, 0, 100, 100);
+        // Try to find a space to break at
+        const spaceIndex = text.lastIndexOf(' ', maxLength);
 
-        // Get image data
-        const imageData = ctx.getImageData(0, 0, 100, 100).data;
+        // If no space found or the space is too far from maxLength, just cut at maxLength
+        const truncateAt = spaceIndex > 0 && (maxLength - spaceIndex) < 20
+            ? spaceIndex
+            : maxLength;
 
-        // Calculate average brightness
-        let brightnessSum = 0;
-        for (let i = 0; i < imageData.length; i += 4) {
-            const r = imageData[i];
-            const g = imageData[i + 1];
-            const b = imageData[i + 2];
-            brightnessSum += (r * 299 + g * 587 + b * 114) / 1000;
-        }
-
-        const averageBrightness = brightnessSum / (100 * 100);
-
-        // Set text color based on brightness (threshold at 128)
-        setTextColor(averageBrightness > 128 ? 'dark' : 'light');
+        return `${text.substring(0, truncateAt)}...`;
     };
 
+    // Create a custom hook for responsive truncation
+    const useResponsiveTruncate = () => {
+        const [maxLength, setMaxLength] = useState(50);
 
+        useEffect(() => {
+            const handleResize = () => {
+                if (window.innerWidth < 768) {
+                    setMaxLength(20);
+                } else if (window.innerWidth < 1024) {
+                    setMaxLength(30);
+                } else {
+                    setMaxLength(50);
+                }
+            };
 
-    // Animation variants
+            handleResize();
+            window.addEventListener('resize', handleResize);
+            return () => window.removeEventListener('resize', handleResize);
+        }, []);
+
+        return maxLength;
+    };
+
+    const maxLength = useResponsiveTruncate();
+
+    useEffect(() => {
+        const fetchRelatedPrograms = async () => {
+            if (!program?.schoolChannelID) return;
+
+            try {
+                setRelatedLoading(true);
+                const response = await apiFetch(`Program/by-channel/${program.schoolChannelID}`);
+
+                if (!response.ok) throw new Error('Không thể tải chương trình liên quan');
+
+                const data = await response.json();
+                setRelatedPrograms(data.data.$values || []);
+            } catch (err) {
+                setRelatedError(err.message);
+            } finally {
+                setRelatedLoading(false);
+            }
+        };
+
+        fetchRelatedPrograms();
+    }, [program?.schoolChannelID]);
+
     const pageTransition = {
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
@@ -246,12 +282,84 @@ const ProgramDetailPage = () => {
             >
                 <FontAwesomeIcon icon={faExclamationCircle} size="3x" />
                 <h2>{error}</h2>
-                <button onClick={() => navigate('/programs')}>
+                <button onClick={() => navigate('/liveList')}>
                     Quay lại danh sách chương trình
                 </button>
             </motion.div>
         );
     }
+
+    const StatusIndicator = ({ schedule }) => {
+        if (!schedule) {
+            return (
+                <div className={styles.statusIndicator} style={{ background: 'var(--text-secondary)' }}>
+                    <FontAwesomeIcon icon={faInfoCircle} />
+                    <span>Trạng thái không xác định</span>
+                </div>
+            );
+        }
+
+        let statusText;
+        let icon;
+        let bgColor;
+
+        const getStatus = () => {
+            try {
+                // Live stream is currently active
+                if (schedule.liveStreamStarted && !schedule.liveStreamEnded) return 'live';
+
+                // Special case: Ready status but stream has ended
+                if (schedule.status === 'Ready' && schedule.liveStreamEnded) return 'ended';
+
+                // Ended status
+                if (schedule.status === 'Ended') return 'ended';
+
+                // All other statuses (Ready, Pending, LateStart, EndedEarly) are considered upcoming
+                return 'upcoming';
+            } catch (error) {
+                console.error('Error determining status:', error);
+                return 'unknown';
+            }
+        };
+
+        const status = getStatus();
+
+        switch (status) {
+            case 'live':
+                statusText = 'Đang phát sóng';
+                icon = faBroadcastTower;
+                bgColor = 'var(--primary-color)';
+                break;
+            case 'ended':
+                statusText = 'Đã phát';
+                icon = faCheckCircle;
+                bgColor = 'var(--primary-color)';
+                break;
+            case 'upcoming':
+                statusText = 'Chờ phát';
+                icon = faClock;
+                bgColor = 'var(--primary-color)';
+                break;
+            default:
+                statusText = 'Trạng thái không xác định';
+                icon = faInfoCircle;
+                bgColor = 'var(--primary-color)';
+        }
+
+        return (
+            <div className={styles.statusIndicator} style={{ background: bgColor }}>
+                <FontAwesomeIcon icon={icon} />
+                <span>{statusText}</span>
+            </div>
+        );
+    };
+
+    const convertUTCToGMT7 = (utcDateString) => {
+        const date = new Date(utcDateString);
+        date.setHours(date.getHours() + 7); // Add 7 hours for GMT+7
+        return date;
+    };
+
 
     return (
         <motion.div
@@ -266,26 +374,10 @@ const ProgramDetailPage = () => {
             <div className={styles.heroSection}>
                 <div className={styles.heroBackground}>
                     <div className={styles.blurOverlay}></div>
-                    <img
-                        src={program.thumbnail || `https://picsum.photos/800/600?random=${program.programID}`}
-                        alt="background"
-                        className={styles.backgroundImage}
-                    />
                 </div>
 
                 <div className={styles.heroContent}>
-                    <div className={styles.imageContainer}>
-                        <motion.img
-                            ref={heroImageRef}
-                            src={program.thumbnail || `https://picsum.photos/800/600?random=${program.programID}`}
-                            alt={program.programName}
-                            className={styles.heroImage}
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                        />
-                        <div className={styles.imageBorder}></div>
-                    </div>
+
 
                     <motion.div
                         className={styles.contentWrapper}
@@ -294,13 +386,16 @@ const ProgramDetailPage = () => {
                         transition={{ delay: 0.2 }}
                     >
 
-                        <motion.h1
+                        <motion.div
+                            className={styles.truncateContainer}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                         >
-                            {program.programName}
-                        </motion.h1>
+                            <h1 className={styles.truncateText} title={program.programName}>
+                                {truncateText(program.programName, maxLength)}
+                            </h1>
+                        </motion.div>
 
                         <motion.div
                             className={styles.metaInfo}
@@ -314,7 +409,7 @@ const ProgramDetailPage = () => {
                             </span>
                             <span className={styles.metaItem}>
                                 <FontAwesomeIcon icon={faCalendarAlt} />
-                                {new Date(program.createdAt).toLocaleDateString('vi-VN')}
+                                {convertUTCToGMT7(program.createdAt).toLocaleDateString('vi-VN')}
                             </span>
                             <span className={styles.metaItem}>
                                 <FontAwesomeIcon icon={faUsers} />
@@ -435,21 +530,23 @@ const ProgramDetailPage = () => {
                             <h2>Lịch phát sóng</h2>
                             {program.schedules.$values.length > 0 ? (
                                 <div className={styles.scheduleList}>
-                                    {program.schedules.$values.map((schedule, index) => (
-                                        <motion.div
-                                            key={schedule.scheduleID}
-                                            className={styles.scheduleCard}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.1 }}
-                                        >
-                                            <div className={styles.scheduleTime}>
-                                                <FontAwesomeIcon icon={faCalendarAlt} />
-                                                {new Date(schedule.startTime).toLocaleString('vi-VN')}
-                                            </div>
-                                            <StatusIndicator status={schedule.status} />
-                                        </motion.div>
-                                    ))}
+                                    {program.schedules.$values
+                                        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                                        .map((schedule, index) => (
+                                            <motion.div
+                                                key={schedule.scheduleID}
+                                                className={styles.scheduleCard}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: index * 0.1 }}
+                                            >
+                                                <div className={styles.scheduleTime}>
+                                                    <FontAwesomeIcon icon={faCalendarAlt} />
+                                                    {convertUTCToGMT7(schedule.startTime).toLocaleString('vi-VN')}
+                                                </div>
+                                                <StatusIndicator schedule={schedule} />
+                                            </motion.div>
+                                        ))}
                                 </div>
                             ) : (
                                 <div className={styles.noSchedule}>
@@ -461,9 +558,44 @@ const ProgramDetailPage = () => {
                     )}
 
                     {activeTab === 'related' && (
-                        <div className={styles.relatedSection}>
+                        <div className={styles.scheduleSection}>
                             <h2>Chương trình liên quan</h2>
-                            {/* Related programs content */}
+                            {relatedLoading ? (
+                                <div className={styles.loadingContainer}>
+                                    <FontAwesomeIcon icon={faSpinner} spin />
+                                    <p>Đang tải chương trình liên quan...</p>
+                                </div>
+                            ) : relatedError ? (
+                                <div className={styles.noSchedule}>
+                                    <FontAwesomeIcon icon={faExclamationCircle} />
+                                    <p>{relatedError}</p>
+                                </div>
+                            ) : (
+                                <div className={styles.scheduleList}>
+                                    {relatedPrograms.map((related, index) => (
+                                        <motion.div
+                                            key={related.programID}
+                                            className={styles.scheduleCard}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.1 }}
+                                            onClick={() => navigate(`/program/${related.programID}`)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <div className={`${styles.scheduleTime} ${styles.truncateContainer}`}>
+                                                <FontAwesomeIcon icon={faPlay} />
+                                                <span className={styles.truncateText} title={related.programName}>
+                                                    {truncateText(related.programName, maxLength)}
+                                                </span>
+                                            </div>
+                                            <div className={styles.metaItem}>
+                                                <FontAwesomeIcon icon={faUsers} />
+                                                {related.followCount || 0} người theo dõi
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
                 </motion.div>
