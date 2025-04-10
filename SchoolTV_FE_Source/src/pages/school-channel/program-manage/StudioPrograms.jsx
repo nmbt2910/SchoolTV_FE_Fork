@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTv, faCalendarAlt, faPlus, faSpinner, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faTv, faCalendarAlt, faPlus, faSpinner, faXmark, faClock } from '@fortawesome/free-solid-svg-icons';
 import { toast } from 'react-toastify';
 import apiFetch from '../../../config/baseAPI';
 import styles from './studio-programs.module.scss';
@@ -11,10 +11,17 @@ const StudioPrograms = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     programName: '',
     title: ''
+  });
+  const [scheduleForm, setScheduleForm] = useState({
+    programID: '',
+    startTime: '',
+    endTime: '',
+    isReplay: false
   });
 
   const fetchPrograms = async () => {
@@ -79,6 +86,45 @@ const StudioPrograms = () => {
     }
   };
 
+  const handleCreateSchedule = async () => {
+    try {
+      if (!scheduleForm.programID || !scheduleForm.startTime || !scheduleForm.endTime) {
+        toast.error('Vui lòng điền đầy đủ thông tin');
+        return;
+      }
+
+      if (new Date(scheduleForm.startTime) >= new Date(scheduleForm.endTime)) {
+        toast.error('Thời gian kết thúc phải sau thời gian bắt đầu');
+        return;
+      }
+
+      const startUTC = new Date(scheduleForm.startTime).toISOString();
+      const endUTC = new Date(scheduleForm.endTime).toISOString();
+
+      const response = await apiFetch('Schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          programID: parseInt(scheduleForm.programID),
+          startTime: startUTC,
+          endTime: endUTC,
+          isReplay: scheduleForm.isReplay
+        })
+      });
+
+      if (!response.ok) throw new Error('Tạo lịch phát thất bại');
+
+      toast.success('Tạo lịch phát thành công!');
+      setIsScheduleModalOpen(false);
+      setScheduleForm({ programID: '', startTime: '', endTime: '', isReplay: false });
+      await fetchPrograms();
+    } catch (error) {
+      toast.error(error.message || 'Lỗi khi tạo lịch phát');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
@@ -95,13 +141,22 @@ const StudioPrograms = () => {
           <FontAwesomeIcon icon={faTv} />
           Quản lý Chương trình
         </h2>
-        <button 
-          className={styles.createButton}
-          onClick={() => setIsModalOpen(true)}
-        >
-          <FontAwesomeIcon icon={faPlus} />
-          Tạo chương trình mới
-        </button>
+        <div className={styles.buttonGroup}>
+          <button 
+            className={styles.createButton}
+            onClick={() => setIsModalOpen(true)}
+          >
+            <FontAwesomeIcon icon={faPlus} />
+            Tạo chương trình mới
+          </button>
+          <button 
+            className={styles.scheduleButton}
+            onClick={() => setIsScheduleModalOpen(true)}
+          >
+            <FontAwesomeIcon icon={faClock} />
+            Tạo lịch phát mới
+          </button>
+        </div>
       </div>
 
       {isModalOpen && (
@@ -143,6 +198,74 @@ const StudioPrograms = () => {
               disabled={isCreating}
             >
               {isCreating ? 'Đang tạo...' : 'Tạo chương trình'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isScheduleModalOpen && (
+        <div className={styles.createModal}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h3>Tạo lịch phát mới</h3>
+              <button 
+                onClick={() => setIsScheduleModalOpen(false)}
+                className={styles.closeButton}
+              >
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Chọn chương trình</label>
+              <select
+                value={scheduleForm.programID}
+                onChange={(e) => setScheduleForm({...scheduleForm, programID: e.target.value})}
+              >
+                <option value="">-- Chọn chương trình --</option>
+                {programs.map(program => (
+                  <option key={program.programID} value={program.programID}>
+                    {program.programName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Thời gian bắt đầu (GMT+7)</label>
+              <input
+                type="datetime-local"
+                value={scheduleForm.startTime}
+                onChange={(e) => setScheduleForm({...scheduleForm, startTime: e.target.value})}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Thời gian kết thúc (GMT+7)</label>
+              <input
+                type="datetime-local"
+                value={scheduleForm.endTime}
+                onChange={(e) => setScheduleForm({...scheduleForm, endTime: e.target.value})}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={scheduleForm.isReplay}
+                  onChange={(e) => setScheduleForm({...scheduleForm, isReplay: e.target.checked})}
+                  className={styles.checkboxInput}
+                />
+                Cho phép phát lại
+              </label>
+            </div>
+
+            <button 
+              className={styles.submitButton}
+              onClick={handleCreateSchedule}
+            >
+              Tạo lịch phát
             </button>
           </div>
         </div>

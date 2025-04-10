@@ -1,68 +1,68 @@
 :root[data-theme="light"] {
-    --primary-color: #4a90e2;
-    --secondary-color: #f0f4f8;
-    --text-color: #2c3e50;
-    --bg-color: #ffffff;
-    --card-bg: rgba(255, 255, 255, 0.95);
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --hover-color: #357abd;
-    --border-color: #e1e8ed;
-    --live-color: #ff4757; /* Conflict: "live-color" vs. "live-indicator" */
-    --live-indicator: #ff4757; /* Keeping both for clarity */
-    --gradient-bg: linear-gradient(135deg, #f6f8fa 0%, #f0f4f8 100%);
-    --card-hover: rgba(255, 255, 255, 0.98);
-    --filter-bg: rgba(255, 255, 255, 0.8);
-    --filter-border: rgba(74, 144, 226, 0.2);
-    --tab-active: #4a90e2;
-    --tab-hover: #f8fafc;
-    --skeleton-bg: #eef2f7;
-    --skeleton-shine: rgba(255, 255, 255, 0.2);
-    --chat-bg: rgba(255, 255, 255, 0.8);
-    --message-bg: rgba(74, 144, 226, 0.1);
-    --interaction-bg: rgba(0, 0, 0, 0.6);
-    --player-gradient: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
-    --card-hover-bg: rgba(255, 255, 255, 0.98);
-    --tab-active-bg: #4a90e2;
-    --tab-active-color: #ffffff;
-    --notification-bg: #ff4757;
-    --success-color: #28a745;
-    --warning-color: #ffc107;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --primary-text: #2c3e50;
-    --secondary-text: #4a5568;
-    --description-text: #2d3748;
-    --message-text: #2d3748;
-  }
-  
-  :root[data-theme="dark"] {
-    --primary-color: #4a90e2;
-    --secondary-color: #1a2634;
-    --text-color: #e1e8ed;
-    --bg-color: #0f172a;
-    --card-bg: rgba(26, 38, 52, 0.95);
-    --shadow-color: rgba(0, 0, 0, 0.3);
-    --hover-color: #5a9de2;
-    --border-color: #2a3f52;
-    --gradient-bg: linear-gradient(135deg, #1a2634 0%, #0f172a 100%);
-    --card-hover: rgba(26, 38, 52, 0.98);
-    --filter-bg: rgba(26, 38, 52, 0.8);
-    --filter-border: rgba(74, 144, 226, 0.3);
-    --tab-hover: #1e293b;
-    --skeleton-bg: #2a3f52;
-    --skeleton-shine: rgba(255, 255, 255, 0.05);
-    --chat-bg: rgba(26, 38, 52, 0.8);
-    --message-bg: rgba(74, 144, 226, 0.2);
-    --interaction-bg: rgba(0, 0, 0, 0.8);
-    --card-hover-bg: rgba(26, 38, 52, 0.98);
-    --glass-bg: rgba(0, 0, 0, 0.2);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --primary-text: #e2e8f0;
-    --secondary-text: #cbd5e0;
-    --description-text: #e2e8f0;
-    --message-text: #e2e8f0;
-  }
-  
+  --primary-color: #4a90e2;
+  --secondary-color: #f0f4f8;
+  --text-color: #2c3e50;
+  --bg-color: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --hover-color: #357abd;
+  --border-color: #e1e8ed;
+  --live-color: #ff4757; /* Conflict: "live-color" vs. "live-indicator" */
+  --live-indicator: #ff4757; /* Keeping both for clarity */
+  --gradient-bg: linear-gradient(135deg, #f6f8fa 0%, #f0f4f8 100%);
+  --card-hover: rgba(255, 255, 255, 0.98);
+  --filter-bg: rgba(255, 255, 255, 0.8);
+  --filter-border: rgba(74, 144, 226, 0.2);
+  --tab-active: #4a90e2;
+  --tab-hover: #f8fafc;
+  --skeleton-bg: #eef2f7;
+  --skeleton-shine: rgba(255, 255, 255, 0.2);
+  --chat-bg: rgba(255, 255, 255, 0.8);
+  --message-bg: rgba(74, 144, 226, 0.1);
+  --interaction-bg: rgba(0, 0, 0, 0.6);
+  --player-gradient: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+  --card-hover-bg: rgba(255, 255, 255, 0.98);
+  --tab-active-bg: #4a90e2;
+  --tab-active-color: #ffffff;
+  --notification-bg: #ff4757;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --primary-text: #2c3e50;
+  --secondary-text: #4a5568;
+  --description-text: #2d3748;
+  --message-text: #2d3748;
+}
+
+:root[data-theme="dark"] {
+  --primary-color: #4a90e2;
+  --secondary-color: #1a2634;
+  --text-color: #e1e8ed;
+  --bg-color: #0f172a;
+  --card-bg: rgba(26, 38, 52, 0.95);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --hover-color: #5a9de2;
+  --border-color: #2a3f52;
+  --gradient-bg: linear-gradient(135deg, #1a2634 0%, #0f172a 100%);
+  --card-hover: rgba(26, 38, 52, 0.98);
+  --filter-bg: rgba(26, 38, 52, 0.8);
+  --filter-border: rgba(74, 144, 226, 0.3);
+  --tab-hover: #1e293b;
+  --skeleton-bg: #2a3f52;
+  --skeleton-shine: rgba(255, 255, 255, 0.05);
+  --chat-bg: rgba(26, 38, 52, 0.8);
+  --message-bg: rgba(74, 144, 226, 0.2);
+  --interaction-bg: rgba(0, 0, 0, 0.8);
+  --card-hover-bg: rgba(26, 38, 52, 0.98);
+  --glass-bg: rgba(0, 0, 0, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --primary-text: #e2e8f0;
+  --secondary-text: #cbd5e0;
+  --description-text: #e2e8f0;
+  --message-text: #e2e8f0;
+}
+
 
 @keyframes pulse {
 0% {
@@ -114,10 +114,10 @@ opacity: 0;
 
 /* Replace the existing .main-container style with this */
 .main-container {
-margin-top: 20px; /* Changed from 80px to 20px */
+margin-top: 20px;
 padding: 2rem 5%;
 display: grid;
-grid-template-columns: 1fr 350px;
+grid-template-columns: 1.2fr 350px; /* Adjusted ratio */
 gap: 2rem;
 padding-top: 80px;
 }
@@ -143,7 +143,7 @@ box-shadow: 0 15px 40px var(--shadow-color);
 
 .video-container {
 position: relative;
-padding-top: 56.25%;
+padding-top: 56.25%; /* Reduced from 56.25% to 45% for shorter height */
 background: #000;
 overflow: hidden;
 }
@@ -525,13 +525,14 @@ border-radius: 15px;
 backdrop-filter: blur(10px);
 display: flex;
 flex-direction: column;
-height: calc(100vh - 60px); /* Changed from 120px to 60px */
+height: calc(100vh - 140px);
 position: sticky;
-top: 20px; /* Changed from 100px to 20px */
+top: 20px;
 box-shadow: 0 10px 30px var(--shadow-color);
 transition: all 0.3s ease;
 border: 1px solid var(--glass-border);
 }
+
 
 .chat-header {
 padding: 1rem;
@@ -769,4 +770,595 @@ border-radius: 4px;
 
 ::-webkit-scrollbar-thumb:hover {
 background: var(--hover-color);
+}
+
+/* Schedule styles */
+.schedule-button {
+max-height: 36px;
+display: flex;
+align-items: center;
+gap: 0.75rem;
+background: var(--glass-bg);
+border: 1px solid var(--glass-border);
+color: var(--primary-text);
+padding: 10px 20px;
+border-radius: 25px;
+cursor: pointer;
+transition: all 0.3s ease;
+font-size: 0.95rem;
+font-weight: 500;
+backdrop-filter: blur(8px);
+}
+
+.schedule-button i {
+font-size: 1.1rem;
+color: var(--primary-color);
+}
+
+.schedule-button:hover {
+background: var(--primary-color);
+transform: translateY(-2px);
+box-shadow: 0 5px 15px var(--shadow-color);
+}
+
+.schedule-button:hover i {
+color: white;
+}
+
+.schedule-popup {
+position: absolute;
+bottom: calc(100% + 15px);
+right: -20px;
+width: 450px;
+background: var(--card-bg);
+border-radius: 20px;
+box-shadow: 0 15px 40px var(--shadow-color);
+backdrop-filter: blur(15px);
+border: 1px solid var(--glass-border);
+z-index: 1000;
+animation: fadeIn 0.3s ease;
+overflow: hidden;
+}
+
+.schedule-popup::after {
+content: '';
+position: absolute;
+bottom: -12px;
+right: 30px;
+width: 0;
+height: 0;
+border-left: 12px solid transparent;
+border-right: 12px solid transparent;
+border-top: 12px solid var(--card-bg);
+}
+
+.schedule-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 1.25rem 1.5rem;
+border-bottom: 1px solid var(--border-color);
+background: var(--glass-bg);
+}
+
+.schedule-title {
+font-size: 1.2rem;
+font-weight: 600;
+color: var(--primary-text);
+display: flex;
+align-items: center;
+gap: 0.75rem;
+}
+
+.schedule-title i {
+color: var(--primary-color);
+font-size: 1.3rem;
+}
+
+.schedule-close {
+background: var(--glass-bg);
+border: 1px solid var(--glass-border);
+color: var(--primary-text);
+cursor: pointer;
+padding: 0.6rem;
+border-radius: 12px;
+transition: all 0.3s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.schedule-close:hover {
+background: var(--glass-bg);
+transform: scale(1.1);
+}
+
+.schedule-content {
+max-height: 450px;
+overflow-y: auto;
+padding: 1.5rem;
+}
+
+.schedule-content::-webkit-scrollbar {
+width: 6px;
+}
+
+.schedule-content::-webkit-scrollbar-track {
+background: transparent;
+}
+
+.schedule-content::-webkit-scrollbar-thumb {
+background: var(--primary-color);
+border-radius: 3px;
+}
+
+.schedule-content::-webkit-scrollbar-thumb:hover {
+background: var(--hover-color);
+}
+
+@keyframes scheduleSlideIn {
+from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+to {
+  opacity: 1;
+  transform: translateX(0);
+}
+}
+
+.schedule-item {
+display: flex;
+align-items: flex-start;
+gap: 1.25rem;
+padding: 1.25rem;
+border-radius: 15px;
+transition: all 0.3s ease;
+position: relative;
+cursor: pointer;
+border: 1px solid transparent;
+margin-bottom: 1rem;
+animation: scheduleSlideIn 0.3s ease forwards;
+animation-delay: calc(var(--item-index) * 0.1s);
+}
+
+.schedule-item:hover {
+background: var(--glass-bg);
+transform: translateX(8px);
+border-color: var(--glass-border);
+}
+
+.schedule-item.active {
+background: var(--primary-color);
+color: white;
+border-color: var(--primary-color);
+}
+
+.schedule-item.active .schedule-name,
+.schedule-item.active .schedule-description,
+.schedule-item.active .schedule-time {
+color: white;
+}
+
+.schedule-item.active::before {
+content: 'LIVE';
+position: absolute;
+top: 50%;
+right: 1rem;
+transform: translateY(-50%);
+background: var(--live-indicator);
+color: white;
+padding: 0.2rem 0.5rem;
+border-radius: 4px;
+font-size: 0.8rem;
+font-weight: 600;
+animation: pulse 1.5s infinite;
+}
+
+.schedule-info {
+flex: 1;
+padding: 0.5rem 0;
+}
+
+.schedule-name {
+font-weight: 600;
+margin-bottom: 0.5rem;
+color: var(--primary-text);
+font-size: 1.1rem;
+line-height: 1.4;
+}
+
+.schedule-description {
+font-size: 0.95rem;
+color: var(--secondary-text);
+line-height: 1.5;
+}
+
+.schedule-nav {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 1rem 1.25rem;
+background: var(--glass-bg);
+border-radius: 15px;
+margin-bottom: 1.5rem;
+border: 1px solid var(--glass-border);
+}
+
+.schedule-date {
+display: flex;
+align-items: center;
+gap: 0.75rem;
+color: var(--primary-text);
+font-weight: 500;
+font-size: 1.1rem;
+}
+
+.schedule-date i {
+color: var(--primary-color);
+font-size: 1.2rem;
+}
+
+.schedule-arrows {
+display: flex;
+gap: 0.75rem;
+}
+
+.schedule-arrow {
+background: var(--glass-bg);
+border: 1px solid var(--glass-border);
+color: var(--primary-text);
+cursor: pointer;
+padding: 0.6rem;
+border-radius: 12px;
+transition: all 0.3s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.schedule-arrow:hover {
+background: var(--primary-color);
+color: white;
+transform: translateY(-2px);
+}
+
+.schedule-arrow:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.schedule-item.past {
+opacity: 0.7;
+}
+
+.schedule-item.upcoming {
+border-left: 3px solid var(--primary-color);
+}
+
+.schedule-item.live {
+position: relative;
+overflow: hidden;
+}
+
+.schedule-item.live::before {
+content: 'LIVE';
+position: absolute;
+top: 1rem;
+right: 1rem;
+background: var(--live-indicator);
+color: white;
+padding: 0.4rem 1rem;
+border-radius: 20px;
+font-size: 0.8rem;
+font-weight: 600;
+animation: pulse 1.5s infinite;
+box-shadow: 0 2px 10px rgba(255, 71, 87, 0.3);
+}
+
+.schedule-time {
+min-width: 70px;
+text-align: center;
+font-weight: 600;
+color: var(--primary-text);
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 0.5rem;
+padding: 0.5rem;
+background: var(--glass-bg);
+border-radius: 12px;
+border: 1px solid var(--glass-border);
+}
+
+.time-indicator {
+width: 10px;
+height: 10px;
+border-radius: 50%;
+position: relative;
+}
+
+.time-indicator.past {
+background: var(--secondary-text);
+}
+
+.time-indicator.live {
+background: var(--live-indicator);
+box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.2);
+animation: pulse 1.5s infinite;
+}
+
+.time-indicator.upcoming {
+background: var(--primary-color);
+box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.2);
+}
+
+/* Enhanced Responsive Design for Schedule Feature */
+
+/* iPad Pro */
+@media screen and (max-width: 1024px) {
+.schedule-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  margin: 0;
+  right: auto;
+  bottom: auto;
+  z-index: 1000;
+}
+
+.schedule-popup::after {
+  display: none;
+}
+
+.schedule-content {
+  max-height: calc(80vh - 140px);
+}
+
+/* Backdrop for modal */
+.schedule-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+.schedule-button {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+}
+}
+
+/* iPad & Smaller Tablets */
+@media screen and (max-width: 768px) {
+.schedule-popup {
+  width: 95%;
+  max-width: 500px;
+}
+
+.schedule-header {
+  padding: 1rem;
+}
+
+.schedule-title {
+  font-size: 1.1rem;
+}
+
+.schedule-nav {
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.schedule-date {
+  font-size: 1rem;
+}
+
+.schedule-item {
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.schedule-time {
+  min-width: 60px;
+  padding: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.schedule-name {
+  font-size: 1rem;
+}
+
+.schedule-description {
+  font-size: 0.9rem;
+}
+}
+
+/* iPhone and Small Mobile Devices */
+@media screen and (max-width: 480px) {
+.schedule-button {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.schedule-button i {
+  font-size: 0.9rem;
+}
+
+.schedule-popup {
+  width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  top: 0;
+  left: 0;
+  transform: none;
+  border-radius: 0;
+}
+
+.schedule-content {
+  max-height: calc(100vh - 60px);
+}
+
+.schedule-header {
+  padding: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.schedule-title {
+  font-size: 1rem;
+}
+
+.schedule-nav {
+  margin: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.schedule-date {
+  font-size: 0.9rem;
+}
+
+.schedule-arrows button {
+  padding: 0.4rem;
+}
+
+.schedule-item {
+  margin: 0.5rem 0.75rem;
+  padding: 0.75rem;
+}
+
+.schedule-time {
+  min-width: 50px;
+  font-size: 0.85rem;
+}
+
+.schedule-name {
+  font-size: 0.9rem;
+}
+
+.schedule-description {
+  font-size: 0.8rem;
+}
+
+/* Enhanced touch targets for mobile */
+.schedule-arrow,
+.schedule-close {
+  min-width: 40px;
+  min-height: 40px;
+}
+
+/* Improved scrolling experience */
+.schedule-content {
+  -webkit-overflow-scrolling: touch;
+  padding: 0.5rem;
+}
+}
+
+/* Landscape Mode Adjustments */
+@media screen and (max-height: 480px) and (orientation: landscape) {
+.schedule-popup {
+  height: 90vh;
+  top: 5vh;
+}
+
+.schedule-content {
+  max-height: calc(90vh - 60px);
+}
+
+.schedule-item {
+  padding: 0.6rem;
+}
+
+.schedule-nav {
+  flex-direction: row;
+  padding: 0.5rem;
+}
+}
+
+/* Animation Enhancements for Mobile */
+@media (max-width: 768px) {
+@keyframes scheduleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.schedule-popup {
+  animation: slideUpMobile 0.3s ease-out;
+}
+
+@keyframes slideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+}
+
+/* Additional Utility Classes */
+.scroll-lock {
+overflow: hidden;
+position: fixed;
+width: 100%;
+height: 100%;
+}
+
+.safe-area-bottom {
+padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Touch Feedback Effects */
+@media (hover: none) {
+.schedule-item:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.schedule-arrow:active,
+.schedule-close:active {
+  opacity: 0.7;
+}
+}
+
+/* Loading State for Schedule */
+.schedule-loading {
+display: flex;
+align-items: center;
+justify-content: center;
+height: 200px;
+color: var(--primary-color);
+}
+
+.schedule-loading::after {
+content: '';
+width: 30px;
+height: 30px;
+border: 3px solid var(--primary-color);
+border-top-color: transparent;
+border-radius: 50%;
+animation: scheduleLoading 1s linear infinite;
+}
+
+@keyframes scheduleLoading {
+to {
+  transform: rotate(360deg);
+}
 }
