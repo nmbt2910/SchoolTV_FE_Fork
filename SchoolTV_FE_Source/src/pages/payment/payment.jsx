@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import api from "../../config/baseAPI";
 import "./payment.css";
+import apiFetch from "../../config/baseAPI";
+import { message } from "antd";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [selectedPayment, setSelectedPayment] = useState(0);
-  const [orderId, setOrderId] = useState(null);
-  const [paymentLink, setPaymentLink] = useState(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -18,32 +17,45 @@ const Checkout = () => {
   });
 
   useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await apiFetch("accounts/info", {
+          headers: { "Content-Type": "application/json" },
+        });
+        const userInfo = await response.json();
+        console.log("User info:", userInfo);
+
+        if (userInfo) {
+          setFormData({
+            fullName: userInfo.username || "",
+            email: userInfo.email || "",
+            phone: userInfo.phoneNumber || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+
     const packageData = localStorage.getItem("selectedPackage");
     if (packageData) {
-      setSelectedPackage(JSON.parse(packageData));
+      const parsedPackage = JSON.parse(packageData);
+      // Tính lại tổng tiền
+      const finalPrice = parsedPackage.price - (parsedPackage.discount || 0);
+      setSelectedPackage({ ...parsedPackage, finalPrice });
     } else {
       navigate("/package");
     }
+
+    fetchUserInfo();
   }, [navigate]);
 
   const paymentMethods = [
     {
-      id: 0,
-      name: "Thẻ Visa/Mastercard",
-      description: "Thanh toán an toàn qua cổng VNPAY",
-      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png",
-    },
-    {
       id: 1,
-      name: "Ví MoMo",
+      name: "PAYOS",
       description: "Quét mã QR để thanh toán",
-      image: "https://homepage.momocdn.net/fileuploads/svg/momo-file-240411162904.svg",
-    },
-    {
-      id: 2,
-      name: "Chuyển khoản ngân hàng",
-      description: "Hỗ trợ +40 ngân hàng tại Việt Nam",
-      image: "https://theme.hstatic.net/200000467803/1000988268/14/cart_pay_2.png?v=815",
+      image: "https://payos.vn/docs/img/logo.svg",
     },
   ];
 
@@ -55,34 +67,41 @@ const Checkout = () => {
   };
 
   const createOrder = async () => {
+    const token = localStorage.getItem("authToken");
     setLoading(true);
     try {
       const orderData = {
         PackageID: selectedPackage?.packageID,
         Quantity: 1,
-        CustomerInfo: formData,
+        // CustomerInfo: formData,
       };
 
-      const returnUrl = "http://localhost:3000/payment/success";
-      const cancelUrl = "http://localhost:3000/payment/cancel";
+      const returnUrl = `http://localhost:5173/checkout/success`;
+      const cancelUrl = `http://localhost:5173/checkout/cancel`;
 
-      const response = await api(
-        `/api/orders/create?returnUrl=${encodeURIComponent(returnUrl)}&cancelUrl=${encodeURIComponent(cancelUrl)}`,
+      const response = await apiFetch(
+        `/api/orders/create?returnUrl=${returnUrl}&cancelUrl=${cancelUrl}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(orderData),
         }
       );
 
       const result = await response.json();
-      setOrderId(result.orderId);
-      setPaymentLink(result.paymentLink);
-
-      if (result.paymentLink) {
-        window.location.href = result.paymentLink;
+      if (result) {
+        localStorage.setItem("orderId", JSON.stringify(result));
+      }
+      console.log("Order result:", result);
+      if (result) {
+        if (result?.paymentLink) {
+          window.location.href = result.paymentLink;
+        } else {
+          message.error(`Lỗi khi tạo đơn hàng: ${result.message}`);
+        }
       }
     } catch (error) {
       console.error("Lỗi khi tạo đơn hàng:", error);
@@ -93,7 +112,7 @@ const Checkout = () => {
 
   const handleCheckout = () => {
     if (!formData.fullName || !formData.email || !formData.phone) {
-      alert("Vui lòng điền đầy đủ thông tin");
+      message.warning("Vui lòng điền đầy đủ thông tin");
       return;
     }
     createOrder();
@@ -160,13 +179,15 @@ const Checkout = () => {
         </div>
 
         <h2 className="payment-section-title">Phương thức thanh toán</h2>
-        <div className="payment-methods">
+        <div className="payment-methods ">
           {paymentMethods.map((method) => (
             <motion.div
               key={method.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`payment-method ${selectedPayment === method.id ? "selected" : ""}`}
+              className={`payment-method selected ${
+                selectedPayment === method.id ? "selected" : ""
+              }`}
               onClick={() => setSelectedPayment(method.id)}
             >
               <img src={method.image} alt={method.name} />
@@ -192,7 +213,7 @@ const Checkout = () => {
           <div>
             <div className="package-name">{selectedPackage.name}</div>
             <div className="package-duration">
-              Thời hạn: {selectedPackage.duration} tháng
+              <b> Thời hạn: {selectedPackage.duration} phút</b>
             </div>
           </div>
           <div className="package-price">
@@ -209,7 +230,7 @@ const Checkout = () => {
 
         <div className="payment-order-total">
           <div>Tổng cộng</div>
-          <div>{selectedPackage.finalPrice}₫</div>
+          <div>{selectedPackage.finalPrice.toLocaleString()}₫</div>
         </div>
 
         <motion.button

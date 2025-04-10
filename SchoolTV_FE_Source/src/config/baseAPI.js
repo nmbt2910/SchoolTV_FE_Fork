@@ -9,9 +9,9 @@ export default function apiFetch(request, requestInit) {
   const url = new URL(request, import.meta.env.VITE_SERVER_API_URL);
   const token = localStorage.getItem("authToken")?.replaceAll('"', "");
   const headers = {
-    'Accept': 'application/json',
+    Accept: "application/json",
     ...requestInit?.headers,
-    Authorization: `Bearer ${token}`
+    Authorization: `Bearer ${token}`,
   };
 
   return originalFetch(url, { ...requestInit, headers });
