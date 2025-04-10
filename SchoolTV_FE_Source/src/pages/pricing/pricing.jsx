@@ -38,21 +38,28 @@ const PricingPage = () => {
           throw new Error("No authentication token found");
         }
 
-        const response = await apiFetch('/api/Package/active');
-        
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await apiFetch("/api/Package/active");
+
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
-        
+     
+
+        console.log("Data fetched:", data);
+
         if (!data?.$values) {
           throw new Error("Invalid package data structure");
         }
 
-        setPackages(data.$values.map(pkg => ({
-          ...pkg,
-          features: featureMapping[pkg.packageID] || ["Tính năng đang cập nhật..."],
-        })));
-        
+        setPackages(
+          data.$values.map((pkg) => ({
+            ...pkg,
+            features: featureMapping[pkg.packageID] || [
+              "Tính năng đang cập nhật...",
+            ],
+          }))
+        );
       } catch (err) {
         setError(err.message);
         console.error("Package fetch error:", err);
@@ -80,7 +87,8 @@ const PricingPage = () => {
       <div className="prc-hero">
         <h1 className="prc-title">Lựa Chọn Gói Dịch Vụ Phù Hợp</h1>
         <p className="prc-subtitle">
-          Giải pháp streaming và học trực tuyến toàn diện cho mọi quy mô trường học
+          Giải pháp streaming và học trực tuyến toàn diện cho mọi quy mô trường
+          học
         </p>
       </div>
 
@@ -90,13 +98,18 @@ const PricingPage = () => {
             <div className="prc-error-icon">⚠️</div>
             <div>
               <h3>Có lỗi xảy ra!</h3>
-              <p>{error}. Vui lòng thử lại sau hoặc <a href="/contact">liên hệ hỗ trợ</a></p>
+              <p>
+                {error}. Vui lòng thử lại sau hoặc{" "}
+                <a href="/contact">liên hệ hỗ trợ</a>
+              </p>
             </div>
           </div>
         ) : packages.length === 0 ? (
           <div className="prc-empty">
             <div className="prc-empty-illustration">🎯</div>
-            <p className="prc-empty-text">Hiện không có gói dịch vụ nào khả dụng</p>
+            <p className="prc-empty-text">
+              Hiện không có gói dịch vụ nào khả dụng
+            </p>
           </div>
         ) : (
           packages.map((pkg) => (
@@ -105,7 +118,9 @@ const PricingPage = () => {
               <div className="prc-card-header">
                 <h3 className="prc-plan">{pkg.name}</h3>
                 <div className="prc-price">
-                  <span className="prc-amount">{pkg.price.toLocaleString()}</span>
+                  <span className="prc-amount">
+                    {pkg.price.toLocaleString()}
+                  </span>
                   <span className="prc-currency">VND/tháng</span>
                 </div>
               </div>
@@ -114,7 +129,7 @@ const PricingPage = () => {
                 {pkg.features.map((feature, idx) => (
                   <li key={idx} className="prc-feature">
                     <svg className="prc-feature-icon" viewBox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                     </svg>
                     <span>{feature}</span>
                   </li>
@@ -128,7 +143,7 @@ const PricingPage = () => {
                 >
                   Mua ngay
                   <svg className="prc-btn-icon" viewBox="0 0 24 24">
-                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />
                   </svg>
                 </button>
                 <button

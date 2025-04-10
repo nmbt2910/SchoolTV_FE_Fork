@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, Home, FileText } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import apiFetch from "../../../config/baseAPI"; // Đảm bảo đường dẫn đúng
 import "./success.css";
-import { Link } from "react-router-dom";
+
 const PaymentSuccess = () => {
   const [theme, setTheme] = useState("light");
+  const [orderDetails, setOrderDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [orders, setOrders] = useState([]);
 
+  const dataOrderId = JSON.parse(localStorage.getItem("orderId"));
+  const orderId = dataOrderId.orderId;
+  console.log(orderId, "orderId");
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
@@ -14,7 +23,46 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-  }, []);
+  }, [theme]);
+
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        if (!orderId) {
+          throw new Error("Không tìm thấy mã đơn hàng");
+        }
+
+        const response = await apiFetch(`/api/orders/${orderId}`);
+        if (!response.ok) {
+          throw new Error(`Lỗi khi lấy thông tin đơn hàng: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const orderDetails = data.orderDetails.$values;
+        console.log("Order details Thanh:", data);
+        setOrderDetails(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetails();
+  }, [orderId]);
+
+  if (loading) {
+    return <div className="loading-spinner">Đang tải...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="error-message">
+        <p>Đã xảy ra lỗi: {error}</p>
+        <Link to="/">Quay lại trang chủ</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="success-container">
@@ -63,19 +111,29 @@ const PaymentSuccess = () => {
         >
           <div className="detail-row">
             <span>Mã đơn hàng</span>
-            <span>#SCH123456</span>
+            <span>{orderDetails?.orderCode || "Không xác định"}</span>
           </div>
           <div className="detail-row">
             <span>Gói đăng ký</span>
-            <span>Premium Course</span>
+            <span>
+              {orderDetails?.orderDetails?.$values[0]?.package?.name ||
+                "Không xác định"}
+            </span>
           </div>
           <div className="detail-row">
             <span>Thời gian</span>
-            <span>{new Date().toLocaleDateString()}</span>
+            <span>
+              {new Date(orderDetails?.createdAt).toLocaleDateString() ||
+                "Không xác định"}
+            </span>
           </div>
           <div className="detail-row">
             <span>Tổng thanh toán</span>
-            <span>1,999,000 VNĐ</span>
+            <span>{orderDetails?.totalPrice?.toLocaleString()} VNĐ</span>
+          </div>
+          <div className="detail-row">
+            <span>Trạng thái</span>
+            <span>{orderDetails?.status || "Không xác định"}</span>
           </div>
         </motion.div>
 

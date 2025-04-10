@@ -85,6 +85,9 @@ const Checkout = () => {
       );
 
       const result = await response.json();
+      if (result) {
+        localStorage.setItem("orderId", JSON.stringify(result));
+      }
       console.log("Order result:", result);
       if (result) {
         setOrderId(result.orderId);

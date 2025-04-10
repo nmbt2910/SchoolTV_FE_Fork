@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ThemeContext } from '../context/ThemeContext';
-import './Header.css';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import apiFetch from '../config/baseAPI';
-import darkLogo from '../assets/dark-tv-logo.png';
-import lightLogo from '../assets/light-tv-logo.png';
+import React, { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { ThemeContext } from "../context/ThemeContext";
+import "./Header.css";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import apiFetch from "../config/baseAPI";
+import darkLogo from "../assets/dark-tv-logo.png";
+import lightLogo from "../assets/light-tv-logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,11 +16,11 @@ const Header = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    
+    const token = localStorage.getItem("authToken");
+
     if (token) {
       // First try to load from localStorage for immediate display
-      const storedUserData = localStorage.getItem('userData');
+      const storedUserData = localStorage.getItem("userData");
       if (storedUserData) {
         try {
           const parsedUserData = JSON.parse(storedUserData);
@@ -32,55 +32,58 @@ const Header = () => {
       }
 
       // Determine if user is Admin from localStorage
-      const isAdmin = storedUserData && JSON.parse(storedUserData).roleName === "Admin";
+      const isAdmin =
+        storedUserData && JSON.parse(storedUserData).roleName === "Admin";
       const accountID = storedUserData && JSON.parse(storedUserData).accountID;
 
       // Then fetch fresh data from the appropriate API
-      const apiUrl = isAdmin 
-        ? `accounts/admin/${accountID}`
-        : 'accounts/info';
+      const apiUrl = isAdmin ? `accounts/admin/${accountID}` : "accounts/info";
 
       apiFetch(apiUrl, {
         headers: {
-          'accept': '*/*'
-        }
+          accept: "*/*",
+        },
       })
-        .then(res => {
+        .then((res) => {
           if (!res.ok) {
             throw new Error(`Failed to fetch user data: ${res.status}`);
           }
           return res.json();
         })
-        .then(data => {
+        .then((data) => {
           console.log("API response for user info:", data);
-          
+
           // Handle different response structures for Admin vs regular user
-          const userData = isAdmin ? {
-            accountID: data.accountID,
-            username: data.username,
-            email: data.email,
-            fullname: data.fullname,
-            address: data.address,
-            phoneNumber: data.phoneNumber,
-            roleName: data.role.roleName
-          } : {
-            accountID: data.accountID,
-            username: data.username,
-            email: data.email,
-            fullname: data.fullname,
-            address: data.address,
-            phoneNumber: data.phoneNumber,
-            roleName: data.roleName || (storedUserData ? JSON.parse(storedUserData).roleName : null)
-          };
-          
+          const userData = isAdmin
+            ? {
+                accountID: data.accountID,
+                username: data.username,
+                email: data.email,
+                fullname: data.fullname,
+                address: data.address,
+                phoneNumber: data.phoneNumber,
+                roleName: data.role.roleName,
+              }
+            : {
+                accountID: data.accountID,
+                username: data.username,
+                email: data.email,
+                fullname: data.fullname,
+                address: data.address,
+                phoneNumber: data.phoneNumber,
+                roleName:
+                  data.roleName ||
+                  (storedUserData ? JSON.parse(storedUserData).roleName : null),
+              };
+
           setUser(userData);
-          localStorage.setItem('userData', JSON.stringify(userData));
+          localStorage.setItem("userData", JSON.stringify(userData));
         })
-        .catch(err => {
-          console.error('Error fetching user info:', err);
-          if (err.message.includes('Failed to fetch user data')) {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('userData');
+        .catch((err) => {
+          console.error("Error fetching user info:", err);
+          if (err.message.includes("Failed to fetch user data")) {
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("userData");
             setUser(null);
           }
         });
@@ -90,18 +93,17 @@ const Header = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userData");
     setUser(null);
-    navigate('/login');
+    navigate("/login");
   };
 
   useEffect(() => {
-    const favicon = document.getElementById('favicon');
+    const favicon = document.getElementById("favicon");
     if (favicon) {
-      favicon.href = theme === 'dark' 
-        ? '/img/dark-tv-logo.png' 
-        : '/img/light-tv-logo.png';
+      favicon.href =
+        theme === "dark" ? "/img/dark-tv-logo.png" : "/img/light-tv-logo.png";
     }
   }, [theme]);
 
@@ -112,34 +114,48 @@ const Header = () => {
   return (
     <header className="header">
       <a href="/" className="logo">
-        <img 
-          src={theme === 'dark' ? darkLogo : lightLogo} 
-          alt="SchoolTV Logo" 
-          className="logo-img" 
+        <img
+          src={theme === "dark" ? darkLogo : lightLogo}
+          alt="SchoolTV Logo"
+          className="logo-img"
         />
         SchoolTV
       </a>
 
-      <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-        <i className={`fas ${isMenuOpen ? 'fa-times' : 'fa-bars'}`}></i>
+      <button
+        className="mobile-menu-btn"
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      >
+        <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"}`}></i>
       </button>
 
-      <nav className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
-        <a href="/" onClick={() => setIsMenuOpen(false)}>Trang Chủ</a>
-        <a href="/liveList" onClick={() => setIsMenuOpen(false)}>Trực Tiếp</a>
-        <a href="/channelList" onClick={() => setIsMenuOpen(false)}>Trường Học</a>
+      <nav className={`nav-links ${isMenuOpen ? "active" : ""}`}>
+        <a href="/" onClick={() => setIsMenuOpen(false)}>
+          Trang Chủ
+        </a>
+        <a href="/liveList" onClick={() => setIsMenuOpen(false)}>
+          Trực Tiếp
+        </a>
+        <a href="/channelList" onClick={() => setIsMenuOpen(false)}>
+          Trường Học
+        </a>
         <button
           className="theme-toggle"
           onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
         >
-          <i className={`fas ${theme === 'light' ? 'fa-moon' : 'fa-sun'}`}></i>
+          <i className={`fas ${theme === "light" ? "fa-moon" : "fa-sun"}`}></i>
         </button>
 
         {user ? (
-          <div className="user-profile" onClick={() => setShowDropdown(!showDropdown)}>
+          <div
+            className="user-profile"
+            onClick={() => setShowDropdown(!showDropdown)}
+          >
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullname || 'User')}&background=random&size=256&font-size=0.37`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                user.fullname || "User"
+              )}&background=random&size=256&font-size=0.37`}
               alt="Profile"
               className="profile-pic"
             />
@@ -169,7 +185,10 @@ const Header = () => {
                 )}
                 {isSchoolOwner && (
                   <>
-                    <a href="/school-studio/statistics" className="dropdown-item studio-link">
+                    <a
+                      href="/school-studio/statistics"
+                      className="dropdown-item studio-link"
+                    >
                       <i className="fas fa-tv"></i> SchoolTV Studio
                     </a>
                     <div className="dropdown-divider"></div>
@@ -185,7 +204,11 @@ const Header = () => {
             )}
           </div>
         ) : (
-          <a href="login" className="cta-button primary-button" onClick={() => setIsMenuOpen(false)}>
+          <a
+            href="login"
+            className="cta-button primary-button"
+            onClick={() => setIsMenuOpen(false)}
+          >
             Đăng Nhập
           </a>
         )}
