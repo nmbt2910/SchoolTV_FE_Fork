@@ -17,9 +17,71 @@ const WatchLive = () => {
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
-
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const playerRef = useRef(null);
   const chatMessagesRef = useRef(null);
+
+  const scheduleData = [
+    {
+      time: "07:25",
+      name: "Vì một tương lai xanh: Vẽ tranh bích họa môi trường",
+      description: "Chương trình về môi trường",
+      status: "past"
+    },
+    {
+      time: "07:30",
+      name: "Nèo về nguồn cội: Nhân bạc của người Chu Ru",
+      description: "Phim tài liệu",
+      status: "past"
+    },
+    {
+      time: "07:45",
+      name: "Ký sự: Tình quê trong lá",
+      description: "Phóng sự - Ký sự",
+      status: "live"
+    },
+    {
+      time: "08:00",
+      name: "Phim truyện: Mỹ nhân Sài Thành - Tập 2",
+      description: "Phim truyện",
+      status: "upcoming"
+    },
+    {
+      time: "08:50",
+      name: "Một vòng Việt Nam: Thung Nham - Bản tình ca mùa xuân",
+      description: "Du lịch - Văn hóa",
+      status: "upcoming"
+    },
+    {
+      time: "09:00",
+      name: "Thời sự",
+      description: "Tin tức - Thời sự",
+      status: "upcoming"
+    }
+  ];
+
+  useEffect(() => {
+    if (isScheduleOpen) {
+      document.body.classList.add('scroll-lock');
+    } else {
+      document.body.classList.remove('scroll-lock');
+    }
+    return () => {
+      document.body.classList.remove('scroll-lock');
+    };
+  }, [isScheduleOpen]);
+
+  const handleScheduleClick = () => {
+    setIsScheduleOpen(!isScheduleOpen);
+    setShowSchedule(!showSchedule);
+  };
+
+  const handleScheduleClose = () => {
+    setIsScheduleOpen(false);
+    setShowSchedule(false);
+  };
 
   const mockUsers = [
     { name: 'Minh Anh', badge: 'Mod' },
@@ -134,7 +196,7 @@ const WatchLive = () => {
   };
 
   return (
-  <div className="main-container" style={{ background: 'var(--bg-color)' }}>
+    <div className="main-container" style={{ background: 'var(--bg-color)' }}>
       <div className="content-section">
         <section className="stream-section">
           <div className="video-container">
@@ -162,10 +224,10 @@ const WatchLive = () => {
               <div className="volume-control">
                 <button className="control-button" onClick={toggleMute}>
                   <i className={`fas ${isMuted || volume === 0
-                      ? 'fa-volume-mute'
-                      : volume < 50
-                        ? 'fa-volume-down'
-                        : 'fa-volume-up'
+                    ? 'fa-volume-mute'
+                    : volume < 50
+                      ? 'fa-volume-down'
+                      : 'fa-volume-up'
                     }`} />
                 </button>
                 <input
@@ -179,6 +241,87 @@ const WatchLive = () => {
                     background: `linear-gradient(to right, var(--primary-color) ${volume}%, rgba(255, 255, 255, 0.3) ${volume}%)`
                   }}
                 />
+              </div>
+
+              <div style={{ position: 'relative' }}>
+                <button
+                  className="schedule-button"
+                  onClick={handleScheduleClick}
+                >
+                  <i className="fas fa-calendar-alt" /> Lịch chiếu
+                </button>
+
+                {showSchedule && (
+                  <>
+                    <div className="schedule-backdrop" onClick={handleScheduleClose} />
+                    <div className="schedule-popup safe-area-bottom">
+                      <div className="schedule-header">
+                        <h3 className="schedule-title">
+                          <i className="fas fa-calendar-alt" /> Lịch phát sóng
+                        </h3>
+                        <button
+                          className="schedule-close"
+                          onClick={handleScheduleClose}
+                        >
+                          <i className="fas fa-times" />
+                        </button>
+                      </div>
+
+                      <div className="schedule-content">
+                        <div className="schedule-nav">
+                          <div className="schedule-date">
+                            <i className="fas fa-calendar" />
+                            {currentDate.toLocaleDateString('vi-VN', {
+                              weekday: 'long',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </div>
+                          <div className="schedule-arrows">
+                            <button
+                              className="schedule-arrow"
+                              onClick={() => {
+                                const newDate = new Date(currentDate);
+                                newDate.setDate(newDate.getDate() - 1);
+                                setCurrentDate(newDate);
+                              }}
+                            >
+                              <i className="fas fa-chevron-left" />
+                            </button>
+                            <button
+                              className="schedule-arrow"
+                              onClick={() => {
+                                const newDate = new Date(currentDate);
+                                newDate.setDate(newDate.getDate() + 1);
+                                setCurrentDate(newDate);
+                              }}
+                            >
+                              <i className="fas fa-chevron-right" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {scheduleData.map((item, index) => (
+                          <div
+                            key={index}
+                            className={`schedule-item ${item.status}`}
+                            style={{ '--item-index': index }}
+                          >
+                            <div className="schedule-time">
+                              <div className={`time-indicator ${item.status}`} />
+                              {item.time}
+                            </div>
+                            <div className="schedule-info">
+                              <div className="schedule-name">{item.name}</div>
+                              <div className="schedule-description">{item.description}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               <button
@@ -234,117 +377,6 @@ const WatchLive = () => {
                 <li>Vinh danh sinh viên xuất sắc</li>
                 <li>Các tiết mục văn nghệ đặc sắc</li>
               </ul>
-            </div>
-          </div>
-        </section>
-
-        <section className="suggested-content">
-          <div className="content-tabs">
-            <button
-              className={`content-tab ${activeTab === 'live' ? 'active' : ''}`}
-              onClick={() => setActiveTab('live')}
-            >
-              Đang Live
-            </button>
-            <button
-              className={`content-tab ${activeTab === 'videos' ? 'active' : ''}`}
-              onClick={() => setActiveTab('videos')}
-            >
-              Video Gợi Ý
-            </button>
-            <button
-              className={`content-tab ${activeTab === 'posts' ? 'active' : ''}`}
-              onClick={() => setActiveTab('posts')}
-            >
-              Bài Viết
-            </button>
-          </div>
-
-          <div className={`tab-content ${activeTab === 'live' ? 'active' : ''}`}>
-            <div className="content-card" data-aos="fade-up">
-              <div className="content-thumbnail">
-                <img src="https://picsum.photos/200/120?random=1" alt="Live thumbnail" />
-                <div className="live-indicator">
-                  <span className="pulse"></span> LIVE
-                </div>
-              </div>
-              <div className="content-info">
-                <h3 className="content-title">Hội thảo: Công nghệ AI trong Giáo dục</h3>
-                <div className="content-meta">
-                  <span>ĐH FPT</span>
-                  <span><i className="fas fa-users" /> 856 người xem</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="content-card" data-aos="fade-up" data-aos-delay="100">
-              <div className="content-thumbnail">
-                <img src="https://picsum.photos/200/120?random=2" alt="Live thumbnail" />
-                <div className="live-indicator">
-                  <span className="pulse"></span> LIVE
-                </div>
-              </div>
-              <div className="content-info">
-                <h3 className="content-title">Workshop: Digital Marketing Trends 2024</h3>
-                <div className="content-meta">
-                  <span>ĐH Ngoại thương</span>
-                  <span><i className="fas fa-users" /> 445 người xem</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={`tab-content ${activeTab === 'videos' ? 'active' : ''}`}>
-            <div className="content-card" data-aos="fade-up">
-              <div className="content-thumbnail">
-                <img src="https://picsum.photos/200/120?random=3" alt="Video thumbnail" />
-                <span className="duration">15:24</span>
-              </div>
-              <div className="content-info">
-                <h3 className="content-title">Top 10 Lý Do Chọn ĐH Bách Khoa</h3>
-                <div className="content-meta">
-                  <span>ĐH Bách Khoa Hà Nội</span>
-                  <span><i className="fas fa-eye" /> 12K lượt xem</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="content-card" data-aos="fade-up" data-aos-delay="100">
-              <div className="content-thumbnail">
-                <img src="https://picsum.photos/200/120?random=4" alt="Video thumbnail" />
-                <span className="duration">22:15</span>
-              </div>
-              <div className="content-info">
-                <h3 className="content-title">Một Ngày Của Sinh Viên Y Khoa</h3>
-                <div className="content-meta">
-                  <span>ĐH Y Hà Nội</span>
-                  <span><i className="fas fa-eye" /> 8.5K lượt xem</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className={`tab-content ${activeTab === 'posts' ? 'active' : ''}`}>
-            <div className="content-card" data-aos="fade-up">
-              <div className="content-info">
-                <h3 className="content-title">
-                  🎉 Chúc mừng đội tuyển sinh viên FTU đã đạt giải Nhất cuộc thi "Marketing Challenge 2023"!
-                </h3>
-                <div className="content-meta">
-                  <span>ĐH Ngoại thương</span>
-                  <span><i className="far fa-clock" /> 2 giờ trước</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="content-card" data-aos="fade-up" data-aos-delay="100">
-              <div className="content-info">
-                <h3 className="content-title">📢 Thông báo tuyển sinh năm học 2024-2025</h3>
-                <div className="content-meta">
-                  <span>ĐH Bách Khoa Hà Nội</span>
-                  <span><i className="far fa-clock" /> 3 giờ trước</span>
-                </div>
-              </div>
             </div>
           </div>
         </section>

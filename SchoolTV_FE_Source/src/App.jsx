@@ -43,6 +43,8 @@ import CreatePackage from "./pages/AdminPage/CreatePackage";
 import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage";
 import PaymentSuccess from "./pages/PaymentComplete/Success/success";
 import PaymentCancel from "./pages/PaymentComplete/Cancel/cancel";
+import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage";
+import ViewChannelProgram from "./pages/watch-program/ViewChannelProgram";
 import StudioChannel from "./pages/school-channel/view-channel/StudioChannel";
 import StudioPrograms from "./pages/school-channel/program-manage/StudioPrograms";
 
@@ -161,7 +163,7 @@ function App() {
         },
         {
           path: "your-channel",
-          element: <StudioChannel />
+          element: <StudioChannel />,
         },
         {
           path: "program-manage",
@@ -169,9 +171,9 @@ function App() {
             {
               index: true,
               element: <StudioPrograms />,
-            }
-          ]
-        }
+            },
+          ],
+        },
       ],
     },
     {
@@ -240,6 +242,10 @@ function App() {
         {
           path: "/program/:id",
           element: <ProgramDetailPage />,
+        },
+        {
+          path: "/view-channel/:channelId",
+          element: <ViewChannelProgram />,
         },
         {
           path: "/adminpage",

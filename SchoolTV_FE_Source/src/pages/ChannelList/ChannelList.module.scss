@@ -41,6 +41,24 @@
   padding-top: 70px;
 }
 
+.authError {
+  text-align: center;
+  padding-top: 200px;
+  padding-bottom: 0px;
+  
+  h3 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--chnl-text);
+  }
+
+  p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    color: var(--chnl-text);
+  }
+}
+
 // Updated Search Section
 .chnl_search {
   background: var(--chnl-card-bg);

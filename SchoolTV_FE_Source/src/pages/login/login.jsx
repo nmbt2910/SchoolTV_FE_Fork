@@ -104,15 +104,6 @@ function Login() {
         <h1>Chào mừng trở lại</h1>
         <p>Đăng nhập để tiếp tục hành trình của bạn</p>
 
-        <button className="auth-login-google">
-          <img
-            src="https://img.icons8.com/color/24/000000/google-logo.png"
-            alt="Google"
-            className="auth-login-google-icon"
-          />
-          Tiếp tục với Google
-        </button>
-
         <Link to="/school-login" className="auth-login-school">
           <svg
             className="auth-login-school-icon"

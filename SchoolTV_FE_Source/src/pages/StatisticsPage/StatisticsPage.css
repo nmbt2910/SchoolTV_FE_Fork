@@ -1,8 +1,6 @@
-/* StatisticsPage.css - Modified with unique class names */
-/* Base styles and theme variables */
 .stats-page {
     padding: 24px; /* Changed from just 24px to match header's 5% */
-    padding-top: 90px;
+    padding-top: 30px;
     background: var(--bg-color);
     min-height: 100vh;
     transition: all 0.3s ease;
@@ -591,7 +589,7 @@
 @media (max-width: 768px) {
     .stats-page {
         padding: 16px; /* Match header's 3% on tablet */
-        padding-top: 80px;
+        padding-top: 30px;
     }
 
     .stats-page-header {
