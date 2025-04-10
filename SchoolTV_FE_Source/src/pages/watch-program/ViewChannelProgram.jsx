@@ -78,8 +78,8 @@ function ViewChannelProgram() {
       if (data) {
         const time = data.data.$values
           .map((schedule) => {
-            const start = dayjs.utc(schedule.startTime).tz("Asia/Ho_Chi_Minh");
-            const end = dayjs.utc(schedule.endTime).tz("Asia/Ho_Chi_Minh");
+            const start = dayjs(schedule.startTime); 
+            const end = dayjs(schedule.endTime);
 
             return {
               startTime: start,
