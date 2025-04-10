@@ -40,7 +40,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CreateSchoolChannel from "./pages/school-channel/create/CreateSchoolChannel";
 import AdminPackage from "./pages/AdminPage/AdminPackage";
 import CreatePackage from "./pages/AdminPage/CreatePackage";
-import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage"; // Keep this one
+import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage";
+import PaymentSuccess from "./pages/PaymentComplete/Success/success";
+import PaymentCancel from "./pages/PaymentComplete/Cancel/cancel";
+import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage";
 import ViewChannelProgram from "./pages/watch-program/ViewChannelProgram";
 import StudioChannel from "./pages/school-channel/view-channel/StudioChannel";
 import StudioPrograms from "./pages/school-channel/program-manage/StudioPrograms";
@@ -65,6 +68,28 @@ function App() {
           <Login />
         </ThemeProvider>
       ),
+    },
+    {
+      path: "/checkout/cancel",
+      element: (
+        <ThemeProvider>
+          <ScrollToTopWrapper />
+          <PaymentCancel />
+        </ThemeProvider>
+      ),
+    },
+    {
+      path: "/checkout/success",
+      element: (
+        <ThemeProvider>
+          <ScrollToTopWrapper />
+          <PaymentSuccess />
+        </ThemeProvider>
+      ),
+    },
+    {
+      path: "/upcomingDetail",
+      element: <UpComingDetail />,
     },
     {
       path: "/register",
@@ -209,10 +234,6 @@ function App() {
         {
           path: "/checkout",
           element: <Checkout />,
-        },
-        {
-          path: "/upcomingDetail",
-          element: <UpComingDetail />,
         },
         {
           path: "/communityPost",
