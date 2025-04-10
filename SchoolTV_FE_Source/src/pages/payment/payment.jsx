@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../../config/baseAPI";
 import "./payment.css";
+import apiFetch from "../../config/baseAPI";
+import { message } from "antd";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -31,19 +33,22 @@ const Checkout = () => {
       id: 0,
       name: "Thẻ Visa/Mastercard",
       description: "Thanh toán an toàn qua cổng VNPAY",
-      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png",
+      image:
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png",
     },
     {
       id: 1,
       name: "Ví MoMo",
       description: "Quét mã QR để thanh toán",
-      image: "https://homepage.momocdn.net/fileuploads/svg/momo-file-240411162904.svg",
+      image:
+        "https://homepage.momocdn.net/fileuploads/svg/momo-file-240411162904.svg",
     },
     {
       id: 2,
       name: "Chuyển khoản ngân hàng",
       description: "Hỗ trợ +40 ngân hàng tại Việt Nam",
-      image: "https://theme.hstatic.net/200000467803/1000988268/14/cart_pay_2.png?v=815",
+      image:
+        "https://theme.hstatic.net/200000467803/1000988268/14/cart_pay_2.png?v=815",
     },
   ];
 
@@ -55,34 +60,40 @@ const Checkout = () => {
   };
 
   const createOrder = async () => {
+    const token = localStorage.getItem("authToken");
     setLoading(true);
     try {
       const orderData = {
         PackageID: selectedPackage?.packageID,
         Quantity: 1,
-        CustomerInfo: formData,
+        // CustomerInfo: formData,
       };
 
-      const returnUrl = "http://localhost:3000/payment/success";
-      const cancelUrl = "http://localhost:3000/payment/cancel";
+      const returnUrl = `http://localhost:5173/checkout/success`;
+      const cancelUrl = `http://localhost:5173/checkout/cancel`;
 
-      const response = await api(
-        `/api/orders/create?returnUrl=${encodeURIComponent(returnUrl)}&cancelUrl=${encodeURIComponent(cancelUrl)}`,
+      const response = await apiFetch(
+        `/api/orders/create?returnUrl=${returnUrl}&cancelUrl=${cancelUrl}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(orderData),
         }
       );
 
       const result = await response.json();
-      setOrderId(result.orderId);
-      setPaymentLink(result.paymentLink);
-
-      if (result.paymentLink) {
-        window.location.href = result.paymentLink;
+      console.log("Order result:", result);
+      if (result) {
+        setOrderId(result.orderId);
+        setPaymentLink(result.paymentLink);
+        if (result?.paymentLink) {
+          window.location.href = result.paymentLink;
+        } else {
+          message.error(`Lỗi khi tạo đơn hàng: ${result.message}`);
+        }
       }
     } catch (error) {
       console.error("Lỗi khi tạo đơn hàng:", error);
@@ -93,7 +104,7 @@ const Checkout = () => {
 
   const handleCheckout = () => {
     if (!formData.fullName || !formData.email || !formData.phone) {
-      alert("Vui lòng điền đầy đủ thông tin");
+      message.warning("Vui lòng điền đầy đủ thông tin");
       return;
     }
     createOrder();
@@ -166,7 +177,9 @@ const Checkout = () => {
               key={method.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`payment-method ${selectedPayment === method.id ? "selected" : ""}`}
+              className={`payment-method ${
+                selectedPayment === method.id ? "selected" : ""
+              }`}
               onClick={() => setSelectedPayment(method.id)}
             >
               <img src={method.image} alt={method.name} />

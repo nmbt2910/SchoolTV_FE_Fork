@@ -40,7 +40,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CreateSchoolChannel from "./pages/school-channel/create/CreateSchoolChannel";
 import AdminPackage from "./pages/AdminPage/AdminPackage";
 import CreatePackage from "./pages/AdminPage/CreatePackage";
-import ProgramDetailPage from './pages/ProgramDetail/ProgramDetailPage';
+import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage";
+import PaymentSuccess from "./pages/PaymentComplete/Success/success";
+import PaymentCancel from "./pages/PaymentComplete/Cancel/cancel";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -62,6 +64,28 @@ function App() {
           <Login />
         </ThemeProvider>
       ),
+    },
+    {
+      path: "/checkout/cancel",
+      element: (
+        <ThemeProvider>
+          <ScrollToTopWrapper />
+          <PaymentCancel />
+        </ThemeProvider>
+      ),
+    },
+    {
+      path: "/checkout/success",
+      element: (
+        <ThemeProvider>
+          <ScrollToTopWrapper />
+          <PaymentSuccess />
+        </ThemeProvider>
+      ),
+    },
+    {
+      path: "/upcomingDetail",
+      element: <UpComingDetail />,
     },
     {
       path: "/register",
@@ -195,10 +219,6 @@ function App() {
           element: <Checkout />,
         },
         {
-          path: "/upcomingDetail",
-          element: <UpComingDetail />,
-        },
-        {
           path: "/communityPost",
           element: <CommunityPost />,
         },
@@ -209,7 +229,7 @@ function App() {
         {
           path: "/adminpage",
           element: (
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <AdminPage />
             </ProtectedRoute>
           ),
@@ -217,7 +237,7 @@ function App() {
         {
           path: "/userlist",
           element: (
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <UserList />
             </ProtectedRoute>
           ),
@@ -225,7 +245,7 @@ function App() {
         {
           path: "/adminlist",
           element: (
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <AdminList />
             </ProtectedRoute>
           ),
@@ -233,7 +253,7 @@ function App() {
         {
           path: "/sopending",
           element: (
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <SchoolOwnerPending />
             </ProtectedRoute>
           ),
@@ -241,7 +261,7 @@ function App() {
         {
           path: "/soaccount",
           element: (
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <SchoolOwnerAccount />
             </ProtectedRoute>
           ),
@@ -249,7 +269,7 @@ function App() {
         {
           path: "/adminpackage",
           element: (
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <AdminPackage />
             </ProtectedRoute>
           ),
@@ -257,7 +277,7 @@ function App() {
         {
           path: "/createpackage",
           element: (
-            <ProtectedRoute allowedRoles={['admin']}>
+            <ProtectedRoute allowedRoles={["admin"]}>
               <CreatePackage />
             </ProtectedRoute>
           ),
