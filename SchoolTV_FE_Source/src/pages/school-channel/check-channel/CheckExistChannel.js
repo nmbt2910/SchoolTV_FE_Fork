@@ -6,20 +6,22 @@ export const checkExistChannel = async (accountID) => {
     const url = `/api/schoolchannels/search?${params.toString()}`;
 
     try {
-      const response = await apiFetch(url, { method: "GET" });
-      if(response.status === 404) {
-        return null;
-      }
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Có lỗi xảy ra!");
-      }
+        const response = await apiFetch(url, { method: "GET" });
+        if (response.status === 404) {
+            return null;
+        }
 
-      const data = await response.json();
-      return data;
-      
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Có lỗi xảy ra!");
+        }
+
+        const data = await response.json();
+        // Save the entire response to localStorage
+        localStorage.setItem('schoolChannelData', JSON.stringify(data));
+        return data;
+
     } catch (error) {
-      throw error;
+        throw error;
     }
-  };
+};

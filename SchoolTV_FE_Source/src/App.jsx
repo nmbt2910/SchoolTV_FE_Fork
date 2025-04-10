@@ -41,8 +41,10 @@ import CreateSchoolChannel from "./pages/school-channel/create/CreateSchoolChann
 import AdminPackage from "./pages/AdminPage/AdminPackage";
 import CreatePackage from "./pages/AdminPage/CreatePackage";
 import ProgramDetailPage from "./pages/ProgramDetail/ProgramDetailPage";
-import { View } from "lucide-react";
 import ViewChannelProgram from "./pages/watch-program/ViewChannelProgram";
+import ProgramDetailPage from './pages/ProgramDetail/ProgramDetailPage';
+import StudioChannel from "./pages/school-channel/view-channel/StudioChannel";
+import StudioPrograms from "./pages/school-channel/program-manage/StudioPrograms";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -135,6 +137,19 @@ function App() {
           path: "live-stream",
           element: <StudioLiveStream />,
         },
+        {
+          path: "your-channel",
+          element: <StudioChannel />
+        },
+        {
+          path: "program-manage",
+          children: [
+            {
+              index: true,
+              element: <StudioPrograms />,
+            }
+          ]
+        }
       ],
     },
     {

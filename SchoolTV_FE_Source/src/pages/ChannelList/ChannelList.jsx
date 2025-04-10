@@ -31,6 +31,7 @@ const Toast = ({ message, type, onClose }) => {
 
 const ChannelList = () => {
     const { theme } = useContext(ThemeContext);
+    const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('authToken'));
     const [activeTab, setActiveTab] = useState('explore');
     const [searchTerm, setSearchTerm] = useState('');
     const [searchedTerm, setSearchedTerm] = useState('');
@@ -73,6 +74,8 @@ const ChannelList = () => {
                 const token = localStorage.getItem('authToken');
                 if (!token) {
                     showToast('Vui lòng đăng nhập để tiếp tục', 'error');
+                    setIsAuthenticated(false); // Add this line
+                    setIsLoading(false);
                     return;
                 }
 
@@ -132,6 +135,10 @@ const ChannelList = () => {
     
         fetchInitialData();
     }, []);
+
+    const handleCardClick = useCallback(() => {
+        navigate(`/watchLive`); // Navigate with channel ID
+      }, [navigate]);
 
     const handleSearch = useCallback(async () => {
         if (!searchTerm.trim()) {
@@ -282,7 +289,7 @@ const ChannelList = () => {
         }
     }, []);
 
-    const SchoolCard = useMemo(() => React.memo(({ channel }) => (
+    const SchoolCard = useMemo(() => React.memo(({ channel, onCardClick }) => (
         <motion.div
             className={styles.chnl_card}
             initial={{ opacity: 0, y: 20 }}
@@ -306,9 +313,11 @@ const ChannelList = () => {
             </div>
             <button
                 className={`${styles.chnl_subscribe_btn} ${channel.isSubscribed ? styles.subscribed : ''}`}
-                onClick={() => channel.isSubscribed ? 
+                onClick={ (e) => {
+                    e.stopPropagation();
+                    channel.isSubscribed ? 
                     handleUnsubscription(channel.id) : 
-                    handleSubscription(channel.id)}
+                    handleSubscription(channel.id)}}
                 disabled={isProcessing}
             >
                 {isProcessing ? 'Đang xử lý...' : (channel.isSubscribed ? 'Đã đăng ký' : 'Đăng ký')}
@@ -327,6 +336,17 @@ const ChannelList = () => {
 
     if (error) {
         return <div className={styles.chnl_wrapper}>Error: {error}</div>;
+    }
+
+    if (!isAuthenticated) {
+        return (
+            <div className={styles.chnl_wrapper}>
+                <div className={styles.authError}>
+                    <h3>Bạn chưa đăng nhập</h3>
+                    <p>Bạn phải đăng nhập để thực hiện hành động này.</p>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -471,7 +491,7 @@ const ChannelList = () => {
                 >
                     {(displayChannels || []).length > 0 ? (
                         displayChannels.map((channel) => (
-                            <SchoolCard key={channel.id} channel={channel} />
+                            <SchoolCard key={channel.id} channel={channel} onCardClick={handleCardClick} />
                         ))
                     ) : (
                         <div className={styles.chnl_empty}>
