@@ -1,10 +1,54 @@
 import './CommunityPost.scss';
-import { Avatar, Breadcrumb, Form, Input, Tooltip } from 'antd';
-import { AntDesignOutlined, FireOutlined, GlobalOutlined, HeartOutlined, MessageOutlined, SaveOutlined, SearchOutlined, SendOutlined, SmileOutlined, UserOutlined } from '@ant-design/icons';
-import FPTU from '../../img/FPTU.jpg';
+import { Avatar, Breadcrumb, Form } from 'antd';
+import { UserOutlined, GlobalOutlined } from '@ant-design/icons';
 import Carousel from '../../components/carousel/carousel';
+import  { useEffect, useState } from 'react';
+import apiFetch from '../../config/baseAPI';  
+import { notification } from 'antd';
 
 function CommunityPost() {
+  const [posts, setPosts] = useState([]); 
+  const [loading, setLoading] = useState(true); 
+
+  const token = localStorage.getItem("authToken");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await apiFetch("News/combined", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`, 
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setPosts(data.$values);
+          setLoading(false);
+        } else {
+          throw new Error('Failed to fetch posts');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        notification.error({
+          message: "Lỗi tải dữ liệu",
+          description: "Không thể lấy bài viết từ API. Vui lòng thử lại.",
+          placement: "topRight",
+          duration: 5,
+        });
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);  
+
+  if (loading) {
+    return <div>Loading...</div>; 
+  }
+
   return (
     <div className="community-post-container">
       <div>
@@ -14,92 +58,48 @@ function CommunityPost() {
       <div className="community-post-home">
         <Breadcrumb
           separator=">"
-          items={[
-            {
-              title: 'Home',
-              href: '/watchHome'
-            },
-            {
-              title: 'Bài Viết Cộng Đồng',
-              href: '/CommunityPost',
-            },
-          ]}
+          items={[{ title: 'Home', href: '/watchHome' }, { title: 'Bài Viết Cộng Đồng', href: '/CommunityPost' }]}
         />
       </div>
 
-      <div className="community-post-form">
-        <Form>
+      {posts.map((post) => (
+        <div key={post.newsID} className="community-post-form">
+          <Form>
             <div className="community-post-avatar">
               <Avatar size={50} icon={<UserOutlined />} />
-                <div className="community-post-info">
-                  <a className="community-post-username">FPT University HCM</a>
-                  <a className="community-post-time">2 hours ago <GlobalOutlined/></a>
-                </div>
+              <div className="community-post-info">
+                <a className="community-post-username">
+                  {post.schoolChannel && post.schoolChannel.name ? post.schoolChannel.name : 'N/A'}
+                </a>
+                <a className="community-post-time">
+                  {new Date(post.createdAt).toLocaleString()} <GlobalOutlined />
+                </a>
+              </div>
             </div>
 
             <div className="community-post-content">
-              <span>
-                Sau một tuần trở lại trường, FPTUers đã vào mood chạy deadline chưaa!!?
-              </span>
-              <span>
-                Điểm danh những đồng chí cuối tuần vẫn miệt mài teamworks - taowork nào?
-              </span>
+              <span>{post.title}</span>
+              <span>{post.content}</span>
               <span className="community-post-hashtags">
-                #TruongDaiHocFPT #FPTU #FPTUniversity #FPTUniversityLife #FPTFutureYou
+                {post.categoryNews ? `#${post.categoryNews.name}` : ''}
               </span>
             </div>
 
-            <div className="community-post-image">
-              <img src={FPTU} alt="" />
-            </div>
+            {post.newsPictures && post.newsPictures.$values.length > 0 && (
+              <div className="community-post-image">
+                <img
+                  src={`data:image/jpeg;base64,${post.newsPictures.$values[0].fileData}`}
+                  alt={post.title}
+                />
+              </div>
+            )}
 
-            <div className="community-post-like">
-              <HeartOutlined />
-              <MessageOutlined />
-              <SendOutlined />
-              <SaveOutlined className="community-post-save"/>
-            </div>
+          </Form>
+        </div>
+      ))}
 
-            <div className="community-post-cmt-container">
-              <Avatar.Group
-                size="medium"
-                max={{
-                  count: 2,
-                  style: {
-                    color: '#f56a00',
-                    backgroundColor: '#fde3cf',
-                  },
-                }}
-              >
-                <Avatar src="https://api.dicebear.com/7.x/miniavs/svg?seed=3" />
-                <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
-                <Tooltip title="Ant User" placement="top">
-                  <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
-                </Tooltip>
-                <Avatar style={{ backgroundColor: '#1677ff' }} icon={<AntDesignOutlined />} />
-              </Avatar.Group>
-
-              <span>Liked by <strong>phamtuananh</strong> and others</span>
-            </div>
-
-            <div className="community-post-view-cmt">
-              <span>View all 22,300 comments</span>
-            </div>      
-
-            <div className="community-post-text-area">
-              <Input 
-                placeholder="Add a comment" 
-                addonAfter={<SmileOutlined />}
-              />
-            </div>
-        </Form>
-      </div>
-
-      <div className="community-post-view-more">
-          <a>View more</a>
-      </div>
     </div>
-  )
+  );
 }
 
 export default CommunityPost;
