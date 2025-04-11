@@ -329,7 +329,7 @@ export default function WatchHome() {
       <section className="section">
         <div className="section-header">
           <h2 className="section-title">Bài Viết Cộng Đồng</h2>
-          <a href="#" className="see-all">
+          <a href="/communityPost" className="see-all">
             Xem tất cả <i className="fas fa-arrow-right" />
           </a>
         </div>
