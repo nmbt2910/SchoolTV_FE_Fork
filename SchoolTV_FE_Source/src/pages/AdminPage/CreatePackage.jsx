@@ -1,4 +1,4 @@
-import './Createpackage.scss';
+import './CreatePackage.scss';
 import apiFetch from '../../config/baseAPI'; 
 import { Layout, Form, Input, Button, message } from 'antd';
 import Sider from 'antd/es/layout/Sider';
