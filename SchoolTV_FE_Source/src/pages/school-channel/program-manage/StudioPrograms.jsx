@@ -97,17 +97,18 @@ const StudioPrograms = () => {
     try {
       const savedData = JSON.parse(localStorage.getItem('schoolChannelData'));
       const schoolChannelId = savedData?.$values?.[0]?.schoolChannelID;
-
+  
       if (!schoolChannelId) {
         toast.error('Không tìm thấy thông tin kênh');
         return;
       }
-
+  
       const response = await apiFetch(`Program/by-channel/${schoolChannelId}`);
       if (!response.ok) throw new Error('Lỗi khi tải chương trình');
-
+  
       const data = await response.json();
-      setPrograms(data.data.$values);
+      // Update this line to properly access the $values array
+      setPrograms(data.$values || []);
     } catch (error) {
       toast.error(error.message || 'Có lỗi xảy ra khi tải chương trình');
     } finally {
@@ -195,15 +196,20 @@ const StudioPrograms = () => {
         toast.error('Vui lòng điền đầy đủ thông tin');
         return;
       }
-
-      if (new Date(scheduleForm.startTime) >= new Date(scheduleForm.endTime)) {
+  
+      // Parse the input strings directly (they're in GMT+7)
+      const startGMT7 = new Date(scheduleForm.startTime + '+07:00');
+      const endGMT7 = new Date(scheduleForm.endTime + '+07:00');
+  
+      // Convert to UTC by using toISOString()
+      const startUTC = startGMT7.toISOString();
+      const endUTC = endGMT7.toISOString();
+  
+      if (new Date(startUTC) >= new Date(endUTC)) {
         toast.error('Thời gian kết thúc phải sau thời gian bắt đầu');
         return;
       }
-
-      const startUTC = new Date(scheduleForm.startTime).toISOString();
-      const endUTC = new Date(scheduleForm.endTime).toISOString();
-
+  
       const response = await apiFetch('Schedule', {
         method: 'POST',
         headers: {
@@ -216,9 +222,9 @@ const StudioPrograms = () => {
           isReplay: scheduleForm.isReplay
         })
       });
-
+  
       if (!response.ok) throw new Error('Tạo lịch phát thất bại');
-
+  
       toast.success('Tạo lịch phát thành công!');
       setIsScheduleModalOpen(false);
       setScheduleForm({ programID: '', startTime: '', endTime: '', isReplay: false });

@@ -249,6 +249,7 @@ $modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), tr
 
   .timeContainer {
     .streamStats {
+
       span {
         display: flex;
         align-items: center;
@@ -538,6 +539,7 @@ $modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), tr
     background: var(--card-info-bg);
     width: 100%;
 
+
     .streamTitle {
         // Make sure title is always visible
         -webkit-line-clamp: 3; // Show up to 3 lines
@@ -546,8 +548,6 @@ $modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), tr
         -webkit-box-orient: vertical;
         overflow: hidden;
       }
-
-    
 
     @media (max-width: 768px) {
         padding: 1rem;
@@ -588,11 +588,6 @@ $modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), tr
     opacity: 0.8;
     font-size: 0.9rem;
     
-  }
-  
-  .streamStats {
-    display: flex;
-    gap: 0.75rem;
   }
   
   .streamScheduleCounter {
@@ -1026,3 +1021,14 @@ $modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), tr
       }
     }
   }
+
+  .scheduleDate {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+}
