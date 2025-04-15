@@ -1,8 +1,187 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import './WatchHome.css';
+import apiFetch from "../../config/baseAPI";
 
 export default function WatchHome() {
+  const [liveSchedules, setLiveSchedules] = useState([]);
+  const [upcomingSchedules, setUpcomingSchedules] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [upcomingLoading, setUpcomingLoading] = useState(true);
+  const [videoHistory, setVideoHistory] = useState([]);
+  const [videoLoading, setVideoLoading] = useState(true);
+  const [posts, setPosts] = useState([]);
+  const [postsLoading, setPostsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLiveSchedules = async () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+
+      try {
+        const response = await apiFetch("Schedule/live-now", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json"
+          }
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch live schedules");
+
+        const data = await response.json();
+        setLiveSchedules(data.$values || []);
+      } catch (error) {
+        console.error("Error fetching live schedules:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLiveSchedules();
+  }, []);
+
+  const convertToGMT7 = (dateString) => {
+    if (!dateString) return new Date();
+    const date = new Date(dateString);
+    return new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  };
+
+  // Định dạng ngày giờ
+  const formatDateTime = (date) => {
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const calculateDuration = (start, end) => {
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+    const diff = endTime - startTime;
+
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+
+    return `${hours}h ${minutes}m`;
+  };
+
+  useEffect(() => {
+    // Fetch live schedules
+    const fetchLiveSchedules = async () => {
+      try {
+        const response = await apiFetch("Schedule/live-now", {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+            "Accept": "application/json"
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setLiveSchedules(data.$values || []);
+        }
+      } catch (error) {
+        console.error("Error fetching live schedules:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Fetch upcoming schedules
+    const fetchUpcomingSchedules = async () => {
+      try {
+        const response = await apiFetch("Schedule/timeline", {
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+            "Accept": "application/json"
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUpcomingSchedules(data.data.Upcoming.$values || []);
+        }
+      } catch (error) {
+        console.error("Error fetching upcoming schedules:", error);
+      } finally {
+        setUpcomingLoading(false);
+      }
+    };
+
+    fetchLiveSchedules();
+    fetchUpcomingSchedules();
+  }, []);
+
+  useEffect(() => {
+    const fetchVideoHistory = async () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+
+      try {
+        const response = await apiFetch("VideoHistory/active", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json"
+          }
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch video history");
+
+        const data = await response.json();
+        setVideoHistory(data.$values.slice(0, 6) || []);
+      } catch (error) {
+        console.error("Error fetching video history:", error);
+      } finally {
+        setVideoLoading(false);
+      }
+    };
+
+    fetchVideoHistory();
+  }, []);
+
+  // Hàm chuyển đổi thời gian đã có trong component
+  const getTimeAgo = (dateString) => {
+    const updatedAt = convertToGMT7(dateString);
+    const now = new Date();
+    const diff = now - updatedAt;
+
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days} ngày trước`;
+    if (hours > 0) return `${hours} giờ trước`;
+    return `${minutes} phút trước`;
+  };
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) return;
+
+      try {
+        const response = await apiFetch("News/combined", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json"
+          }
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch posts");
+
+        const data = await response.json();
+        setPosts(data.$values || []);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      } finally {
+        setPostsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
   return (
     <>
       <meta charSet="UTF-8" />
@@ -66,378 +245,234 @@ export default function WatchHome() {
             Xem tất cả <i className="fas fa-arrow-right" />
           </Link>
         </div>
-        <div className="streams-grid">
-          <Link to="/watchLive">
-            <div className="stream-card" style={{ cursor: "pointer" }}>
-              <div className="stream-thumbnail">
-                <img
-                  src="https://th.bing.com/th/id/R.8e4e66e9f40181fe438820b72c858c1f?rik=iUnxzImnEcS3Mw&riu=http%3a%2f%2fwww.rich-group.com.cn%2fupload%2fimage%2f20200909%2f20200909170711431143.JPG&ehk=1AmN2abj2b%2b%2ff2JCt8B1wqgcwHnFmr4%2bQz23yX%2fwetI%3d&risl=&pid=ImgRaw&r=0"
-                  alt="Stream thumbnail"
-                />
-                <div className="live-badge-home">LIVE</div>
-              </div>
-              <div className="stream-info">
-                <h3 className="stream-title">Hội Thảo Công Nghệ AI 2023</h3>
-                <div className="stream-meta">
-                  <span>ĐH Bách Khoa</span>
-                  <span>
-                    <i className="fas fa-users" /> 1.2K người xem
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
 
-          <Link to="/watchLive">
-            <div className="stream-card" style={{ cursor: "pointer" }}>
-              <div className="stream-thumbnail">
-                <img
-                  src="https://cdn.tuoitre.vn/471584752817336320/2024/5/12/dsc8344-17154910796401821942426.jpg"
-                  alt="Stream thumbnail"
-                />
-                <div className="live-badge-home">LIVE</div>
-              </div>
-              <div className="stream-info">
-                <h3 className="stream-title">
-                  Talkshow: Khởi Nghiệp Sinh Viên
-                </h3>
-                <div className="stream-meta">
-                  <span>ĐH Kinh Tế</span>
-                  <span>
-                    <i className="fas fa-users" /> 856 người xem
-                  </span>
+        {loading ? (
+          <div className="loading-placeholder">Đang tải...</div>
+        ) : liveSchedules.length > 0 ? (
+          <div className="streams-grid horizontal-scroll">
+            {liveSchedules.slice(0, 5).map((schedule) => (
+              <Link to="/watchLive" key={schedule.scheduleID}>
+                <div className="stream-card">
+                  <div className="stream-thumbnail">
+                    <img
+                      src={`https://picsum.photos/seed/${schedule.scheduleID}/300/180`}
+                      alt="Stream thumbnail"
+                    />
+                    <div className="live-badge-home">LIVE</div>
+                  </div>
+                  <div className="stream-info">
+                    <h3 className="stream-title">{schedule.programName}</h3>
+                    <div className="stream-meta">
+                      <span>{schedule.schoolChannelName}</span>
+                      <span>
+                        <i className="fas fa-clock" />{" "}
+                        {calculateDuration(schedule.startTime, schedule.endTime)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="no-live-container">
+            <div className="no-live-content">
+              <i className="fas fa-satellite-dish fa-3x" />
+              <p>Không có chương trình trực tiếp nào đang hoạt động.</p>
             </div>
-          </Link>
-
-          <Link to="/watchLive">
-            <div className="stream-card" style={{ cursor: "pointer" }}>
-              <div className="stream-thumbnail">
-                <img
-                  src="https://vov2.vov.vn/sites/default/files/styles/large/public/2021-01/FPT-hoa-lac-VTN-greenmore6.jpg"
-                  alt="Stream thumbnail"
-                />
-                <div className="live-badge-home">LIVE</div>
-              </div>
-              <div className="stream-info">
-                <h3 className="stream-title">Workshop: Digital Marketing</h3>
-                <div className="stream-meta">
-                  <span>ĐH FPT</span>
-                  <span>
-                    <i className="fas fa-users" /> 623 người xem
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
+          </div>
+        )}
       </section>
       <section className="section">
         <div className="section-header">
           <h2 className="section-title">Sắp Diễn Ra</h2>
-          <a href="/upcomingList" className="see-all">
+          <Link to="/LiveList" className="see-all">
             Xem tất cả <i className="fas fa-arrow-right" />
-          </a>
-        </div>
-        <div className="events-grid">
-        <Link to ="/upcomingDetail">
-          <div className="event-card" data-aos="fade-up">
-            <div className="event-date">
-              <i className="far fa-calendar" /> 25/12/2023 - 14:00
-            </div>
-            <h3 className="event-title">Lễ Trao Bằng Tốt Nghiệp</h3>
-            <p>ĐH Quốc Gia Hà Nội</p>
-            <div className="event-meta">
-              <span>
-                <i className="fas fa-map-marker-alt" /> Hội trường A1
-              </span>
-              <span>
-                <i className="fas fa-users" /> 2000 người tham gia
-              </span>
-            </div>
-            <button className="reminder-btn">
-              <i className="far fa-bell" /> Đặt Lịch Nhắc
-            </button>
-          </div>
-          </Link>
-          <Link to ="/upcomingDetail">
-          <div className="event-card" data-aos="fade-up" data-aos-delay={100}>
-            <div className="event-date">
-              <i className="far fa-calendar" /> 27/12/2023 - 09:00
-            </div>
-            <h3 className="event-title">Hội Thảo: Trí Tuệ Nhân Tạo</h3>
-            <p>ĐH Bách Khoa Hà Nội</p>
-            <div className="event-meta">
-              <span>
-                <i className="fas fa-map-marker-alt" /> Phòng Hội Thảo B3
-              </span>
-              <span>
-                <i className="fas fa-users" /> 500 người tham gia
-              </span>
-            </div>
-            <button className="reminder-btn">
-              <i className="far fa-bell" /> Đặt Lịch Nhắc
-            </button>
-          </div>
-          </Link>
-          <Link to ="/upcomingDetail">
-          <div className="event-card" data-aos="fade-up" data-aos-delay={200}>
-            <div className="event-date">
-              <i className="far fa-calendar" /> 28/12/2023 - 15:30
-            </div>
-            <h3 className="event-title">Workshop: Digital Marketing</h3>
-            <p>ĐH Ngoại Thương</p>
-            <div className="event-meta">
-              <span>
-                <i className="fas fa-map-marker-alt" /> Hội trường C2
-              </span>
-              <span>
-                <i className="fas fa-users" /> 300 người tham gia
-              </span>
-            </div>
-            <button className="reminder-btn">
-              <i className="far fa-bell" /> Đặt Lịch Nhắc
-            </button>
-          </div>
-          </Link>
-          <Link to ="/upcomingDetail">
-          <div className="event-card" data-aos="fade-up" data-aos-delay={300}>
-            <div className="event-date">
-              <i className="far fa-calendar" /> 30/12/2023 - 08:00
-            </div>
-            <h3 className="event-title">Ngày Hội Việc Làm 2023</h3>
-            <p>ĐH Kinh Tế Quốc Dân</p>
-            <div className="event-meta">
-              <span>
-                <i className="fas fa-map-marker-alt" /> Sân trường
-              </span>
-              <span>
-                <i className="fas fa-users" /> 5000 người tham gia
-              </span>
-            </div>
-            <button className="reminder-btn">
-              <i className="far fa-bell" /> Đặt Lịch Nhắc
-            </button>
-          </div>
           </Link>
         </div>
+
+        {upcomingLoading ? (
+          <div className="loading-placeholder">Đang tải...</div>
+        ) : upcomingSchedules.length > 0 ? (
+          <div className="events-grid">
+            {upcomingSchedules.map((schedule) => {
+              const startTime = convertToGMT7(schedule.startTime);
+              const endTime = convertToGMT7(schedule.endTime);
+
+              return (
+                <div className="event-card" data-aos="fade-up" key={schedule.scheduleID}>
+                  <div className="event-date">
+                    <i className="far fa-calendar" />
+                    {formatDateTime(startTime)}
+                  </div>
+                  <h3 className="event-title">
+                    <div className="title-text">
+                      {schedule.program.programName}
+                    </div>
+                  </h3>
+                  <p>
+                    {schedule.program.schoolChannel?.name || "Trường không xác định"}
+                  </p>
+                  <div className="event-meta">
+                    <span>
+                      <i className="fas fa-clock" />
+                      {` ${Math.floor((endTime - startTime) / 3600000)}h 
+          ${Math.floor(((endTime - startTime) % 3600000) / 60000)}m`}
+                    </span>
+                  </div>
+                  <Link to={`/program/${schedule.program.programID}`}>
+                    <button className="reminder-btn">
+                      <i className="fas fa-info-circle" /> Xem Chi Tiết
+                    </button>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="no-live-container">
+            <div className="no-live-content">
+              <i className="fas fa-calendar-times fa-3x" />
+              <p>Không có lịch phát sóng nào sắp diễn ra.</p>
+            </div>
+          </div>
+        )}
       </section>
       <section className="section">
         <div className="section-header">
-          <h2 className="section-title">Video Nổi Bật</h2>
-          <a href="featured-video" className="see-all">
+          <h2 className="section-title">Video Lưu Trữ</h2>
+          <a href="/archive" className="see-all">
             Xem tất cả <i className="fas fa-arrow-right" />
           </a>
         </div>
 
-        <div className="videos-grid">
-          <div className="video-card" data-aos="fade-up">
-            <div className="video-thumbnail">
-              <img
-                src="https://huongnghiep.hocmai.vn/wp-content/uploads/2022/03/dh-bach-khoa-tphcm.jpeg"
-                alt="Video thumbnail"
-              />
-              <span className="video-duration">15:24</span>
-            </div>
-            <div className="video-info">
-              <div className="video-header">
-                <img
-                  src="https://vov2.vov.vn/sites/default/files/styles/large/public/2021-01/FPT-hoa-lac-VTN-greenmore6.jpg"
-                  alt="University avatar"
-                  className="university-avatar"
-                />
-                <div className="video-meta">
-                  <h3 className="video-title">
-                    Top 10 Lý Do Chọn ĐH Bách Khoa
-                  </h3>
-                  <p className="university-name">ĐH Bách Khoa Hà Nội</p>
+        {videoLoading ? (
+          <div className="loading-placeholder">Đang tải...</div>
+        ) : videoHistory.length > 0 ? (
+          <div className="videos-grid horizontal-scroll">
+            {videoHistory.map((video) => {
+              const updatedAt = convertToGMT7(video.updatedAt);
+
+              return (
+                <div className="video-card" key={video.videoHistoryID} data-aos="fade-up">
+                  <div className="video-thumbnail">
+                    <img
+                      src={`https://picsum.photos/seed/${video.videoHistoryID}/300/180`}
+                      alt="Video thumbnail"
+                    />
+                  </div>
+                  <div className="video-info">
+                    <div className="video-header">
+                      <h3 className="video-title">
+                        {video.program.programName}
+                      </h3>
+                      <div className="video-meta">
+                        <div className="channel-info">
+                          <img
+                            src={`https://picsum.photos/seed/${video.videoHistoryID}/100/100`}
+                            alt="University avatar"
+                            className="university-avatar"
+                          />
+                          <span className="university-name">
+                            {video.program.schoolChannel?.name || "Trường không xác định"}
+                          </span>
+                        </div>
+                        <div className="video-time">
+                          <i className="far fa-clock" />
+                          {formatDateTime(updatedAt)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="video-stats">
-                <span>
-                  <i className="fas fa-eye" /> 12K lượt xem
-                </span>
-                <span>
-                  <i className="far fa-clock" /> 2 ngày trước
-                </span>
-              </div>
+
+              );
+            })}
+          </div>
+        ) : (
+          <div className="no-live-container">
+            <div className="no-live-content">
+              <i className="fas fa-video-slash fa-3x" />
+              <p>Không có Video Lưu Trữ nào.</p>
             </div>
           </div>
-          <div className="video-card" data-aos="fade-up" data-aos-delay={100}>
-            <div className="video-thumbnail">
-              <img
-                src="https://th.bing.com/th/id/R.24559b8a6c2a76982d878d18cb564a25?rik=2a6LnBf5Dwwjgg&riu=http%3a%2f%2fnganhydakhoa.edu.vn%2fwp-content%2fuploads%2f2020%2f07%2fnganhydakhoa1-kinh-nghiem-cho-bac-si-y-khoa-640x400.jpg&ehk=fdKgbI%2bn0PLNUv3iqc513CXTbQh3i2%2bgpVprVNdNvVE%3d&risl=&pid=ImgRaw&r=0"
-                alt="Video thumbnail"
-              />
-              <span className="video-duration">22:15</span>
-            </div>
-            <div className="video-info">
-              <div className="video-header">
-                <img
-                  src="https://vov2.vov.vn/sites/default/files/styles/large/public/2021-01/FPT-hoa-lac-VTN-greenmore6.jpg"
-                  alt="University avatar"
-                  className="university-avatar"
-                />
-                <div className="video-meta">
-                  <h3 className="video-title">Một Ngày Của Sinh Viên Y Khoa</h3>
-                  <p className="university-name">ĐH Y Hà Nội</p>
-                </div>
-              </div>
-              <div className="video-stats">
-                <span>
-                  <i className="fas fa-eye" /> 8.5K lượt xem
-                </span>
-                <span>
-                  <i className="far fa-clock" /> 5 ngày trước
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="video-card" data-aos="fade-up" data-aos-delay={200}>
-            <div className="video-thumbnail">
-              <img
-                src="https://th.bing.com/th/id/OIP.z5HSKK9MY4hX2bL06q-3pAHaE8?rs=1&pid=ImgDetMain"
-                alt="Video thumbnail"
-              />
-              <span className="video-duration">18:30</span>
-            </div>
-            <div className="video-info">
-              <div className="video-header">
-                <img
-                  src="https://vov2.vov.vn/sites/default/files/styles/large/public/2021-01/FPT-hoa-lac-VTN-greenmore6.jpg"
-                  alt="University avatar"
-                  className="university-avatar"
-                />
-                <div className="video-meta">
-                  <h3 className="video-title">Hướng Dẫn Đăng Ký Học Phần</h3>
-                  <p className="university-name">ĐH Kinh Tế Quốc Dân</p>
-                </div>
-              </div>
-              <div className="video-stats">
-                <span>
-                  <i className="fas fa-eye" /> 15K lượt xem
-                </span>
-                <span>
-                  <i className="far fa-clock" /> 1 tuần trước
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </section>
       <section className="section">
         <div className="section-header">
           <h2 className="section-title">Bài Viết Cộng Đồng</h2>
-          <a href="/communityPost" className="see-all">
+          <Link to="/communityPost" className="see-all">
             Xem tất cả <i className="fas fa-arrow-right" />
-          </a>
+          </Link>
         </div>
-        <div className="posts-grid">
-          <div className="post-card" data-aos="fade-up">
-            <div className="post-header">
-              <img
-                src="https://loremflickr.com/320/240?random=2"
-                alt="University avatar"
-                className="university-avatar"
-              />
-              <div className="post-meta">
-                <h3 className="university-name">ĐH Ngoại Thương</h3>
-                <span className="post-time">2 giờ trước</span>
+
+        {postsLoading ? (
+          <div className="loading-placeholder">Đang tải...</div>
+        ) : posts.length > 0 ? (
+          <div className="posts-grid">
+            {posts.slice(0, 3).map((post) => (
+              <div className="post-card" key={post.newsID} data-aos="fade-up">
+                <div className="post-header">
+                  <img
+                    src={post.schoolChannel?.logoUrl || `https://picsum.photos/seed/${post.newsID}/32/32`}
+                    alt="University avatar"
+                    className="university-avatar"
+                  />
+                  <div className="post-meta">
+                    <h3 className="university-name">
+                      {post.schoolChannel?.name || "Trường không xác định"}
+                    </h3>
+                    <span className="post-time">
+                      {getTimeAgo(post.createdAt)}
+                    </span>
+                  </div>
+                </div>
+                <div className="post-content">
+                  <div className="post-text">
+                    <h4 style={{
+                      fontWeight: '600',
+                      marginBottom: '0.5rem',
+                      display: '-webkit-box',
+                      WebkitLineClamp: '1',
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
+                      {post.title}
+                    </h4>
+                    <p>{post.content}</p>
+                  </div>
+                  {post.newsPictures && post.newsPictures.$values &&
+                    post.newsPictures.$values.length > 0 && (
+                      <div className="post-image-container">
+                        <img
+                          src={`data:image/jpeg;base64,${post.newsPictures.$values[0].fileData}`}
+                          alt={post.title}
+                        />
+                      </div>
+                    )}
+                  <div className="post-actions">
+                    <button>
+                      <i className="far fa-heart" /> {Math.floor(Math.random() * 1000)}
+                    </button>
+                    <button>
+                      <i className="far fa-comment" /> {Math.floor(Math.random() * 100)}
+                    </button>
+                    <button>
+                      <i className="far fa-share-square" /> Chia sẻ
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="post-content">
-              <p>
-                🎉 Chúc mừng đội tuyển sinh viên FTU đã đạt giải Nhất cuộc thi
-                "Marketing Challenge 2023"! Tự hào về các bạn! 🏆
-              </p>
-              <img
-                src="https://loremflickr.com/320/240?random=2"
-                alt="Post image"
-              />
-              <div className="post-actions">
-                <button>
-                  <i className="far fa-heart" /> 1.2K
-                </button>
-                <button>
-                  <i className="far fa-comment" /> 85
-                </button>
-                <button>
-                  <i className="far fa-share-square" /> Chia sẻ
-                </button>
-              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="no-live-container">
+            <div className="no-live-content">
+              <i className="fas fa-newspaper fa-3x" />
+              <p>Không có Bài Viết Cộng Đồng nào được tìm thấy.</p>
             </div>
           </div>
-          <div className="post-card" data-aos="fade-up" data-aos-delay={200}>
-            <div className="post-header">
-              <img
-                src="https://loremflickr.com/320/240?random=2"
-                alt="University avatar"
-                className="university-avatar"
-              />
-              <div className="post-meta">
-                <h3 className="university-name">ĐH Bách Khoa Hà Nội</h3>
-                <span className="post-time">5 giờ trước</span>
-              </div>
-            </div>
-            <div className="post-content">
-              <p>
-                📢 Thông báo quan trọng: Đã mở đăng ký học kỳ 2 năm học
-                2023-2024. Sinh viên vui lòng truy cập cổng thông tin để đăng
-                ký!
-              </p>
-              <img
-                src="https://loremflickr.com/320/240?random=2"
-                alt="Post image"
-              />
-              <div className="post-actions">
-                <button>
-                  <i className="far fa-heart" /> 856
-                </button>
-                <button>
-                  <i className="far fa-comment" /> 123
-                </button>
-                <button>
-                  <i className="far fa-share-square" /> Chia sẻ
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="post-card" data-aos="fade-up" data-aos-delay={200}>
-            <div className="post-header">
-              <img
-                src="https://loremflickr.com/320/240?random=2"
-                alt="University avatar"
-                className="university-avatar"
-              />
-              <div className="post-meta">
-                <h3 className="university-name">ĐH FPT</h3>
-                <span className="post-time">8 giờ trước</span>
-              </div>
-            </div>
-            <div className="post-content">
-              <p>
-                🌟 Chương trình trao đổi sinh viên với các trường đại học Nhật
-                Bản đã chính thức mở đơn!
-              </p>
-              <img
-                src="https://loremflickr.com/320/240?random=2"
-                alt="Post image"
-              />
-              <div className="post-actions">
-                <button>
-                  <i className="far fa-heart" /> 645
-                </button>
-                <button>
-                  <i className="far fa-comment" /> 78
-                </button>
-                <button>
-                  <i className="far fa-share-square" /> Chia sẻ
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </section>
     </>
   );

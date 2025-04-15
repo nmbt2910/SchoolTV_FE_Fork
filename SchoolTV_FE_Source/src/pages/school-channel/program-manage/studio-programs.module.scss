@@ -40,11 +40,23 @@
       gap: 1rem;
       margin: 0;
     }
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
   }
   
   .buttonGroup {
     display: flex;
     gap: 1rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      width: 100%;
+      gap: 0.8rem;
+    }
   }
   
   .createButton {
@@ -172,6 +184,14 @@
     box-shadow: var(--user-profile-modal-shadow);
     border: 1px solid var(--user-profile-modal-border);
     overflow: hidden;
+
+    @media (max-width: 768px) {
+      width: calc(100% - 2rem); // Subtracting 2rem (1rem on each side) for margin
+      max-width: 100%;
+      margin: 0 1rem; // Add some horizontal margin
+      max-height: 90vh;
+      overflow-y: auto;
+    }
   }
   
   .modalHeader {
@@ -185,6 +205,14 @@
       margin: 0;
       font-weight: 700;
       color: var(--user-profile-text-primary);
+    }
+
+    @media (max-width: 768px) {
+      padding: 1rem 1rem 0.8rem;
+      
+      h3 {
+        font-size: 1.3rem; // Slightly smaller heading
+      }
     }
   }
   
@@ -203,6 +231,12 @@
     &:hover {
       color: var(--modal-close-x);
       transform: rotate(90deg);
+    }
+
+    @media (max-width: 768px) {
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.3rem;
     }
   }
   
@@ -264,6 +298,16 @@
       &::-webkit-calendar-picker-indicator {
         filter: var(--user-profile-theme-filter);
       }
+
+      @media (max-width: 768px) {
+        font-size: 0.9rem; // Make sure date text fits
+      }
+    }
+
+    @media (max-width: 768px) {
+      padding: 0 1rem; // Reduce side padding on mobile
+      margin-bottom: 1rem;
+      padding-top: 0.5rem;
     }
   }
 
@@ -314,6 +358,61 @@
   }
 }
 
+.toggleInactiveButton {
+  background: transparent;
+  color: var(--primary-color);
+  padding: 0.8rem 1.5rem;
+  border: 1px solid var(--primary-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(74, 144, 226, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.createButton,
+.scheduleButton,
+.toggleInactiveButton {
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .studioProgramsContainer {
+    padding: 1.5rem;
+    padding-top: 65px;
+  }
+
+  .headerSection h2 {
+    font-size: 1.5rem;
+  }
+
+  .programsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .programCard {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .createButton,
+  .scheduleButton,
+  .toggleInactiveButton {
+    padding: 1rem 1.5rem;
+  }
+}
+
   .submitButton {
     width: calc(100% - 48px);
     margin: 0 24px 24px;
@@ -344,6 +443,15 @@
       box-shadow: none;
     }
   }
+
+  .submitButton,
+.deleteButton {
+  
+  @media (max-width: 768px) {
+    width: calc(100% - 2rem); // Match the modal width
+    margin: 0 1rem 1rem; // Consistent with modal margins
+  }
+}
 
   @keyframes fadeIn {
     from {
@@ -417,6 +525,10 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  
+    &.inactive {
+      background: rgba(255, 77, 79, 0.8);
+    }
   }
   
   .programInfo {

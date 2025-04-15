@@ -15,6 +15,7 @@ const StudioPrograms = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [showInactive, setShowInactive] = useState(false);
   const [formData, setFormData] = useState({
     programName: '',
     title: '',
@@ -35,6 +36,10 @@ const StudioPrograms = () => {
     programNameError: false,  // Add error states
     titleError: false
   });
+
+  const filteredPrograms = programs.filter(program =>
+    showInactive ? program.status === 'Inactive' : program.status === 'Active'
+  );
 
   const validateInputs = (name, value, isEditModal = false) => {
     let isValid = true;
@@ -66,12 +71,21 @@ const StudioPrograms = () => {
   };
 
   const handleUpdateProgram = async () => {
+    // Find the program being edited
+    const programToEdit = programs.find(p => p.programID === editFormData.programID);
+    
+    // Prevent editing if program is inactive
+    if (programToEdit?.status === 'Inactive') {
+      toast.error('Không thể chỉnh sửa chương trình đã xóa');
+      return;
+    }
+  
     try {
       const isNameValid = validateInputs('programName', editFormData.programName, true);
       const isTitleValid = validateInputs('title', editFormData.title, true);
-
+  
       if (!isNameValid || !isTitleValid) return;
-
+  
       const response = await apiFetch(`Program/${editFormData.programID}`, {
         method: 'PUT',
         headers: {
@@ -82,9 +96,9 @@ const StudioPrograms = () => {
           title: editFormData.title
         })
       });
-
+  
       if (!response.ok) throw new Error('Cập nhật thất bại');
-
+  
       toast.success('Cập nhật thành công');
       setIsEditModalOpen(false);
       await fetchPrograms();
@@ -97,15 +111,15 @@ const StudioPrograms = () => {
     try {
       const savedData = JSON.parse(localStorage.getItem('schoolChannelData'));
       const schoolChannelId = savedData?.$values?.[0]?.schoolChannelID;
-  
+
       if (!schoolChannelId) {
         toast.error('Không tìm thấy thông tin kênh');
         return;
       }
-  
+
       const response = await apiFetch(`Program/by-channel/${schoolChannelId}`);
       if (!response.ok) throw new Error('Lỗi khi tải chương trình');
-  
+
       const data = await response.json();
       // Update this line to properly access the $values array
       setPrograms(data.$values || []);
@@ -161,7 +175,6 @@ const StudioPrograms = () => {
     }
   };
 
-  // Add this function inside your component
   const handleDeleteProgram = async () => {
     if (!window.confirm("Bạn có chắc muốn xóa đi chương trình này không? Hành động này không thể hoàn tác.")) {
       return;
@@ -181,6 +194,7 @@ const StudioPrograms = () => {
       if (result.success) {
         toast.success(result.message || 'Xóa chương trình thành công');
         setIsEditModalOpen(false);
+        setShowInactive(false); // Reset to show only active programs
         await fetchPrograms();
       } else {
         throw new Error(result.message || 'Lỗi khi xóa chương trình');
@@ -196,20 +210,20 @@ const StudioPrograms = () => {
         toast.error('Vui lòng điền đầy đủ thông tin');
         return;
       }
-  
+
       // Parse the input strings directly (they're in GMT+7)
       const startGMT7 = new Date(scheduleForm.startTime + '+07:00');
       const endGMT7 = new Date(scheduleForm.endTime + '+07:00');
-  
+
       // Convert to UTC by using toISOString()
       const startUTC = startGMT7.toISOString();
       const endUTC = endGMT7.toISOString();
-  
+
       if (new Date(startUTC) >= new Date(endUTC)) {
         toast.error('Thời gian kết thúc phải sau thời gian bắt đầu');
         return;
       }
-  
+
       const response = await apiFetch('Schedule', {
         method: 'POST',
         headers: {
@@ -222,9 +236,9 @@ const StudioPrograms = () => {
           isReplay: scheduleForm.isReplay
         })
       });
-  
+
       if (!response.ok) throw new Error('Tạo lịch phát thất bại');
-  
+
       toast.success('Tạo lịch phát thành công!');
       setIsScheduleModalOpen(false);
       setScheduleForm({ programID: '', startTime: '', endTime: '', isReplay: false });
@@ -251,6 +265,12 @@ const StudioPrograms = () => {
           Quản lý Chương trình
         </h2>
         <div className={styles.buttonGroup}>
+        <button
+          className={styles.toggleInactiveButton}
+          onClick={() => setShowInactive(!showInactive)}
+        >
+          {showInactive ? 'Ẩn chương trình đã xóa' : 'Xem chương trình đã xóa'}
+        </button>
           <button
             className={styles.createButton}
             onClick={() => setIsModalOpen(true)}
@@ -446,55 +466,56 @@ const StudioPrograms = () => {
         </div>
       )}
 
-      {programs.length === 0 ? (
+      {filteredPrograms.length === 0 ? (
         <div className={styles.emptyState}>
-          <h3>Chưa có chương trình nào được tạo</h3>
-          <p>Bấm vào nút "Tạo chương trình mới" để bắt đầu</p>
+          <h3>{showInactive ? 'Không có chương trình đã xóa' : 'Chưa có chương trình nào được tạo'}</h3>
+          <p>{showInactive ? '' : 'Bấm vào nút "Tạo chương trình mới" để bắt đầu'}</p>
         </div>
       ) : (
         <div className={styles.programsGrid}>
-          {programs.map((program) => (
+          {filteredPrograms.map((program) => (
             <div key={program.programID} className={styles.programCard}>
-              <div className={styles.programThumbnail}>
-                <img
-                  src={program.thumbnail || `https://picsum.photos/300/200?random=${program.programID}`}
-                  alt={program.programName}
-                />
-                <div className={styles.programBadge}>
-                  <FontAwesomeIcon icon={faTv} />
-                  {program.status === 'Active' ? 'Hoạt động' : 'Tạm dừng'}
-                </div>
-              </div>
-              <div className={styles.programInfo}>
-                <div className={styles.programHeader}>
-                  <h3>{program.programName}</h3>
-                  <button
-                    className={styles.editButton}
-                    onClick={() => {
-                      setEditFormData({
-                        programID: program.programID,
-                        programName: program.programName,
-                        title: program.title
-                      });
-                      setIsEditModalOpen(true);
-                    }}
-                  >
-                    Sửa
-                  </button>
-                </div>
-
-                <div className={styles.programTitle}>
-                  {program.title}
-                </div>
-                <div className={styles.programMeta}>
-                  <span>
-                    <FontAwesomeIcon icon={faCalendarAlt} />
-                    {new Date(program.createdAt).toLocaleDateString('vi-VN')}
-                  </span>
-                  <span>{program.schedules.$values.length} lịch phát</span>
-                </div>
-              </div>
-            </div>
+  <div className={styles.programThumbnail}>
+    <img
+      src={program.thumbnail || `https://picsum.photos/300/200?random=${program.programID}`}
+      alt={program.programName}
+    />
+    <div className={`${styles.programBadge} ${program.status === 'Inactive' ? styles.inactive : ''}`}>
+      <FontAwesomeIcon icon={faTv} />
+      {program.status === 'Active' ? 'Hoạt động' : 'Đã xóa'}
+    </div>
+  </div>
+  <div className={styles.programInfo}>
+    <div className={styles.programHeader}>
+      <h3>{program.programName}</h3>
+      {program.status === 'Active' && (
+        <button
+          className={styles.editButton}
+          onClick={() => {
+            setEditFormData({
+              programID: program.programID,
+              programName: program.programName,
+              title: program.title
+            });
+            setIsEditModalOpen(true);
+          }}
+        >
+          Sửa
+        </button>
+      )}
+    </div>
+    <div className={styles.programTitle}>
+      {program.title}
+    </div>
+    <div className={styles.programMeta}>
+      <span>
+        <FontAwesomeIcon icon={faCalendarAlt} />
+        {new Date(program.createdAt).toLocaleDateString('vi-VN')}
+      </span>
+      <span>{program.schedules.$values.length} lịch phát</span>
+    </div>
+  </div>
+</div>
           ))}
         </div>
       )}
