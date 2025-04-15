@@ -1,4 +1,4 @@
-import { Layout, Table, Button, Form, Input, InputNumber, Select, Modal } from 'antd';
+import { Layout, Table, Button, Form, Input, InputNumber, Select, Modal, Tag, Space, Typography, Tooltip } from 'antd';
 import Sider from 'antd/es/layout/Sider';
 import AdminMenu from './AdminMenu';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,7 @@ import './AdminPackage.scss';
 import apiFetch from '../../config/baseAPI';
 
 const { Search } = Input;
+const { Title } = Typography;
 
 function AdminPackage() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ function AdminPackage() {
   const [filteredPackages, setFilteredPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); 
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [packageToDelete, setPackageToDelete] = useState(null);
 
   useEffect(() => {
@@ -29,9 +30,8 @@ function AdminPackage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Data received from API:", data);
         setPackages(data.$values);
-        setFilteredPackages(data.$values); 
+        setFilteredPackages(data.$values);
       })
       .catch((error) => console.error("Error fetching packages:", error));
   }, []);
@@ -48,7 +48,7 @@ function AdminPackage() {
   };
 
   const handleDeleteClick = (packageData) => {
-    setPackageToDelete(packageData); 
+    setPackageToDelete(packageData);
     setIsDeleteModalVisible(true);
   };
 
@@ -66,29 +66,26 @@ function AdminPackage() {
         if (response.ok) {
           setIsDeleteModalVisible(false);
           setPackageToDelete(null);
-          apiFetch("/api/Package", {
+          return apiFetch("/api/Package", {
             method: "GET",
             headers: {
               "Authorization": `Bearer ${token}`,
               "Content-Type": "application/json"
             }
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              setPackages(data.$values);
-              setFilteredPackages(data.$values); 
-            })
-            .catch((error) => console.error("Error fetching packages:", error));
-        } else {
-          console.error("Error deleting package:", response);
+          });
         }
+        throw new Error("Delete failed");
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        setPackages(data.$values);
+        setFilteredPackages(data.$values);
       })
       .catch((error) => console.error("Error deleting package:", error));
   };
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
-
     if (value.trim() === '') {
       setFilteredPackages(packages);
     } else {
@@ -101,37 +98,7 @@ function AdminPackage() {
 
   const handleUpdate = (values) => {
     const token = localStorage.getItem("authToken");
-  
-    const updatedAt = selectedPackage.updatedAt;
-  
-    setPackages(prevPackages =>
-      prevPackages.map(pkg =>
-        pkg.packageID === selectedPackage.packageID ? {
-          ...pkg,
-          name: values.name,
-          description: values.description,
-          price: values.price,
-          duration: values.duration,
-          status: values.status === "Active",
-          updatedAt: updatedAt 
-        } : pkg
-      )
-    );
-  
-    setFilteredPackages(prevFilteredPackages =>
-      prevFilteredPackages.map(pkg =>
-        pkg.packageID === selectedPackage.packageID ? {
-          ...pkg,
-          name: values.name,
-          description: values.description,
-          price: values.price,
-          duration: values.duration,
-          status: values.status === "Active",
-          updatedAt: updatedAt 
-        } : pkg
-      )
-    );
-  
+
     apiFetch(`/api/Package/${selectedPackage.packageID}`, {
       method: "PUT",
       headers: {
@@ -147,38 +114,34 @@ function AdminPackage() {
       })
     })
       .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        if (response.status === 204) {
-          return null;
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data) {
-          console.log('Package updated successfully', data);
-        }
-        const token = localStorage.getItem("authToken");
-        apiFetch("/api/Package", {
+        if (!response.ok) throw new Error("Update failed");
+        return apiFetch("/api/Package", {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
             "Content-Type": "application/json"
           }
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            setPackages(data.$values);
-            setFilteredPackages(data.$values);
-          })
-          .catch((error) => console.error("Error fetching updated packages:", error));
-        
+        });
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        setPackages(data.$values);
+        setFilteredPackages(data.$values);
         setIsModalVisible(false);
       })
-      .catch((error) => {
-        console.error("Error updating package:", error);
-      });
+      .catch((error) => console.error("Error updating package:", error));
+  };
+
+  const formatDateTime = (text) => {
+    const date = new Date(text);
+    return (
+      <Tooltip title={date.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}>
+        <div style={{ lineHeight: 1.5 }}>
+          <div><strong>Day:</strong> {date.toLocaleDateString('en-GB', { timeZone: 'Asia/Ho_Chi_Minh' })}</div>
+          <div><strong>Time:</strong> {date.toLocaleTimeString('en-GB', { timeZone: 'Asia/Ho_Chi_Minh' })}</div>
+        </div>
+      </Tooltip>
+    );
   };
 
   const columns = [
@@ -186,6 +149,7 @@ function AdminPackage() {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      render: text => <strong style={{ fontSize: '16px' }}>{text}</strong>,
     },
     {
       title: 'Description',
@@ -196,52 +160,48 @@ function AdminPackage() {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
+      render: price => `$${price.toLocaleString()}`,
     },
     {
       title: 'Duration',
       dataIndex: 'duration',
       key: 'duration',
+      render: d => `${d} days`,
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => (status ? 'Active' : 'Inactive'),
+      render: status => (
+        <Tag color={status ? 'green' : 'red'}>
+          {status ? 'Active' : 'Inactive'}
+        </Tag>
+      ),
     },
     {
       title: 'Created At',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (text) => {
-        const date = new Date(text);
-        date.setHours(date.getHours() + 7);
-        return date.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' });
-      },
+      render: formatDateTime,
     },
     {
       title: 'Updated At',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
-      render: (text) => {
-        const date = new Date(text);
-        date.setHours(date.getHours() + 7);
-        return date.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' });
-      },
+      render: formatDateTime,
     },
     {
       title: 'Actions',
       key: 'actions',
       render: (text, record) => (
-        <div>
-          <Button onClick={() => handleEditClick(record)}>Edit</Button>
-          <Button
-            type="danger"
-            onClick={() => handleDeleteClick(record)}
-            style={{ marginLeft: 10, backgroundColor: 'red', color: 'white', borderColor: 'red' , width: '55px'}}
-          >
+        <Space>
+          <Button type="primary" onClick={() => handleEditClick(record)}>
+            Edit
+          </Button>
+          <Button danger onClick={() => handleDeleteClick(record)}>
             Delete
           </Button>
-        </div>
+        </Space>
       ),
     },
   ];
@@ -253,23 +213,27 @@ function AdminPackage() {
           <AdminMenu onLogout={handleLogout} />
         </Sider>
         <Layout.Content style={{ padding: '20px' }}>
-          {/* Search Input */}
+          <Title level={2}>Admin Package Management</Title>
           <Search
             placeholder="Search by Name"
-            onChange={handleSearchChange} 
+            onChange={handleSearchChange}
             style={{ width: 300, marginBottom: 20 }}
           />
+
           <Table
             dataSource={filteredPackages}
             columns={columns}
             rowKey="packageID"
+            bordered
+            pagination={{ pageSize: 5 }}
+            style={{ backgroundColor: '#fff', borderRadius: '10px', padding: '15px' }}
           />
         </Layout.Content>
       </Layout>
 
       <Modal
         title="Edit Package"
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
@@ -284,62 +248,21 @@ function AdminPackage() {
             }}
             onFinish={handleUpdate}
           >
-            <Form.Item
-              name="name"
-              label="Name"
-              rules={[{ required: true, message: 'Please input package name!' }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              name="description"
-              label="Description"
-              rules={[{ required: true, message: 'Please input package description!' }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              name="price"
-              label="Price"
-              rules={[{ required: true, message: 'Please input package price!' }]}
-            >
-              <InputNumber min={0.01} step={0.01} />
-            </Form.Item>
-
-            <Form.Item
-              name="duration"
-              label="Duration"
-              rules={[{ required: true, message: 'Please input package duration!' }]}
-            >
-              <InputNumber min={1} />
-            </Form.Item>
-
-            <Form.Item
-              name="status"
-              label="Status"
-              rules={[{ required: true, message: 'Please select package status!' }]}
-            >
-              <Select>
-                <Select.Option value="Active">Active</Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Update
-              </Button>
-            </Form.Item>
+            <Form.Item name="name" label="Name" rules={[{ required: true }]}> <Input /> </Form.Item>
+            <Form.Item name="description" label="Description" rules={[{ required: true }]}> <Input /> </Form.Item>
+            <Form.Item name="price" label="Price" rules={[{ required: true }]}> <InputNumber min={0.01} step={0.01} style={{ width: '100%' }} /> </Form.Item>
+            <Form.Item name="duration" label="Duration" rules={[{ required: true }]}> <InputNumber min={1} style={{ width: '100%' }} /> </Form.Item>
+            <Form.Item name="status" label="Status" rules={[{ required: true }]}> <Select> <Select.Option value="Active">Active</Select.Option> <Select.Option value="Inactive">Inactive</Select.Option> </Select> </Form.Item>
+            <Form.Item> <Button type="primary" htmlType="submit">Update</Button> </Form.Item>
           </Form>
         )}
       </Modal>
 
       <Modal
         title="Confirm Delete"
-        visible={isDeleteModalVisible}
+        open={isDeleteModalVisible}
         onOk={handleDeleteConfirm}
-        onCancel={() => setIsDeleteModalVisible(false)} 
+        onCancel={() => setIsDeleteModalVisible(false)}
         okText="Yes"
         cancelText="No"
       >
