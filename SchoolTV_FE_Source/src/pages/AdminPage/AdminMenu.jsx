@@ -7,7 +7,8 @@ import {
   UsergroupDeleteOutlined, UnorderedListOutlined, 
   ProfileOutlined,
   ScheduleOutlined,
-  MinusSquareOutlined
+  MinusSquareOutlined,
+  SnippetsOutlined
 } from '@ant-design/icons';
 import './AdminMenu.scss';
 
@@ -26,6 +27,7 @@ const AdminMenu = ({ onLogout }) => {
     '/soaccount': '3.3',
     '/adminpackage': '4.1',
     '/createpackage': '4.2',
+    '/adminpayment': '5',
   }), []);
 
   // Initialize menu state
@@ -128,6 +130,11 @@ const AdminMenu = ({ onLogout }) => {
     },
     {
       key: '5',
+      icon: <SnippetsOutlined />,
+      label: <Link to="/adminpayment">Admin Payment Management</Link>,
+    },
+    {
+      key: '6',
       icon: <LogoutOutlined />,
       label: 'Log out',
       onClick: onLogout,
