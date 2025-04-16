@@ -5,83 +5,59 @@ import 'aos/dist/aos.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './WatchLive.css';
 import { ThemeContext } from '../../context/ThemeContext';
+import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import apiFetch from '../../config/baseAPI';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import VideoComment from '../watch-program/VideoComment';
+import { Timeline } from 'antd';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const WatchLive = () => {
   const { theme } = useContext(ThemeContext);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [lastVolume, setLastVolume] = useState(100);
-  const [activeTab, setActiveTab] = useState('live');
+  const { channelId } = useParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [currentDate, setCurrentDate] = useState(dayjs());
+  const [logicDate, setLogicDate] = useState(currentDate.format("YYYY-MM-DD") || "");
+  const [displaySchedule, setDisplaySchedule] = useState([]);
+  const [displayIframeUrl, setDisplayIframeUrl] = useState("");
+  const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
-  const [showSchedule, setShowSchedule] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
   const playerRef = useRef(null);
   const chatMessagesRef = useRef(null);
-
-  const scheduleData = [
-    {
-      time: "07:25",
-      name: "Vì một tương lai xanh: Vẽ tranh bích họa môi trường",
-      description: "Chương trình về môi trường",
-      status: "past"
-    },
-    {
-      time: "07:30",
-      name: "Nèo về nguồn cội: Nhân bạc của người Chu Ru",
-      description: "Phim tài liệu",
-      status: "past"
-    },
-    {
-      time: "07:45",
-      name: "Ký sự: Tình quê trong lá",
-      description: "Phóng sự - Ký sự",
-      status: "live"
-    },
-    {
-      time: "08:00",
-      name: "Phim truyện: Mỹ nhân Sài Thành - Tập 2",
-      description: "Phim truyện",
-      status: "upcoming"
-    },
-    {
-      time: "08:50",
-      name: "Một vòng Việt Nam: Thung Nham - Bản tình ca mùa xuân",
-      description: "Du lịch - Văn hóa",
-      status: "upcoming"
-    },
-    {
-      time: "09:00",
-      name: "Thời sự",
-      description: "Tin tức - Thời sự",
-      status: "upcoming"
-    }
-  ];
+  const isToday = currentDate.isSame(dayjs(), "day");
+  const displayDate = currentDate.format("DD/MM/YYYY");
 
   useEffect(() => {
-    if (isScheduleOpen) {
-      document.body.classList.add('scroll-lock');
-    } else {
-      document.body.classList.remove('scroll-lock');
+    if (!channelId) {
+      toast.error("Không tìm thấy kênh!");
+      navigate('/');
+      return;
     }
-    return () => {
-      document.body.classList.remove('scroll-lock');
-    };
-  }, [isScheduleOpen]);
+  }, [channelId]);
 
-  const handleScheduleClick = () => {
-    setIsScheduleOpen(!isScheduleOpen);
-    setShowSchedule(!showSchedule);
-  };
+  useEffect(() => {
+    // Initial fetch
+    fetchScheduleProgram(logicDate);
 
-  const handleScheduleClose = () => {
-    setIsScheduleOpen(false);
-    setShowSchedule(false);
-  };
+    // Set up auto-refresh every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchScheduleProgram(logicDate);
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(refreshInterval);
+  }, [logicDate, channelId]); // Added channelId as dependency
 
   const mockUsers = [
     { name: 'Minh Anh', badge: 'Mod' },
@@ -112,62 +88,116 @@ const WatchLive = () => {
         addMessage(text, randomUser);
       }, index * 1000);
     });
+
+    handleExistChannel();
   }, []);
 
-  const onPlayerReady = (event) => {
-    playerRef.current = event.target;
-    event.target.playVideo();
-    startProgressBarUpdate();
+  useEffect(() => {
+    const newLogicDate = currentDate.format("YYYY-MM-DD");
+    setLogicDate(newLogicDate);
+    fetchScheduleProgram(newLogicDate);
+  }, [currentDate]);
+
+  const handlePrevDay = () => {
+    setCurrentDate(prev => prev.subtract(1, "day"));
   };
 
-  const startProgressBarUpdate = () => {
-    setInterval(() => {
-      if (playerRef.current) {
-        const currentTime = playerRef.current.getCurrentTime();
-        const duration = playerRef.current.getDuration();
-        setProgress((currentTime / duration) * 100);
-      }
-    }, 1000);
+  const handleNextDay = () => {
+    setCurrentDate(prev => prev.add(1, "day"));
   };
 
-  const togglePlay = () => {
-    if (playerRef.current) {
-      if (isPlaying) {
-        playerRef.current.pauseVideo();
-      } else {
-        playerRef.current.playVideo();
+  const programList = displaySchedule.map((schedule) => ({
+    color: "#FF4757", // Always red since all are live
+    children: (
+      <div
+        className="schedule-item live"
+        onClick={() => setDisplayIframeUrl(schedule.iframeUrl)}
+      >
+        <div className="schedule-time">
+          <div className="time-indicator live" />
+          {schedule.startTime.format("HH:mm")}
+        </div>
+        <div className="schedule-info">
+          <div className="schedule-name">{schedule.programName}</div>
+          <div className="schedule-description">
+            <span className="live-status">Đang phát sóng</span>
+          </div>
+        </div>
+      </div>
+    ),
+  }));
+
+  const fetchScheduleProgram = async (date) => {
+    try {
+      const response = await apiFetch(
+        `Schedule/by-channel-and-date?channelId=${channelId}&date=${encodeURIComponent(date)}`,
+        { method: "GET" }
+      );
+
+      if (!response.ok) throw new Error("Không thể lấy lịch phát sóng!");
+
+      const data = await response.json();
+
+      if (data?.data?.$values) {
+        // Filter and map only live schedules
+        const schedules = data.data.$values
+          .filter(schedule => schedule.status === "Live") // Only get live schedules
+          .map((schedule) => ({
+            startTime: dayjs(schedule.startTime),
+            endTime: dayjs(schedule.endTime),
+            programName: schedule.program.programName,
+            status: true, // Since we're only getting live ones
+            iframeUrl: schedule.iframeUrl,
+            isReplay: schedule.isReplay,
+          }))
+          .sort((a, b) => a.startTime.valueOf() - b.startTime.valueOf());
+
+        setDisplaySchedule(schedules);
+
+        // Set the iframe URL to the first live stream if available
+        if (schedules.length > 0) {
+          setDisplayIframeUrl(schedules[0].iframeUrl);
+        } else {
+          // If no live streams, clear the iframe URL
+          setDisplayIframeUrl("");
+        }
       }
-      setIsPlaying(!isPlaying);
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi lấy lịch phát sóng!");
+      console.error("Error fetching schedule program:", error);
     }
   };
 
-  const handleVolumeChange = (e) => {
-    const newVolume = parseInt(e.target.value);
-    setVolume(newVolume);
-    if (playerRef.current) {
-      if (newVolume === 0) {
-        playerRef.current.mute();
-        setIsMuted(true);
-      } else {
-        playerRef.current.unMute();
-        playerRef.current.setVolume(newVolume);
-        setIsMuted(false);
-      }
+  const handleExistChannel = async () => {
+    if (!channelId) {
+      toast.error("ID kênh không hợp lệ!");
+      navigate("/channelList");
+      return;
     }
-  };
 
-  const toggleMute = () => {
-    if (playerRef.current) {
-      if (isMuted) {
-        playerRef.current.unMute();
-        playerRef.current.setVolume(lastVolume);
-        setVolume(lastVolume);
-      } else {
-        setLastVolume(volume);
-        playerRef.current.mute();
-        setVolume(0);
+    try {
+      const response = await apiFetch(`schoolchannels/${channelId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Kênh không tồn tại!");
       }
-      setIsMuted(!isMuted);
+
+      const data = await response.json();
+      if (!data) {
+        throw new Error("Không có dữ liệu kênh!");
+      }
+
+      fetchScheduleProgram(logicDate);
+    } catch (error) {
+      console.error("Error checking channel:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi kiểm tra kênh!");
+      navigate("/channelList");
     }
   };
 
@@ -200,152 +230,86 @@ const WatchLive = () => {
       <div className="content-section">
         <section className="stream-section">
           <div className="video-container">
-            <YouTube
-              videoId="vHOv3sJWkUs"
-              opts={{
-                playerVars: {
-                  autoplay: 1,
-                  controls: 0,
-                  enablejsapi: 1,
-                }
-              }}
-              onReady={onPlayerReady}
-              className="youtube-player"
+            {showSchedule && (
+              <div className="schedule-overlay visible"
+                onClick={() => setShowSchedule(false)}
+              />
+            )}
+            <div className={`schedule-overlay ${showSchedule ? 'visible' : ''}`}
+              onClick={() => setShowSchedule(false)}
             />
-            <div className="video-controls">
-              <button className="control-button" onClick={togglePlay}>
-                <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`} />
-              </button>
-
-              <div className="progress-bar">
-                <div className="progress" style={{ width: `${progress}%` }} />
-              </div>
-
-              <div className="volume-control">
-                <button className="control-button" onClick={toggleMute}>
-                  <i className={`fas ${isMuted || volume === 0
-                    ? 'fa-volume-mute'
-                    : volume < 50
-                      ? 'fa-volume-down'
-                      : 'fa-volume-up'
-                    }`} />
-                </button>
-                <input
-                  type="range"
-                  className="volume-slider"
-                  min="0"
-                  max="100"
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  style={{
-                    background: `linear-gradient(to right, var(--primary-color) ${volume}%, rgba(255, 255, 255, 0.3) ${volume}%)`
-                  }}
-                />
-              </div>
-
-              <div style={{ position: 'relative' }}>
+            {displayIframeUrl ? (
+              <>
                 <button
                   className="schedule-button"
-                  onClick={handleScheduleClick}
+                  onClick={() => setShowSchedule(!showSchedule)}
                 >
                   <i className="fas fa-calendar-alt" /> Lịch chiếu
                 </button>
-
-                {showSchedule && (
-                  <>
-                    <div className="schedule-backdrop" onClick={handleScheduleClose} />
-                    <div className="schedule-popup safe-area-bottom">
-                      <div className="schedule-header">
-                        <h3 className="schedule-title">
-                          <i className="fas fa-calendar-alt" /> Lịch phát sóng
-                        </h3>
-                        <button
-                          className="schedule-close"
-                          onClick={handleScheduleClose}
-                        >
-                          <i className="fas fa-times" />
-                        </button>
-                      </div>
-
-                      <div className="schedule-content">
-                        <div className="schedule-nav">
-                          <div className="schedule-date">
-                            <i className="fas fa-calendar" />
-                            {currentDate.toLocaleDateString('vi-VN', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </div>
-                          <div className="schedule-arrows">
-                            <button
-                              className="schedule-arrow"
-                              onClick={() => {
-                                const newDate = new Date(currentDate);
-                                newDate.setDate(newDate.getDate() - 1);
-                                setCurrentDate(newDate);
-                              }}
-                            >
-                              <i className="fas fa-chevron-left" />
-                            </button>
-                            <button
-                              className="schedule-arrow"
-                              onClick={() => {
-                                const newDate = new Date(currentDate);
-                                newDate.setDate(newDate.getDate() + 1);
-                                setCurrentDate(newDate);
-                              }}
-                            >
-                              <i className="fas fa-chevron-right" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {scheduleData.map((item, index) => (
-                          <div
-                            key={index}
-                            className={`schedule-item ${item.status}`}
-                            style={{ '--item-index': index }}
-                          >
-                            <div className="schedule-time">
-                              <div className={`time-indicator ${item.status}`} />
-                              {item.time}
-                            </div>
-                            <div className="schedule-info">
-                              <div className="schedule-name">{item.name}</div>
-                              <div className="schedule-description">{item.description}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
+                <iframe
+                  src={displayIframeUrl}
+                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  className="youtube-player"
+                />
+              </>
+            ) : (
+              <div className="no-video-placeholder">
+                <i className="fas fa-tv fa-3x" />
+                <p>Không có chương trình nào đang phát sóng</p>
               </div>
+            )}
+            {showSchedule && (
+              <div className="schedule-panel visible">
+                <div className="schedule-header">
+                  <h3 className="schedule-title">
+                    <i className="fas fa-calendar-alt" /> Lịch phát sóng
+                  </h3>
+                  <button
+                    className="schedule-close"
+                    onClick={() => setShowSchedule(false)}
+                  >
+                    <i className="fas fa-times" />
+                  </button>
+                </div>
 
-              <button
-                className="control-button"
-                onClick={() => {
-                  const iframe = document.querySelector('.youtube-player');
-                  if (iframe) {
-                    if (iframe.requestFullscreen) {
-                      iframe.requestFullscreen();
-                    } else if (iframe.webkitRequestFullscreen) {
-                      iframe.webkitRequestFullscreen();
-                    }
-                  }
-                }}
-              >
-                <i className="fas fa-expand" />
-              </button>
-            </div>
+                <div className="schedule-nav">
+                  <div className="schedule-date">
+                    <i className="fas fa-calendar" />
+                    {isToday && "Hôm nay - "}
+                    {displayDate}
+                  </div>
+                  <div className="schedule-arrows">
+                    <button
+                      className="schedule-arrow"
+                      onClick={handlePrevDay}
+                    >
+                      <i className="fas fa-chevron-left" />
+                    </button>
+                    <button
+                      className="schedule-arrow"
+                      onClick={handleNextDay}
+                    >
+                      <i className="fas fa-chevron-right" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="schedule-content">
+                  {displaySchedule.length > 0 ? (
+                    <Timeline items={programList} />
+                  ) : (
+                    <div className="no-schedule">Không có lịch phát sóng</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="stream-info">
             <div className="stream-header">
               <h1 className="stream-title">
-                Lễ Tốt Nghiệp 2023 - ĐH Bách Khoa Hà Nội
+                {displaySchedule.find(s => s.iframeUrl === displayIframeUrl)?.programName || "Chương trình đang phát sóng"}
               </h1>
               <div className="live-badge">LIVE</div>
             </div>
@@ -370,13 +334,7 @@ const WatchLive = () => {
             </div>
 
             <div className="stream-description">
-              <p>Buổi lễ tốt nghiệp trang trọng dành cho các tân kỹ sư, cử nhân Đại học Bách Khoa Hà Nội. Chương trình bao gồm các phần:</p>
-              <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-                <li>Phát biểu của Ban Giám hiệu</li>
-                <li>Trao bằng tốt nghiệp</li>
-                <li>Vinh danh sinh viên xuất sắc</li>
-                <li>Các tiết mục văn nghệ đặc sắc</li>
-              </ul>
+              <p>Nội dung chương trình sẽ được cập nhật sớm nhất.</p>
             </div>
           </div>
         </section>

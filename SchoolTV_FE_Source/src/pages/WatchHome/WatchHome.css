@@ -247,10 +247,6 @@ display: flex;
 flex-direction: column;
 }
 
-.stream-card:hover {
-transform: translateY(-5px);
-}
-
 .stream-thumbnail {
 position: relative;
 height: 180px;

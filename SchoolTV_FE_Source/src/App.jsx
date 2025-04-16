@@ -195,7 +195,7 @@ function App() {
           element: <PlayFeaturedVideo />,
         },
         {
-          path: "/watchLive",
+          path: "/watchLive/:channelId",
           element: <WatchLive />,
         },
         {

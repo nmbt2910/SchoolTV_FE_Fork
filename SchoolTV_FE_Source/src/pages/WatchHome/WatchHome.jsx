@@ -309,7 +309,10 @@ export default function WatchHome() {
           <div className="horizontal-scroll-container">
             <div className="streams-grid horizontal-scroll">
               {liveSchedules.slice(0, 5).map((schedule) => (
-                <Link to="/watchLive" key={schedule.scheduleID}>
+                <Link
+                  to={`/watchLive/${schedule.program?.schoolChannel?.schoolChannelID || ''}`}
+                  key={schedule.scheduleID}
+                >
                   <div className="stream-card">
                     <div className="stream-thumbnail">
                       <img
@@ -319,9 +322,13 @@ export default function WatchHome() {
                       <div className="live-badge-home">LIVE</div>
                     </div>
                     <div className="stream-info">
-                      <h3 className="stream-title">{schedule.programName || "Chương trình không xác định"}</h3>
+                      <h3 className="stream-title">
+                        {schedule.program?.title || "Chương trình không xác định"}
+                      </h3>
                       <div className="stream-meta">
-                        <span>{schedule.schoolChannelName || "Trường không xác định"}</span>
+                        <span>
+                          {schedule.program?.schoolChannel?.name || "Trường không xác định"}
+                        </span>
                         <span>
                           <i className="fas fa-clock" />{" "}
                           {calculateDuration(schedule.startTime, schedule.endTime)}
