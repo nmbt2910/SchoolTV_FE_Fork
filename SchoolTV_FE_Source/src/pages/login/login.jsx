@@ -18,11 +18,9 @@ function Login() {
 
   const dispatch = useDispatch();
 
-  // Inside login.jsx, update the handleSubmit function:
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!email || !password) {
       notification.warning({
         message: "Vui lòng kiểm tra lại thông tin đăng nhập!",
@@ -32,28 +30,37 @@ function Login() {
       });
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       const req = await apiFetch("accounts/login", {
         method: "POST",
         body: JSON.stringify({ email, password, remember: rememberMe }),
         headers: { "Content-Type": "application/json" },
       });
-
+  
       if (req.ok) {
         let data = await req.json();
         console.log("Login response:", data);
-
-        // Extract token and account data from response
+  
         const { token, account } = data;
-
+  
         if (token && account) {
-          // Store token in localStorage
+          // Check for SchoolOwner role
+          if (account.roleName === "SchoolOwner") {
+            notification.error({
+              message: "Đăng nhập thất bại!",
+              description: "Bạn phải chuyển qua đăng nhập bằng chức năng dành cho Trường Học.",
+              placement: "topRight",
+              duration: 5,
+            });
+            setLoading(false);
+            return; // Abort login process
+          }
+  
+          // Proceed with normal login
           localStorage.setItem("authToken", token);
-
-          // Store user data including the roleName
           const userData = {
             accountID: account.accountID,
             username: account.username,
@@ -61,17 +68,17 @@ function Login() {
             fullname: account.fullname,
             roleName: account.roleName,
           };
-
+  
           dispatch(login(account));
           localStorage.setItem("userData", JSON.stringify(userData));
-
+  
           notification.success({
             message: "Đăng nhập thành công!",
             description: "Chào mừng bạn quay trở lại!",
             placement: "topRight",
             duration: 3,
           });
-
+  
           navigate("/watchHome");
         } else {
           throw new Error("Invalid response format");
@@ -83,7 +90,6 @@ function Login() {
       }
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
-
       notification.error({
         message: "Đăng nhập thất bại!",
         description:

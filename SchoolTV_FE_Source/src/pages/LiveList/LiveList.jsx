@@ -973,10 +973,6 @@ const LiveList = () => {
                       <span>{video.university}</span>
                     </div>
                     <div className={styles.streamStats}>
-                      <span>
-                        <FontAwesomeIcon icon={faUsers} />{' '}
-                        {`${Math.floor(video.viewers / 1000)}K lượt xem`}
-                      </span>
                     </div>
                   </div>
                 </div>
