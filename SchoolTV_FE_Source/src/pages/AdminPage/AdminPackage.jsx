@@ -166,7 +166,7 @@ function AdminPackage() {
       title: 'Duration',
       dataIndex: 'duration',
       key: 'duration',
-      render: d => `${d} days`,
+      render: d => `${d} minutes`,
     },
     {
       title: 'Status',

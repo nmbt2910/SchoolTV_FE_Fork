@@ -46,6 +46,7 @@ import PaymentCancel from "./pages/PaymentComplete/Cancel/cancel";
 import ViewChannelProgram from "./pages/watch-program/ViewChannelProgram";
 import StudioChannel from "./pages/school-channel/view-channel/StudioChannel";
 import StudioPrograms from "./pages/school-channel/program-manage/StudioPrograms";
+import AdminPaymentManagement from "./pages/AdminPage/AdminPaymentManagement";
 
 const ScrollToTopWrapper = () => {
   const { pathname } = useLocation();
@@ -299,6 +300,14 @@ function App() {
           element: (
             <ProtectedRoute allowedRoles={["admin"]}>
               <CreatePackage />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/adminpayment",
+          element: (
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminPaymentManagement />
             </ProtectedRoute>
           ),
         },
