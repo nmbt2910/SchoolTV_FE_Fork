@@ -1,13 +1,27 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react'; 
 
-// Tạo context để cung cấp trạng thái người dùng trong toàn bộ ứng dụng
+// Tạo context cho toàn ứng dụng
 export const UserContext = createContext();
 
-// Cung cấp UserContext cho toàn bộ ứng dụng
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("userData")) || null);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); 
 
-  console.log(user);  // Kiểm tra giá trị của user khi khởi tạo
+  useEffect(() => {
+    const storedUser = localStorage.getItem("userData");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        if (parsed?.roleName) {
+          setUser(parsed);
+        }
+      } catch (err) {
+        console.error("Failed to parse userData:", err);
+        localStorage.removeItem("userData");
+      }
+    }
+    setLoading(false); 
+  }, []);
 
   const loginUser = (userData) => {
     setUser(userData);
@@ -20,15 +34,19 @@ export const UserProvider = ({ children }) => {
   };
 
   const checkRole = (role) => {
-    return user && user.roleName.toLowerCase() === role.toLowerCase();
-  };  
+    return user && user.roleName?.toLowerCase() === role.toLowerCase();
+  };
+
+  const hasAnyRole = (roles) => {
+    if (!user || !user.roleName) return false;
+    return roles.map(r => r.toLowerCase()).includes(user.roleName.toLowerCase());
+  };
 
   return (
-    <UserContext.Provider value={{ user, loginUser, logoutUser, checkRole }}>
+    <UserContext.Provider value={{ user, loginUser, logoutUser, checkRole, hasAnyRole, loading }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-// Hook để sử dụng user context ở bất kỳ đâu trong ứng dụng
 export const useUser = () => useContext(UserContext);

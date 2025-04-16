@@ -7,6 +7,7 @@ import { DatePicker } from "antd";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
 import apiFetch from "../../../../config/baseAPI";
+import ScheduleManualVideo from "./ScheduleManualVideo";
 
 const { Dragger } = Upload;
 const { TextArea } = Input;
@@ -16,15 +17,14 @@ function StudioVideo() {
   const [program, setProgram] = useState([]);
   const [programID, setProgramID] = useState(null);
   const [form] = Form.useForm();
-  const [dateString, setDateString] = useState(null);
   const [videFileObject, setVideoFileObject] = useState(null);
   const [isBtnLoading, setIsBtnLoading] = useState(false);
+  const [isDisplayVideoSetting, setIsDisplayVideoSetting] = useState(true);
 
   const fetchProgramByChannel = async () => {
-    console.log("Hello", channel.$values[0].schoolChannelID);
     try {
       const response = await apiFetch(
-        `Program/by-channel/${channel.$values[0].schoolChannelID}`,
+        `Program/by-channel/${channel?.$values[0].schoolChannelID}`,
         {
           method: "GET",
         }
@@ -35,7 +35,7 @@ function StudioVideo() {
       }
 
       const data = await response.json();
-      if (data) {
+      if (data && data.$values && data.$values.length > 0) {
         let getProgram = data.$values.map((program) => {
           return {
             value: program.programID,
@@ -43,10 +43,14 @@ function StudioVideo() {
           };
         });
 
-        setProgram(getProgram);
+        setProgram(getProgram); // Cập nhật danh sách chương trình
+      } else {
+        // Nếu không có chương trình nào, báo lỗi
+        throw new Error("Không có chương trình nào phù hợp.");
       }
     } catch (error) {
       toast.error("Lỗi khi lấy danh sách chương trình!");
+      console.log(error);
     }
   };
 
@@ -55,12 +59,10 @@ function StudioVideo() {
   };
 
   useEffect(() => {
-    fetchProgramByChannel();
+    if (channel) {
+      fetchProgramByChannel();
+    }
   }, [channel]);
-
-  const onDateChange = (dateString) => {
-    setDateString(dateString);
-  };
 
   const handleBeforeUpload = (file) => {
     const isValidType =
@@ -78,7 +80,7 @@ function StudioVideo() {
 
   const handleChangeVideoFile = (info) => {
     setVideoFileObject(info.fileList[0].originFileObj);
-  }
+  };
 
   const handleCreateVideo = async (values) => {
     const formData = new FormData();
@@ -106,86 +108,106 @@ function StudioVideo() {
       }
     } catch (error) {
       toast.error("Lỗi khi upload video!");
-    }finally {
+    } finally {
       setIsBtnLoading(false);
     }
   };
   return (
     <div className="studio-video-container">
-      {/* Class applied from main title of SChoolChannelStudio.scss */}
-      <h1 className="studio-function-title">Tuỳ chỉnh video của bạn</h1>
+      {isDisplayVideoSetting ? (
+        <>
+          {/* Class applied from main title of SChoolChannelStudio.scss */}
+          <h1 className="studio-function-title">Tuỳ chỉnh video của bạn</h1>
 
-      <div className="studio-video-content">
-        <Form layout="vertical" form={form} onFinish={handleCreateVideo}>
-          <Form.Item
-            label={<h2 className="studio-video-des">Video</h2>}
-            name="VideoFile"
-            rules={[
-              { required: true, message: "Vui lòng chọn video!" },
-            ]}
-          >
-            <Dragger
-              className="studio-video-dragger"
-              beforeUpload={handleBeforeUpload}
-              onChange={handleChangeVideoFile}
-              maxCount={1}
-            >
-              <p className="ant-upload-drag-icon">
-                <MdOutlineOndemandVideo style={{ fontSize: 50 }} />
-              </p>
-              <p className="ant-upload-text">Kéo thả video vào đây</p>
-              <p>hoặc</p>
-              <Flex justify="center" style={{ marginTop: "10px" }}>
-                <p
-                  style={{
-                    width: 100,
-                    backgroundColor: "#4a90e2",
-                    color: "#fff",
-                    padding: "10px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
+          <div className="studio-video-content">
+            <Form layout="vertical" form={form} onFinish={handleCreateVideo}>
+              <Form.Item
+                label={<h2 className="studio-video-des">Video</h2>}
+                name="VideoFile"
+                rules={[{ required: true, message: "Vui lòng chọn video!" }]}
+              >
+                <Dragger
+                  className="studio-video-dragger"
+                  beforeUpload={handleBeforeUpload}
+                  onChange={handleChangeVideoFile}
+                  maxCount={1}
                 >
-                  Chọn file
-                </p>
-              </Flex>
-            </Dragger>
-          </Form.Item>
+                  <p className="ant-upload-drag-icon">
+                    <MdOutlineOndemandVideo style={{ fontSize: 50 }} />
+                  </p>
+                  <p className="ant-upload-text">Kéo thả video vào đây</p>
+                  <p>hoặc</p>
+                  <Flex justify="center" style={{ marginTop: "10px" }}>
+                    <p
+                      style={{
+                        width: 100,
+                        backgroundColor: "#4a90e2",
+                        color: "#fff",
+                        padding: "10px",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Chọn file
+                    </p>
+                  </Flex>
+                </Dragger>
+              </Form.Item>
 
-          <Form.Item
-            label={<h2 className="studio-video-des">Chương trình</h2>}
-            name="ProgramID"
-            rules={[{ required: true, message: "Vui lòng chọn chương trình!" }]}
-          >
-            <Select
-              defaultValue={{ value: null, label: "Chọn phiên live" }}
-              onChange={handleChangeProgram}
-              options={program}
-            />
-          </Form.Item>
+              <Form.Item
+                label={<h2 className="studio-video-des">Chương trình</h2>}
+                name="ProgramID"
+                rules={[
+                  { required: true, message: "Vui lòng chọn chương trình!" },
+                ]}
+              >
+                <Select
+                  defaultValue={{ value: null, label: "Chọn phiên live" }}
+                  onChange={handleChangeProgram}
+                  options={program}
+                />
+              </Form.Item>
 
-          <Form.Item
-            label={<h2 className="studio-video-des">Mô tả</h2>}
-            name="Description"
-            rules={[
-              {
-                required: true,
-                message: "Vui lòng nhập mô tả cho video!",
-              },
-            ]}
-          >
-            <TextArea
-              className="studio-video-input"
-              placeholder="Nhập mô tả cho bài viết"
-              rows={4}
-            />
-          </Form.Item>
+              <Form.Item
+                label={<h2 className="studio-video-des">Mô tả</h2>}
+                name="Description"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập mô tả cho video!",
+                  },
+                ]}
+              >
+                <TextArea
+                  className="studio-video-input"
+                  placeholder="Nhập mô tả cho bài viết"
+                  rows={4}
+                />
+              </Form.Item>
 
-          <Button className="studio-video-button" htmlType="submit" loading={isBtnLoading}>
-            Đăng
-          </Button>
-        </Form>
-      </div>
+              <Button
+                className="studio-video-button"
+                htmlType="submit"
+                loading={isBtnLoading}
+              >
+                Đăng
+              </Button>
+            </Form>
+
+            <p class="video-manual-ask">
+              Đã dựng video trước đó?{" "}
+              <span
+                class="video-manual-nav"
+                onClick={() => setIsDisplayVideoSetting(false)}
+              >
+                Tạo lịch trình chiếu video
+              </span>
+            </p>
+          </div>
+        </>
+      ) : (
+        <ScheduleManualVideo programList={program} />
+      )}
     </div>
   );
 }

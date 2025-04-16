@@ -3,16 +3,18 @@ body {
 }
 
 /* Add quick transitions for common text and background properties */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   transition: color var(--transition-speed) ease,
-              background-color var(--transition-speed) ease,
-              border-color var(--transition-speed) ease,
-              box-shadow var(--transition-speed) ease;
+    background-color var(--transition-speed) ease,
+    border-color var(--transition-speed) ease,
+    box-shadow var(--transition-speed) ease;
 }
 
 .studio-video-container {
   margin-top: 50px;
-  
+
   .studio-video-content {
     background-color: var(--unique-video-card-bg);
     border-radius: 8px;
@@ -82,6 +84,22 @@ body {
       background-color: #4a90e2;
       color: white;
       border: none;
+    }
+
+    .video-manual-ask {
+      font-size: 16px;
+      color: var(--text-color);
+      margin: 0;
+      padding: 10px 0;
+      display: flex;
+      align-items: center;
+
+      .video-manual-nav {
+        color: #4a90e2;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: 5px;
+      }
     }
   }
 }
