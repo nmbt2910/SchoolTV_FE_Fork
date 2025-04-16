@@ -43,18 +43,28 @@ function SchoolLogin() {
           "Content-Type": "application/json",
         },
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         console.log('Login response:', data);
-
-        // Extract token and accountID from the correct structure
+  
         const { token, account } = data;
-
+  
         if (token && account?.accountID) {
+          // Check if the user has SchoolOwner role
+          if (account.roleName !== "SchoolOwner") {
+            notification.error({
+              message: "Đăng nhập thất bại!",
+              description: "Bạn không thể đăng nhập bằng chức năng dành cho Trường Học.",
+              placement: "topRight",
+              duration: 5,
+            });
+            return;
+          }
+  
           localStorage.setItem("authToken", token);
           localStorage.setItem("accountID", account.accountID);
-
+  
           // Store additional user info if needed
           localStorage.setItem("userData", JSON.stringify({
             username: account.username,
@@ -73,7 +83,7 @@ function SchoolLogin() {
             placement: "topRight",
             duration: 3,
           });
-
+  
           // Redirect to appropriate dashboard for school owners
           navigate("/");
         } else {
@@ -84,7 +94,7 @@ function SchoolLogin() {
       }
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
-
+  
       notification.error({
         message: "Đăng nhập thất bại!",
         description: error?.status === 401
