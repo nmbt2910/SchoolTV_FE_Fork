@@ -96,14 +96,8 @@ function LiveStreamSchedule() {
   //Handle time and validate time
   const handleChangeTime = (dates) => {
     if (dates && dates.length === 2) {
-      const startDate = dayjs(dates[0])
-        .utc()
-        .tz("Asia/Ho_Chi_Minh")
-        .format("YYYY-MM-DDTHH:mm:ss");
-      const endDate = dayjs(dates[1])
-        .utc()
-        .tz("Asia/Ho_Chi_Minh")
-        .format("YYYY-MM-DDTHH:mm:ss");
+      const startDate = dayjs(dates[0]).utc().toISOString();
+      const endDate = dayjs(dates[1]).utc().toISOString();
 
       setSelectedRange([startDate, endDate]);
     }

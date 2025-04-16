@@ -138,12 +138,9 @@ function CreateSchoolChannel() {
                   className="create-channel__form-item"
                   name="email"
                   label="Email"
-                  rules={[
-                    { required: true, message: "Vui lòng nhập email!" },
-                    { type: "email", message: "Email không hợp lệ!" },
-                  ]}
+                  initialValue={user?.email}
                 >
-                  <Input placeholder="Email liên hệ" />
+                  <Input placeholder="Email liên hệ" disabled />
                 </Form.Item>
               </div>
 
@@ -154,10 +151,6 @@ function CreateSchoolChannel() {
                   label="Địa chỉ"
                   rules={[
                     { required: true, message: "Vui lòng nhập địa chỉ!" },
-                    {
-                      max: 100,
-                      message: "Địa chỉ không được vượt quá 100 ký tự!",
-                    },
                   ]}
                 >
                   <Input placeholder="Địa chỉ chi tiết" />
