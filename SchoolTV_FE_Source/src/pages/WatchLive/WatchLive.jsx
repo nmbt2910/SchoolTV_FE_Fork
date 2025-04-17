@@ -90,11 +90,10 @@ const WatchLive = () => {
 
   const fetchComments = async () => {
     try {
-      // Only show loading on first load
       if (isInitialLoad) {
         setIsLoadingComments(true);
       }
-
+  
       setCommentError(null);
       const response = await apiFetch(`Comment/video/${videoHistoryId}`, {
         method: "GET",
@@ -103,9 +102,9 @@ const WatchLive = () => {
           "Accept": "application/json"
         }
       });
-
+  
       if (!response.ok) throw new Error("Không thể tải bình luận!");
-
+  
       const data = await response.json();
       if (data?.$values) {
         const formattedComments = data.$values.map(comment => ({
@@ -115,11 +114,12 @@ const WatchLive = () => {
             name: "Người xem",
             badge: null
           },
-          time: dayjs(comment.createdAt).format('HH:mm')
+          // Explicitly parse UTC and convert to GMT+7
+          time: dayjs.utc(comment.createdAt).tz("Asia/Bangkok").format('HH:mm')
         }));
-
+  
         setMessages(formattedComments);
-
+  
         setTimeout(() => {
           if (!isUserScrolledUp && chatMessagesRef.current) {
             chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
@@ -130,7 +130,6 @@ const WatchLive = () => {
       console.error("Error fetching comments:", error);
       setCommentError("Có lỗi đã xảy ra. Vui lòng thử lại sau.");
     } finally {
-      // Disable loading after first fetch (even if error)
       if (isInitialLoad) {
         setIsInitialLoad(false);
         setIsLoadingComments(false);
@@ -306,10 +305,11 @@ const WatchLive = () => {
 
   const addMessage = (text, user) => {
     const newMessage = {
-      id: Date.now(), // temporary ID for local messages
+      id: Date.now(),
       text,
       user,
-      time: new Date().toLocaleTimeString()
+      // Format current time in GMT+7
+      time: dayjs().tz("Asia/Bangkok").format('HH:mm')
     };
     setMessages(prev => [...prev, newMessage]);
     if (chatMessagesRef.current) {
