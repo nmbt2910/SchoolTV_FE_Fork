@@ -295,7 +295,7 @@ const ChannelList = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            onClick={() => navigate(`/view-channel/${channel.id}`)}
+            onClick={() => navigate(`/watchLive/${channel.id}`)}
         >
             {channel.isLive && (
                 <div className={styles.chnl_live_badge}>

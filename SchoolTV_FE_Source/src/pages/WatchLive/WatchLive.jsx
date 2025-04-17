@@ -33,10 +33,29 @@ const WatchLive = () => {
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [videoHistoryId, setVideoHistoryId] = useState(null);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [commentError, setCommentError] = useState(null);
   const playerRef = useRef(null);
   const chatMessagesRef = useRef(null);
   const isToday = currentDate.isSame(dayjs(), "day");
   const displayDate = currentDate.format("DD/MM/YYYY");
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isUserScrolledUp, setIsUserScrolledUp] = useState(false);
+
+  useEffect(() => {
+    const chatContainer = chatMessagesRef.current;
+    if (!chatContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = chatContainer;
+      const isNearBottom = scrollHeight - (scrollTop + clientHeight) < 50; // 50px threshold
+      setIsUserScrolledUp(!isNearBottom);
+    };
+
+    chatContainer.addEventListener('scroll', handleScroll);
+    return () => chatContainer.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!channelId) {
@@ -57,36 +76,104 @@ const WatchLive = () => {
 
     // Cleanup interval on component unmount
     return () => clearInterval(refreshInterval);
-  }, [logicDate, channelId]); // Added channelId as dependency
+  }, [logicDate, channelId]);
 
-  const mockUsers = [
-    { name: 'Minh Anh', badge: 'Mod' },
-    { name: 'Hoàng Long', badge: 'VIP' },
-    { name: 'Thu Hà', badge: null },
-    { name: 'Đức Nam', badge: 'Admin' }
-  ];
+  useEffect(() => {
+    // Fetch comments when videoHistoryId changes
+    if (videoHistoryId) {
+      fetchComments();
+      // Set up interval to fetch comments every 5 seconds
+      const commentInterval = setInterval(fetchComments, 5000);
+      return () => clearInterval(commentInterval);
+    }
+  }, [videoHistoryId]);
 
-  const emojis = ['😊', '👋', '❤️', '👏', '🎓', '🌟', '💪', '🎉', '🙌', '✨'];
+  const fetchComments = async () => {
+    try {
+      if (isInitialLoad) {
+        setIsLoadingComments(true);
+      }
+  
+      setCommentError(null);
+      const response = await apiFetch(`Comment/video/${videoHistoryId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+          "Accept": "application/json"
+        }
+      });
+  
+      if (!response.ok) throw new Error("Không thể tải bình luận!");
+  
+      const data = await response.json();
+      if (data?.$values) {
+        const formattedComments = data.$values.map(comment => ({
+          id: comment.commentID,
+          text: comment.content,
+          user: {
+            name: "Người xem",
+            badge: null
+          },
+          // Explicitly parse UTC and convert to GMT+7
+          time: dayjs.utc(comment.createdAt).tz("Asia/Bangkok").format('HH:mm')
+        }));
+  
+        setMessages(formattedComments);
+  
+        setTimeout(() => {
+          if (!isUserScrolledUp && chatMessagesRef.current) {
+            chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+          }
+        }, 0);
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      setCommentError("Có lỗi đã xảy ra. Vui lòng thử lại sau.");
+    } finally {
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+        setIsLoadingComments(false);
+      }
+    }
+  };
 
-  const initialMessages = [
-    'Chúc mừng các tân cử nhân! 🎓',
-    'Buổi lễ thật trang trọng và ý nghĩa 👏',
-    'Chúc các bạn thành công trên con đường sắp tới 🌟',
-    'Cảm động quá! 😊'
-  ];
+  useEffect(() => {
+    if (videoHistoryId) {
+      setIsInitialLoad(true); // Reset loading state for new video
+      fetchComments();
+    }
+  }, [videoHistoryId]);
+
+  const postComment = async (content) => {
+    try {
+      const response = await apiFetch(`Comment`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          content: content,
+          videoHistoryID: videoHistoryId
+        })
+      });
+
+      if (!response.ok) throw new Error("Không thể đăng bình luận!");
+
+      // After posting, fetch latest comments
+      await fetchComments();
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      toast.error("Không thể đăng bình luận. Vui lòng thử lại sau.");
+    }
+  };
 
   useEffect(() => {
     AOS.init({
       duration: 800,
       offset: 100,
       once: true
-    });
-
-    initialMessages.forEach((text, index) => {
-      setTimeout(() => {
-        const randomUser = mockUsers[Math.floor(Math.random() * mockUsers.length)];
-        addMessage(text, randomUser);
-      }, index * 1000);
     });
 
     handleExistChannel();
@@ -111,7 +198,10 @@ const WatchLive = () => {
     children: (
       <div
         className="schedule-item live"
-        onClick={() => setDisplayIframeUrl(schedule.iframeUrl)}
+        onClick={() => {
+          setDisplayIframeUrl(schedule.iframeUrl);
+          setVideoHistoryId(schedule.videoHistoryIdFromSchedule);
+        }}
       >
         <div className="schedule-time">
           <div className="time-indicator live" />
@@ -129,44 +219,56 @@ const WatchLive = () => {
 
   const fetchScheduleProgram = async (date) => {
     try {
+      console.log('Fetching schedule for date:', date); // Debug log
       const response = await apiFetch(
         `Schedule/by-channel-and-date?channelId=${channelId}&date=${encodeURIComponent(date)}`,
         { method: "GET" }
       );
 
+      console.log('API response:', response); // Debug log
+
       if (!response.ok) throw new Error("Không thể lấy lịch phát sóng!");
 
       const data = await response.json();
+      console.log('API data:', data); // Debug log
 
       if (data?.data?.$values) {
         // Filter and map only live schedules
         const schedules = data.data.$values
-          .filter(schedule => schedule.status === "Live") // Only get live schedules
+          .filter(schedule => schedule.status === "Live")
           .map((schedule) => ({
             startTime: dayjs(schedule.startTime),
             endTime: dayjs(schedule.endTime),
             programName: schedule.program.programName,
-            status: true, // Since we're only getting live ones
+            status: true,
             iframeUrl: schedule.iframeUrl,
             isReplay: schedule.isReplay,
+            videoHistoryIdFromSchedule: schedule.videoHistoryIdFromSchedule
           }))
           .sort((a, b) => a.startTime.valueOf() - b.startTime.valueOf());
 
+        console.log('Processed schedules:', schedules); // Debug log
+
         setDisplaySchedule(schedules);
 
-        // Set the iframe URL to the first live stream if available
         if (schedules.length > 0) {
+          console.log('Setting iframeUrl and videoHistoryId:', schedules[0].iframeUrl, schedules[0].videoHistoryIdFromSchedule); // Debug log
           setDisplayIframeUrl(schedules[0].iframeUrl);
+          setVideoHistoryId(schedules[0].videoHistoryIdFromSchedule); // This should set videoHistoryId to 1025
         } else {
-          // If no live streams, clear the iframe URL
           setDisplayIframeUrl("");
+          setVideoHistoryId(null);
         }
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi lấy lịch phát sóng!");
       console.error("Error fetching schedule program:", error);
+      toast.error("Có lỗi xảy ra khi lấy lịch phát sóng!");
     }
   };
+
+  useEffect(() => {
+    console.log('videoHistoryId updated:', videoHistoryId);
+  }, [videoHistoryId]);
 
   const handleExistChannel = async () => {
     if (!channelId) {
@@ -203,9 +305,11 @@ const WatchLive = () => {
 
   const addMessage = (text, user) => {
     const newMessage = {
+      id: Date.now(),
       text,
       user,
-      time: new Date().toLocaleTimeString()
+      // Format current time in GMT+7
+      time: dayjs().tz("Asia/Bangkok").format('HH:mm')
     };
     setMessages(prev => [...prev, newMessage]);
     if (chatMessagesRef.current) {
@@ -215,8 +319,19 @@ const WatchLive = () => {
 
   const sendMessage = () => {
     if (messageInput.trim()) {
-      addMessage(messageInput, { name: 'Bạn', badge: null });
+      if (videoHistoryId) {
+        postComment(messageInput);
+      } else {
+        addMessage(messageInput, { name: 'Bạn', badge: null });
+      }
       setMessageInput('');
+
+      // Force scroll to bottom on send (regardless of user scroll)
+      setTimeout(() => {
+        if (chatMessagesRef.current) {
+          chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+        }
+      }, 0);
     }
   };
 
@@ -235,9 +350,6 @@ const WatchLive = () => {
                 onClick={() => setShowSchedule(false)}
               />
             )}
-            <div className={`schedule-overlay ${showSchedule ? 'visible' : ''}`}
-              onClick={() => setShowSchedule(false)}
-            />
             {displayIframeUrl ? (
               <>
                 <button
@@ -308,33 +420,48 @@ const WatchLive = () => {
 
           <div className="stream-info">
             <div className="stream-header">
-              <h1 className="stream-title">
-                {displaySchedule.find(s => s.iframeUrl === displayIframeUrl)?.programName || "Chương trình đang phát sóng"}
-              </h1>
-              <div className="live-badge">LIVE</div>
+              <div className="stream-title-row">
+                <h1 className="stream-title">
+                  {displaySchedule.find(s => s.iframeUrl === displayIframeUrl)?.programName || "Chương trình đang phát sóng"}
+                </h1>
+                <div className="live-badge">LIVE</div>
+              </div>
+
+              <div className="stream-actions">
+                <button className="action-button primary-action">
+                  <i className="fas fa-thumbs-up" /> Thích
+                </button>
+                <button className="action-button secondary-action">
+                  <i className="fas fa-share" /> Chia sẻ
+                </button>
+                <button className="action-button secondary-action">
+                  <i className="fas fa-flag" /> Báo cáo
+                </button>
+              </div>
             </div>
 
-            <div className="stream-meta">
-              <span><i className="fas fa-users" /> 1,234 người xem</span>
-              <span><i className="fas fa-clock" /> Bắt đầu 2 giờ trước</span>
-              <span><i className="fas fa-university" /> ĐH Bách Khoa Hà Nội</span>
-              <span><i className="fas fa-heart" /> 2.5K lượt thích</span>
-            </div>
-
-            <div className="stream-actions">
-              <button className="action-button primary-action">
-                <i className="fas fa-heart" /> Thích
-              </button>
-              <button className="action-button secondary-action">
-                <i className="fas fa-share" /> Chia sẻ
-              </button>
-              <button className="action-button secondary-action">
+            <div className="channel-info">
+              <div className="channel-avatar">
+                <img
+                  src="https://picsum.photos/200/200"
+                  alt="ĐH Bách Khoa Hà Nội"
+                />
+              </div>
+              <div className="channel-details">
+                <div className="channel-name">ĐH Bách Khoa Hà Nội</div>
+                <div className="channel-subscribers">
+                  1.2K người đăng ký
+                </div>
+              </div>
+              <button className="subscribe-button">
                 <i className="fas fa-bell" /> Theo dõi
               </button>
             </div>
 
+            {/* Stream description */}
             <div className="stream-description">
-              <p>Nội dung chương trình sẽ được cập nhật sớm nhất.</p>
+              <h3>Giới thiệu chương trình</h3>
+              <p>Nội dung chương trình sẽ được cập nhật sớm nhất. Đây là buổi lễ tốt nghiệp năm 2023 của trường Đại học Bách Khoa Hà Nội.</p>
             </div>
           </div>
         </section>
@@ -356,20 +483,36 @@ const WatchLive = () => {
         </div>
 
         <div className="chat-messages" ref={chatMessagesRef}>
-          {messages.map((message, index) => (
-            <div className="message" key={index}>
-              <div className="message-header">
-                <span className="username">
-                  {message.user.name}
-                  {message.user.badge && (
-                    <span className="user-badge">{message.user.badge}</span>
-                  )}
-                </span>
-                <span className="message-time">{message.time}</span>
-              </div>
-              <div className="message-content">{message.text}</div>
+          {commentError ? (
+            <div className="message">
+              <div className="message-content">{commentError}</div>
             </div>
-          ))}
+          ) : messages.length === 0 ? (
+            isInitialLoad ? (
+              <div className="message">
+                <div className="message-content">Đang tải bình luận...</div>
+              </div>
+            ) : (
+              <div className="message">
+                <div className="message-content">Chưa có bình luận nào.</div>
+              </div>
+            )
+          ) : (
+            messages.map((message) => (
+              <div className="message" key={message.id}>
+                <div className="message-header">
+                  <span className="username">
+                    {message.user.name}
+                    {message.user.badge && (
+                      <span className="user-badge">{message.user.badge}</span>
+                    )}
+                  </span>
+                  <span className="message-time">{message.time}</span>
+                </div>
+                <div className="message-content">{message.text}</div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="chat-input">
@@ -407,6 +550,7 @@ const WatchLive = () => {
             <button
               className="send-button"
               onClick={sendMessage}
+              disabled={!messageInput.trim()}
             >
               <i className="fas fa-paper-plane" /> Gửi
             </button>
