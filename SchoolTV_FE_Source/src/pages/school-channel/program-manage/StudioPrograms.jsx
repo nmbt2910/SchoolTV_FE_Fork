@@ -451,7 +451,7 @@ const StudioPrograms = () => {
                     onChange={(e) => setScheduleForm({ ...scheduleForm, isReplay: e.target.checked })}
                     className={styles.checkboxInput}
                   />
-                  Cho phép phát lại
+                  Phát lại
                 </label>
               </div>
             </div>
