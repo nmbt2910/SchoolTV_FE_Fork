@@ -103,6 +103,57 @@ function LiveStreamSchedule() {
     }
   };
 
+  const disabledDate = (current) => {
+    // Không cho phép chọn ngày trước ngày hiện tại
+    return current && current < dayjs().startOf('day');
+  };
+
+  const disabledTime = (current) => {
+    if (!current) {
+      return {
+        disabledHours: () => [],
+        disabledMinutes: () => [],
+        disabledSeconds: () => []
+      };
+    }
+
+    const now = dayjs();
+    const currentDateTime = dayjs(current);
+    
+    // Nếu là ngày hôm nay
+    if (currentDateTime.isSame(now, 'day')) {
+      const currentHour = now.hour();
+      const currentMinute = now.minute();
+      
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < currentHour; i++) {
+            hours.push(i);
+          }
+          return hours;
+        },
+        disabledMinutes: (selectedHour) => {
+          if (selectedHour === currentHour) {
+            const minutes = [];
+            for (let i = 0; i <= currentMinute + 10; i++) {
+              minutes.push(i);
+            }
+            return minutes;
+          }
+          return [];
+        },
+        disabledSeconds: () => []
+      };
+    }
+    
+    return {
+      disabledHours: () => [],
+      disabledMinutes: () => [],
+      disabledSeconds: () => []
+    };
+  };
+
   console.log("selectedRange", selectedRange);
 
   const handleCreateSchedule = async () => {
@@ -178,7 +229,7 @@ function LiveStreamSchedule() {
             name={"program"}
           >
             <Select
-              defaultValue={{ value: "none", label: "Chọn phiên live" }}
+              defaultValue={{ value: "none", label: "Chọn chương trình" }}
               onChange={handleChangeProgram}
               options={program}
             />
@@ -197,6 +248,8 @@ function LiveStreamSchedule() {
                 format: "HH:mm:ss",
               }}
               disabled={!programID}
+              disabledDate={disabledDate}
+              disabledTime={disabledTime}
             />
           </Form.Item>
           <Form.Item>
