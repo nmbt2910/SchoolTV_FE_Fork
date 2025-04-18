@@ -7,27 +7,27 @@ import { useNavigate } from 'react-router-dom';
 
 const Toast = ({ message, type, onClose }) => {
     useEffect(() => {
-      const timer = setTimeout(() => {
-        onClose();
-      }, 3000);
-      return () => clearTimeout(timer);
+        const timer = setTimeout(() => {
+            onClose();
+        }, 3000);
+        return () => clearTimeout(timer);
     }, [onClose]);
-  
+
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3 }}
-        className={`${styles.toast} ${styles[type]}`}
-      >
-        {type === 'success' && <i className="fas fa-check-circle" />}
-        {type === 'error' && <i className="fas fa-exclamation-circle" />}
-        {type === 'info' && <i className="fas fa-info-circle" />}
-        {message}
-      </motion.div>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className={`${styles.toast} ${styles[type]}`}
+        >
+            {type === 'success' && <i className="fas fa-check-circle" />}
+            {type === 'error' && <i className="fas fa-exclamation-circle" />}
+            {type === 'info' && <i className="fas fa-info-circle" />}
+            {message}
+        </motion.div>
     );
-  };
+};
 
 const ChannelList = () => {
     const { theme } = useContext(ThemeContext);
@@ -44,6 +44,7 @@ const ChannelList = () => {
     const [searchResults, setSearchResults] = useState(null);
     const [searchError, setSearchError] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
+    const [liveChannels, setLiveChannels] = useState([]);
     const navigate = useNavigate();
     const [toast, setToast] = useState({
         show: false,
@@ -68,64 +69,73 @@ const ChannelList = () => {
         }, 3000);
       };
 
-    useEffect(() => {
+      useEffect(() => {
         const fetchInitialData = async () => {
             try {
                 const token = localStorage.getItem('authToken');
                 if (!token) {
                     showToast('Vui lòng đăng nhập để tiếp tục', 'error');
-                    setIsAuthenticated(false); // Add this line
+                    setIsAuthenticated(false);
                     setIsLoading(false);
                     return;
                 }
-
+    
                 const headers = {
-                    'accept': '*/*'
+                    'accept': '*/*',
+                    'Authorization': `Bearer ${token}`
                 };
     
-                const schoolResponse = await apiFetch('schoolchannels/active', { headers });
-                
+                // Fetch all in parallel
+                const [liveResponse, schoolResponse, followedResponse] = await Promise.all([
+                    apiFetch('Schedule/live-now', { headers }),
+                    apiFetch('schoolchannels/active', { headers }),
+                    apiFetch('schoolchannelfollow/followed', { headers }),
+                ]);
+    
+                // Handle Live Channels
+                let liveChannelIds = [];
+                if (liveResponse.ok) {
+                    const liveData = await liveResponse.json();
+                    liveChannelIds = liveData.$values.map(item =>
+                        item.program?.schoolChannel?.schoolChannelID
+                    ).filter(id => id !== undefined);
+                }
+    
+                // Handle School Channels
                 if (!schoolResponse.ok) {
                     throw new Error('Không thể tải danh sách trường học');
                 }
-                
                 const schoolData = await schoolResponse.json();
     
+                // Handle Followed Channels
                 let followedData = { $values: [] };
-                
-                try {
-                    const followedResponse = await apiFetch('schoolchannelfollow/followed', { headers });
-                    
-                    if (followedResponse.ok) {
-                        followedData = await followedResponse.json();
-                    } else if (followedResponse.status === 404) {
-                        console.log('Chưa có trường nào được theo dõi');
-                    } else {
-                        throw new Error('Không thể tải danh sách trường đã theo dõi');
-                    }
-                } catch (followedError) {
-                    console.log('Lỗi tải danh sách theo dõi:', followedError);
-                    showToast('Không thể tải danh sách trường đã theo dõi', 'error');
+                if (followedResponse.ok) {
+                    followedData = await followedResponse.json();
+                } else if (followedResponse.status === 404) {
+                    console.log('Chưa có trường nào được theo dõi');
+                } else {
+                    throw new Error('Không thể tải danh sách trường đã theo dõi');
                 }
     
+                // Calculate isLive and isSubscribed correctly
                 const channels = schoolData.$values.map(channel => ({
                     id: channel.schoolChannelID,
                     name: channel.name,
-                    isLive: Math.random() < 0.5,
+                    isLive: liveChannelIds.includes(channel.schoolChannelID),
                     isSubscribed: followedData.$values.some(f => f.schoolChannelID === channel.schoolChannelID)
                 }));
     
                 const followed = followedData.$values.map(channel => ({
                     id: channel.schoolChannelID,
                     name: channel.name,
-                    isLive: Math.random() < 0.5,
+                    isLive: liveChannelIds.includes(channel.schoolChannelID),
                     isSubscribed: true
                 }));
     
+                setLiveChannels(liveChannelIds); // update state if you still need it elsewhere
                 setSchoolChannels(channels);
                 setFollowedChannels(followed);
                 setIsLoading(false);
-                
             } catch (err) {
                 console.error('Lỗi tải dữ liệu:', err);
                 showToast('Không thể tải dữ liệu. Vui lòng thử lại sau', 'error');
@@ -138,62 +148,62 @@ const ChannelList = () => {
 
     const handleCardClick = useCallback(() => {
         navigate(`/watchLive`); // Navigate with channel ID
-      }, [navigate]);
+    }, [navigate]);
 
     const handleSearch = useCallback(async () => {
         if (!searchTerm.trim()) {
-          showToast('Vui lòng nhập từ khóa để tìm kiếm', 'error');
-          return;
+            showToast('Vui lòng nhập từ khóa để tìm kiếm', 'error');
+            return;
         }
-      
+
         setIsSearching(true);
         setSearchError(null);
         setSearchedTerm(searchTerm);
-      
-        try {
-          const token = localStorage.getItem('authToken');
-          if (!token) {
-            showToast('Vui lòng đăng nhập để tìm kiếm', 'error');
-            return;
-          }
-      
-          const params = new URLSearchParams({
-            [searchType === 'name' ? 'keyword' : 'address']: searchTerm
-          });
-      
-          const response = await apiFetch(`schoolchannels/search?${params}`, {
-            headers: {
-              'accept': '*/*'
-            }
-          });
-      
-          if (!response.ok) {
-            if (response.status === 404) {
-              setSearchResults([]);
-              showToast('Không tìm thấy kết quả phù hợp', 'info');
-            } else {
-              throw new Error('Lỗi tìm kiếm');
-            }
-          } else {
-            const data = await response.json();
-            const results = data.$values.map(channel => ({
-              id: channel.schoolChannelID,
-              name: channel.name,
-              isLive: Math.random() < 0.5,
-              isSubscribed: followedChannels.some(f => f.id === channel.schoolChannelID)
-            }));
-            setSearchResults(results);
-            showToast(`Tìm thấy ${results.length} kết quả phù hợp`, 'success');
-          }
-        } catch (err) {
-          console.error('Lỗi tìm kiếm:', err);
-          showToast('Đã xảy ra lỗi khi tìm kiếm. Vui lòng thử lại sau', 'error');
-        } finally {
-          setIsSearching(false);
-        }
-      }, [searchTerm, searchType, followedChannels]);
 
-      const clearSearch = useCallback(() => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                showToast('Vui lòng đăng nhập để tìm kiếm', 'error');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                [searchType === 'name' ? 'keyword' : 'address']: searchTerm
+            });
+
+            const response = await apiFetch(`schoolchannels/search?${params}`, {
+                headers: {
+                    'accept': '*/*'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    setSearchResults([]);
+                    showToast('Không tìm thấy kết quả phù hợp', 'info');
+                } else {
+                    throw new Error('Lỗi tìm kiếm');
+                }
+            } else {
+                const data = await response.json();
+                const results = data.$values.map(channel => ({
+                    id: channel.schoolChannelID,
+                    name: channel.name,
+                    isLive: Math.random() < 0.5,
+                    isSubscribed: followedChannels.some(f => f.id === channel.schoolChannelID)
+                }));
+                setSearchResults(results);
+                showToast(`Tìm thấy ${results.length} kết quả phù hợp`, 'success');
+            }
+        } catch (err) {
+            console.error('Lỗi tìm kiếm:', err);
+            showToast('Đã xảy ra lỗi khi tìm kiếm. Vui lòng thử lại sau', 'error');
+        } finally {
+            setIsSearching(false);
+        }
+    }, [searchTerm, searchType, followedChannels]);
+
+    const clearSearch = useCallback(() => {
         setSearchResults(null);
         setSearchTerm('');
         setSearchedTerm('');
@@ -202,48 +212,48 @@ const ChannelList = () => {
 
     const handleSubscription = useCallback(async (channelId) => {
         try {
-          setIsProcessing(true);
-          const token = localStorage.getItem('authToken');
-          if (!token) {
-            showToast('Vui lòng đăng nhập để đăng ký theo dõi', 'error');
-            return;
-          }
-          
-          const response = await apiFetch(`schoolchannelfollow/follow/${channelId}`, {
-            method: 'POST',
-            headers: {
-              'accept': '*/*'
+            setIsProcessing(true);
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                showToast('Vui lòng đăng nhập để đăng ký theo dõi', 'error');
+                return;
             }
-          });
-      
-          if (!response.ok) throw new Error('Không thể đăng ký theo dõi');
-          
-          setSchoolChannels(prev =>
-            prev.map(channel =>
-              channel.id === channelId ? { ...channel, isSubscribed: true } : channel
-            )
-          );
-      
-          const channelToAdd = schoolChannels.find(c => c.id === channelId);
-          if (channelToAdd) {
-            setFollowedChannels(prev => [...prev, { ...channelToAdd, isSubscribed: true }]);
-          }
-      
-          setSearchResults(prevResults => 
-            prevResults ? prevResults.map(channel => 
-              channel.id === channelId ? { ...channel, isSubscribed: true } : channel
-            ) : null
-          );
-      
-          showToast('Đăng ký theo dõi thành công', 'success');
-      
+
+            const response = await apiFetch(`schoolchannelfollow/follow/${channelId}`, {
+                method: 'POST',
+                headers: {
+                    'accept': '*/*'
+                }
+            });
+
+            if (!response.ok) throw new Error('Không thể đăng ký theo dõi');
+
+            setSchoolChannels(prev =>
+                prev.map(channel =>
+                    channel.id === channelId ? { ...channel, isSubscribed: true } : channel
+                )
+            );
+
+            const channelToAdd = schoolChannels.find(c => c.id === channelId);
+            if (channelToAdd) {
+                setFollowedChannels(prev => [...prev, { ...channelToAdd, isSubscribed: true }]);
+            }
+
+            setSearchResults(prevResults =>
+                prevResults ? prevResults.map(channel =>
+                    channel.id === channelId ? { ...channel, isSubscribed: true } : channel
+                ) : null
+            );
+
+            showToast('Đăng ký theo dõi thành công', 'success');
+
         } catch (error) {
-          console.error('Lỗi đăng ký theo dõi:', error);
-          showToast('Không thể đăng ký theo dõi. Vui lòng thử lại sau', 'error');
+            console.error('Lỗi đăng ký theo dõi:', error);
+            showToast('Không thể đăng ký theo dõi. Vui lòng thử lại sau', 'error');
         } finally {
-          setIsProcessing(false);
+            setIsProcessing(false);
         }
-      }, [schoolChannels]);
+    }, [schoolChannels]);
 
     const handleUnsubscription = useCallback(async (channelId) => {
         try {
@@ -253,7 +263,7 @@ const ChannelList = () => {
                 showToast('Vui lòng đăng nhập để hủy theo dõi', 'error');
                 return;
             }
-            
+
             const response = await apiFetch(`schoolchannelfollow/unfollow/${channelId}`, {
                 method: 'PUT',
                 headers: {
@@ -262,19 +272,19 @@ const ChannelList = () => {
             });
 
             if (!response.ok) throw new Error('Không thể hủy theo dõi');
-            
+
             setSchoolChannels(prev =>
                 prev.map(channel =>
                     channel.id === channelId ? { ...channel, isSubscribed: false } : channel
                 )
             );
 
-            setFollowedChannels(prev => 
+            setFollowedChannels(prev =>
                 prev.filter(c => c.id !== channelId)
             );
 
-            setSearchResults(prevResults => 
-                prevResults ? prevResults.map(channel => 
+            setSearchResults(prevResults =>
+                prevResults ? prevResults.map(channel =>
                     channel.id === channelId ? { ...channel, isSubscribed: false } : channel
                 ) : null
             );
@@ -323,7 +333,7 @@ const ChannelList = () => {
                 {isProcessing ? 'Đang xử lý...' : (channel.isSubscribed ? 'Đã đăng ký' : 'Đăng ký')}
             </button>
         </motion.div>
-    )), [handleSubscription, handleUnsubscription, isProcessing]);
+    )), [handleSubscription, handleUnsubscription, isProcessing, navigate]);
 
     const displayChannels = useMemo(() => {
         if (searchResults !== null) return searchResults || [];
@@ -337,13 +347,35 @@ const ChannelList = () => {
     if (error) {
         return <div className={styles.chnl_wrapper}>Error: {error}</div>;
     }
-
-    if (!isAuthenticated) {
+    if (!localStorage.getItem('authToken')) {
         return (
-            <div className={styles.chnl_wrapper}>
-                <div className={styles.authError}>
-                    <h3>Bạn chưa đăng nhập</h3>
-                    <p>Bạn phải đăng nhập để thực hiện hành động này.</p>
+            <div className={styles.chnl_wrapper} style={{ paddingTop: '150px', background: 'var(--bg-color)' }}>
+                <div style={{
+                    textAlign: 'center',
+                    padding: '2rem',
+                    borderRadius: '12px',
+                    margin: '2rem 0'
+                }}>
+                    <h3 style={{ color: 'var(--primary-text)', marginBottom: '1rem' }}>
+                        Bạn cần đăng nhập để xem nội dung này
+                    </h3>
+                    <p style={{ color: 'var(--secondary-text)', marginBottom: '1.5rem' }}>
+                        Vui lòng đăng nhập để tiếp tục xem các chương trình và tương tác.
+                    </p>
+                    <button
+                        style={{
+                            padding: '0.8rem 1.5rem',
+                            borderRadius: '8px',
+                            background: 'var(--primary-color)',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onClick={() => navigate('/login')}
+                    >
+                        Đăng nhập ngay
+                    </button>
                 </div>
             </div>
         );
@@ -389,13 +421,13 @@ const ChannelList = () => {
                         <div className={styles.chnl_search_wrapper}>
                             <div className={styles.chnl_search_input_group}>
                                 <svg className={styles.chnl_search_icon} viewBox="0 0 24 24">
-                                    <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                                    <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                                 </svg>
                                 <input
                                     type="text"
                                     className={styles.chnl_search_input}
-                                    placeholder={searchType === 'name' ? 
-                                        "Nhập tên trường học..." : 
+                                    placeholder={searchType === 'name' ?
+                                        "Nhập tên trường học..." :
                                         "Nhập địa chỉ..."
                                     }
                                     value={searchTerm}
@@ -417,7 +449,7 @@ const ChannelList = () => {
                         </div>
                     </div>
                 </motion.div>
-                
+
                 {searchError && (
                     <motion.div
                         className={styles.chnl_error}
@@ -454,11 +486,11 @@ const ChannelList = () => {
                     animate={{ opacity: 1 }}
                 >
                     <h2 className={styles.chnl_title}>
-                        {searchResults !== null ? 
-                            `Kết quả tìm kiếm "${searchedTerm}"` : 
-                            activeTab === 'explore' ? 
-                            'Khám Phá Trường Học' : 
-                            'Trường Đang Theo Dõi'
+                        {searchResults !== null ?
+                            `Kết quả tìm kiếm "${searchedTerm}"` :
+                            activeTab === 'explore' ?
+                                'Khám Phá Trường Học' :
+                                'Trường Đang Theo Dõi'
                         }
                     </h2>
                     <div className={styles.chnl_counter}>
@@ -476,7 +508,7 @@ const ChannelList = () => {
                             </>
                         ) : (
                             <>
-                                {activeTab === 'explore' ? '🏫' : '✅'} 
+                                {activeTab === 'explore' ? '🏫' : '✅'}
                                 {(displayChannels || []).length} trường
                             </>
                         )}
@@ -501,19 +533,19 @@ const ChannelList = () => {
                                 <span className={styles.chnl_secondary_emoji}>🎓</span>
                             </div>
                             <h3>
-                                {searchResults !== null ? 
-                                    "Không tìm thấy kết quả phù hợp" : 
+                                {searchResults !== null ?
+                                    "Không tìm thấy kết quả phù hợp" :
                                     activeTab === 'explore' ?
-                                    "Không có trường học nào" :
-                                    "Bạn chưa theo dõi trường học nào"
+                                        "Không có trường học nào" :
+                                        "Bạn chưa theo dõi trường học nào"
                                 }
                             </h3>
                             <p>
                                 {searchResults !== null ?
                                     "Vui lòng thử từ khóa khác hoặc thay đổi loại tìm kiếm" :
                                     activeTab === 'explore' ?
-                                    "Hãy thử tìm kiếm các trường học có sẵn" :
-                                    "Tìm kiếm và theo dõi các trường học bạn quan tâm"
+                                        "Hãy thử tìm kiếm các trường học có sẵn" :
+                                        "Tìm kiếm và theo dõi các trường học bạn quan tâm"
                                 }
                             </p>
                         </div>
