@@ -29,7 +29,7 @@ const UserProfile = () => {
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
   const initialValuesRef = useRef({});
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState({ $values: [] });
   const [errorOrders, setErrorOrders] = useState(null);
 
   useEffect(() => {
@@ -98,27 +98,34 @@ const UserProfile = () => {
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
+      // Check if user is not SchoolOwner, skip the API call
+      if (user?.roleName?.toLowerCase() !== "schoolowner") {
+        setOrders({ $values: [] });
+        setLoading(false);
+        return;
+      }
+
       try {
         const dataOrderId = JSON.parse(localStorage.getItem("orderId"));
         const orderId = dataOrderId?.orderId;
-    
+
         if (!orderId) {
           throw new Error("Không tìm thấy mã đơn hàng");
         }
-    
-        const response = await apiFetch(`/api/orders/history`);
+
+        const response = await apiFetch(`orders/history`);
         const data = await response.json();
         console.log("Order details:", data);
-        
+
         if (!response.ok) {
           throw new Error(`Lỗi khi lấy thông tin đơn hàng: ${response.status}`);
         }
-    
+
         // Add validation for the response structure
         if (!data || !data.$values) {
           throw new Error("Dữ liệu đơn hàng không hợp lệ");
         }
-    
+
         setOrders(data);
       } catch (err) {
         setErrorOrders(err.message);
@@ -132,8 +139,11 @@ const UserProfile = () => {
       }
     };
 
-    fetchOrderDetails();
-  }, []);
+    // Only fetch orders if user data is available
+    if (user) {
+      fetchOrderDetails();
+    }
+  }, [user]); // Add user as dependency
 
   const handleUpdateInfo = async (values) => {
     try {
@@ -342,10 +352,6 @@ const UserProfile = () => {
             {user.roleName.toLowerCase() !== "schoolowner" && (
               <p className="user-profile-username">@{user.username}</p>
             )}
-            <p className="user-profile-bio">
-              Học sinh lớp 12 - THPT Chu Văn An. Đam mê công nghệ và khoa học
-              máy tính. 🚀
-            </p>
             <div className="user-profile-actions">
               <Button
                 type="primary"
@@ -383,154 +389,105 @@ const UserProfile = () => {
       </div>
 
       <div className="user-profile-content">
-        <div className="content-left">
-          <div className="user-profile-info-card contact-info">
-            <h2>Thông Tin Liên Hệ</h2>
-            <div className="user-profile-info-list">
-              <div className="user-profile-info-item">
-                <div className="info-icon">
-                  <MailOutlined />
-                </div>
-                <div>
-                  <label>Email</label>
-                  <span>{user.email}</span>
-                </div>
+        <div className="user-profile-info-card contact-info">
+          <h2>Thông Tin Liên Hệ</h2>
+          <div className="user-profile-info-list">
+            <div className="user-profile-info-item">
+              <div className="info-icon">
+                <MailOutlined />
               </div>
-              <div className="user-profile-info-item">
-                <div className="info-icon">
-                  <PhoneOutlined />
-                </div>
-                <div>
-                  <label>Số điện thoại</label>
-                  <span>{user.phoneNumber || "Chưa cập nhật"}</span>
-                </div>
-              </div>
-              <div className="user-profile-info-item">
-                <div className="info-icon">
-                  <EnvironmentOutlined />
-                </div>
-                <div>
-                  <label>Địa chỉ</label>
-                  <span>{user.address || "Chưa cập nhật"}</span>
-                </div>
+              <div>
+                <label>Email</label>
+                <span>{user.email}</span>
               </div>
             </div>
-          </div>
-
-          <div className="user-profile-info-card connected-accounts">
-            <h2>Tài Khoản Liên Kết</h2>
-            <div className="user-profile-account-item">
-              <div className="user-profile-account-icon">
-                <GoogleOutlined />
+            <div className="user-profile-info-item">
+              <div className="info-icon">
+                <PhoneOutlined />
               </div>
-              <div className="user-profile-account-info">
-                <span>Google Account</span>
-                <p>{user.email}</p>
+              <div>
+                <label>Số điện thoại</label>
+                <span>{user.phoneNumber || "Chưa cập nhật"}</span>
               </div>
-              <div className="user-profile-account-status connected">
-                Đã liên kết
+            </div>
+            <div className="user-profile-info-item">
+              <div className="info-icon">
+                <EnvironmentOutlined />
+              </div>
+              <div>
+                <label>Địa chỉ</label>
+                <span>{user.address || "Chưa cập nhật"}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="content-right">
-          <div className="user-profile-info-card recent-activities">
-            <div className="activity-background"></div>
-            <h2>Hoạt Động Gần Đây</h2>
-            <div className="user-profile-activity-list">
-              <div className="user-profile-activity-item live">
-                <div className="user-profile-activity-icon">
-                  <VideoCameraOutlined />
-                </div>
-                <div className="user-profile-activity-content">
-                  <span className="user-profile-activity-tag">LIVE</span>
-                  <h3>Hội Thảo: Định Hướng Ngành CNTT</h3>
-                  <p>ĐH Bách Khoa HN</p>
-                  <span className="user-profile-activity-time">
-                    2 giờ trước
-                  </span>
-                </div>
-              </div>
-
-              <div className="user-profile-activity-item">
-                <div className="user-profile-activity-icon">
-                  <BookOutlined />
-                </div>
-                <div className="user-profile-activity-content">
-                  <span className="user-profile-activity-tag">VIDEO</span>
-                  <h3>Ôn Tập Toán: Giải Tích</h3>
-                  <p>Thầy Nguyễn Văn B</p>
-                  <span className="user-profile-activity-time">Hôm qua</span>
-                </div>
-              </div>
-
-              <div className="user-profile-activity-item">
-                <div className="user-profile-activity-icon">
-                  <CalendarOutlined />
-                </div>
-                <div className="user-profile-activity-content">
-                  <span className="user-profile-activity-tag">SỰ KIỆN</span>
-                  <h3>Ngày Hội Tư Vấn Tuyển Sinh 2024</h3>
-                  <p>ĐH Quốc Gia HN</p>
-                  <span className="user-profile-activity-time">
-                    2 ngày trước
-                  </span>
-                </div>
-              </div>
+        <div className="user-profile-info-card connected-accounts">
+          <h2>Tài Khoản Liên Kết</h2>
+          <div className="user-profile-account-item">
+            <div className="user-profile-account-icon">
+              <GoogleOutlined />
+            </div>
+            <div className="user-profile-account-info">
+              <span>Google Account</span>
+              <p>{user.email}</p>
+            </div>
+            <div className="user-profile-account-status connected">
+              Đã liên kết
             </div>
           </div>
         </div>
       </div>
-      {/* order history */}
-      <div className="user-profile-info-card order-history">
-        <div className="order-background"></div>
-        <h2>Lịch Sử Đơn Hàng</h2>
-        <div className="user-profile-order-list">
-          {orders?.$values?.length > 0 ? (
-            orders.$values.map((order) => (
-              <div key={order.orderID} className="user-profile-order-item">
-                <div className={`order-status ${order.status?.toLowerCase() || 'pending'}`}>
-                  <span className="status-dot"></span>
-                  {order.status === "Pending"
-                    ? "Đang xử lý"
-                    : order.status === "Completed"
-                      ? "Hoàn thành"
-                      : "Đã hủy"}
+      {user?.roleName?.toLowerCase() === "schoolowner" && (
+        <div className="user-profile-info-card order-history">
+          <div className="order-background"></div>
+          <h2>Lịch Sử Đơn Hàng</h2>
+          <div className="user-profile-order-list">
+            {orders?.$values?.length > 0 ? (
+              orders.$values.map((order) => (
+                <div key={order.orderID} className="user-profile-order-item">
+                  <div className={`order-status ${order.status?.toLowerCase() || 'pending'}`}>
+                    <span className="status-dot"></span>
+                    {order.status === "Pending"
+                      ? "Đang xử lý"
+                      : order.status === "Completed"
+                        ? "Hoàn thành"
+                        : "Đã hủy"}
+                  </div>
+                  <div className="order-details">
+                    <div className="order-header">
+                      <h3>Đơn hàng #{order.orderCode || 'N/A'}</h3>
+                      <span className="order-date">
+                        {order.createdAt ? new Date(order.createdAt).toLocaleDateString("vi-VN") : 'Không xác định'}
+                      </span>
+                    </div>
+                    <div className="order-products">
+                      {order.orderDetails?.$values?.map((detail) => (
+                        <p key={detail.orderDetailID}>
+                          {detail.package?.name || "Không xác định"} x 1
+                        </p>
+                      ))}
+                    </div>
+                    <div className="order-footer">
+                      <span className="order-amount">
+                        {order.totalPrice ? order.totalPrice.toLocaleString() : '0'} ₫
+                      </span>
+                      <button
+                        className="order-detail-btn"
+                        onClick={() => handleOrderDetailClick(order)}
+                      >
+                        Chi tiết
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="order-details">
-                  <div className="order-header">
-                    <h3>Đơn hàng #{order.orderCode || 'N/A'}</h3>
-                    <span className="order-date">
-                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString("vi-VN") : 'Không xác định'}
-                    </span>
-                  </div>
-                  <div className="order-products">
-                    {order.orderDetails?.$values?.map((detail) => (
-                      <p key={detail.orderDetailID}>
-                        {detail.package?.name || "Không xác định"} x 1
-                      </p>
-                    ))}
-                  </div>
-                  <div className="order-footer">
-                    <span className="order-amount">
-                      {order.totalPrice ? order.totalPrice.toLocaleString() : '0'} ₫
-                    </span>
-                    <button
-                      className="order-detail-btn"
-                      onClick={() => handleOrderDetailClick(order)}
-                    >
-                      Chi tiết
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>Không có đơn hàng nào.</p>
-          )}
+              ))
+            ) : (
+              <p>Không có đơn hàng nào.</p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <Modal
         title="Cập nhật thông tin"

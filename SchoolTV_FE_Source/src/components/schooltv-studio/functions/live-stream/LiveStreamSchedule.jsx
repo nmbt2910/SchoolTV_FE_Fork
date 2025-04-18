@@ -96,17 +96,62 @@ function LiveStreamSchedule() {
   //Handle time and validate time
   const handleChangeTime = (dates) => {
     if (dates && dates.length === 2) {
-      const startDate = dayjs(dates[0])
-        .utc()
-        .tz("Asia/Ho_Chi_Minh")
-        .format("YYYY-MM-DDTHH:mm:ss");
-      const endDate = dayjs(dates[1])
-        .utc()
-        .tz("Asia/Ho_Chi_Minh")
-        .format("YYYY-MM-DDTHH:mm:ss");
+      const startDate = dayjs(dates[0]).utc().toISOString();
+      const endDate = dayjs(dates[1]).utc().toISOString();
 
       setSelectedRange([startDate, endDate]);
     }
+  };
+
+  const disabledDate = (current) => {
+    // Không cho phép chọn ngày trước ngày hiện tại
+    return current && current < dayjs().startOf('day');
+  };
+
+  const disabledTime = (current) => {
+    if (!current) {
+      return {
+        disabledHours: () => [],
+        disabledMinutes: () => [],
+        disabledSeconds: () => []
+      };
+    }
+
+    const now = dayjs();
+    const currentDateTime = dayjs(current);
+    
+    // Nếu là ngày hôm nay
+    if (currentDateTime.isSame(now, 'day')) {
+      const currentHour = now.hour();
+      const currentMinute = now.minute();
+      
+      return {
+        disabledHours: () => {
+          const hours = [];
+          for (let i = 0; i < currentHour; i++) {
+            hours.push(i);
+          }
+          return hours;
+        },
+        disabledMinutes: (selectedHour) => {
+          if (selectedHour === currentHour) {
+            const minutes = [];
+            for (let i = 0; i <= currentMinute + 10; i++) {
+              minutes.push(i);
+            }
+            return minutes;
+          }
+          return [];
+        },
+        disabledSeconds: () => []
+      };
+    }
+    
+    return {
+      disabledHours: () => [],
+      disabledMinutes: () => [],
+      disabledSeconds: () => []
+    };
   };
 
   console.log("selectedRange", selectedRange);
@@ -184,7 +229,7 @@ function LiveStreamSchedule() {
             name={"program"}
           >
             <Select
-              defaultValue={{ value: "none", label: "Chọn phiên live" }}
+              defaultValue={{ value: "none", label: "Chọn chương trình" }}
               onChange={handleChangeProgram}
               options={program}
             />
@@ -203,6 +248,8 @@ function LiveStreamSchedule() {
                 format: "HH:mm:ss",
               }}
               disabled={!programID}
+              disabledDate={disabledDate}
+              disabledTime={disabledTime}
             />
           </Form.Item>
           <Form.Item>

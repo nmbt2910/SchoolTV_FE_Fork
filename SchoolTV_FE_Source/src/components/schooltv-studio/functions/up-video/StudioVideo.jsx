@@ -162,7 +162,7 @@ function StudioVideo() {
                 ]}
               >
                 <Select
-                  defaultValue={{ value: null, label: "Chọn phiên live" }}
+                  defaultValue={{ value: null, label: "Chọn chương trình" }}
                   onChange={handleChangeProgram}
                   options={program}
                 />

@@ -124,7 +124,6 @@ const SortModal = ({ isOpen, onClose, currentSort, onSave }) => {
           </label>
         </div>
         <div className={styles.modalActions}>
-          <button onClick={onClose}>Hủy</button>
           <button onClick={() => onSave(selectedSort)}>Áp dụng</button>
         </div>
       </div>
@@ -296,6 +295,13 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
     }
   }, []);
 
+  const handleScheduleClick = useCallback((schedule) => {
+    const status = getStatus(schedule);
+    if (status === 'LIVE' && program.schoolChannel?.schoolChannelID) {
+      navigate(`/watchLive/${program.schoolChannel.schoolChannelID}`);
+    }
+  }, [navigate, program.schoolChannel]);
+
   const getStatusColor = useCallback((status) => {
     switch (status) {
       case 'LIVE': return 'var(--live-color)';
@@ -393,18 +399,40 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
             padding: '20px 1rem 1rem',
             marginBottom: '1rem',
             marginTop: '-10px',
-            
+
           }}>
             {filteredSchedules.map((schedule, index) => {
               const status = getStatus(schedule);
+              const isLive = status === 'LIVE';
               const statusIcon = {
                 'LIVE': faBroadcastTower,
                 'ĐÃ PHÁT': faPlay,
                 'CHỜ PHÁT': faClock
               }[status];
 
+              // Format the date in Vietnamese locale
+              const formattedDate = schedule.startTime.toLocaleDateString('vi-VN', {
+                weekday: 'long',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+              });
+
               return (
-                <div key={`${schedule.id}-${index}`} className={styles.streamCard}>
+                <div
+                  key={`${schedule.id}-${index}`}
+                  className={styles.streamCard}
+                  onClick={() => isLive ? handleScheduleClick(schedule) : null}
+                  style={{
+                    cursor: isLive ? 'pointer' : 'default',
+                    position: 'relative'
+                  }}
+                >
+                  {isLive && (
+                    <div className={styles.liveOverlay}>
+                      <span>Bấm để xem trực tiếp</span>
+                    </div>
+                  )}
                   <div className={styles.streamThumbnail}>
                     <img
                       src={memoizedImages.programThumbnail}
@@ -428,6 +456,10 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
                   </div>
                   <div className={styles.streamInfo}>
                     <h3 className={styles.streamTitle}>{schedule.mode || program.programName || 'Chương trình phát sóng'}</h3>
+                    {/* Add the date here */}
+                    <div className={styles.scheduleDate}>
+                      {formattedDate}
+                    </div>
                     <div className={styles.streamMeta}>
                       <div className={styles.timeContainer}>
                         <div className={styles.streamStats}>
@@ -464,32 +496,32 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
           </div>
         )}
 
-<div className={styles.modalActions}>
-  <button
-    onClick={() => {
-      onClose();
-      navigate(`/program/${program.programID}`);
-    }}
-    className={styles.followButton} // Use the same class as follow button
-    style={{ background: 'var(--primary-color)' }} // Ensure primary color
-  >
-    <FontAwesomeIcon icon={faInfoCircle} /> Xem chi tiết
-  </button>
-  <button
-    onClick={() => handleFollow(program.programID)}
-    className={`${styles.followButton} ${followedProgramIds.includes(program.programID) ? styles.following : ''}`}
-  >
-    {followedProgramIds.includes(program.programID) ? (
-      <>
-        <FontAwesomeIcon icon={faBell} /> Đang theo dõi
-      </>
-    ) : (
-      <>
-        <FontAwesomeIcon icon={faBell} /> Theo dõi
-      </>
-    )}
-  </button>
-</div>
+        <div className={styles.modalActions}>
+          <button
+            onClick={() => {
+              onClose();
+              navigate(`/program/${program.programID}`);
+            }}
+            className={styles.followButton} // Use the same class as follow button
+            style={{ background: 'var(--primary-color)' }} // Ensure primary color
+          >
+            <FontAwesomeIcon icon={faInfoCircle} /> Xem chi tiết
+          </button>
+          <button
+            onClick={() => handleFollow(program.programID)}
+            className={`${styles.followButton} ${followedProgramIds.includes(program.programID) ? styles.following : ''}`}
+          >
+            {followedProgramIds.includes(program.programID) ? (
+              <>
+                <FontAwesomeIcon icon={faBell} /> Đang theo dõi
+              </>
+            ) : (
+              <>
+                <FontAwesomeIcon icon={faBell} /> Theo dõi
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -497,7 +529,8 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
 
 const LiveList = () => {
   const { theme } = useContext(ThemeContext);
-  const [followedProgramIds, setFollowedProgramIds] = useState([]);
+  const navigate = useNavigate();
+  const [followedPrograms, setFollowedPrograms] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [videos, setVideos] = useState([]);
   const [filters, setFilters] = useState({
@@ -526,71 +559,128 @@ const LiveList = () => {
     return userData ? JSON.parse(userData).accountID : null;
   };
 
+   // LOGIN CHECK: ADD THIS BLOCK AT THE VERY TOP OF THE COMPONENT FUNCTION
+   if (!localStorage.getItem('authToken')) {
+    return (
+      <div className={styles.mainContainer} style={{ paddingTop: '150px', marginBottom: '130px', background: 'var(--bg-color)' }}>
+        <div className="auth-required" style={{
+          textAlign: 'center',
+          padding: '2rem',
+          background: 'var(--card-bg)',
+          borderRadius: '12px',
+          margin: '2rem 0'
+        }}>
+          <h3 style={{ color: 'var(--primary-text)', marginBottom: '1rem' }}>
+            Bạn cần đăng nhập để xem nội dung này
+          </h3>
+          <p style={{ color: 'var(--secondary-text)', marginBottom: '1.5rem' }}>
+            Vui lòng đăng nhập để tiếp tục xem các chương trình và tương tác.
+          </p>
+          <button
+            style={{
+              padding: '0.8rem 1.5rem',
+              borderRadius: '8px',
+              background: 'var(--primary-color)',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => navigate('/login')}
+          >
+            Đăng nhập ngay
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-useEffect(() => {
-  const fetchInitialFollows = async () => {
-    const accountId = getAccountId();
-    if (accountId) {
-      try {
-        const response = await apiFetch(`ProgramFollow/account/${accountId}`, {
-          headers: { 'accept': 'text/plain' }
-        });
+  useEffect(() => {
+    const fetchInitialFollows = async () => {
+      const accountId = getAccountId();
+      if (accountId) {
+        try {
+          const response = await apiFetch(`ProgramFollow/account/${accountId}`, {
+            headers: { 'accept': 'text/plain' }
+          });
 
-        if (response.ok) {
-          const data = await response.json();
-          const ids = data.$values.map(follow => follow.programID);
-          setFollowedProgramIds(ids);
+          if (response.ok) {
+            const data = await response.json();
+            setFollowedPrograms(data.$values); // Store full follow objects
+          }
+        } catch (error) {
+          console.error('Initial follow fetch error:', error);
         }
-      } catch (error) {
-        console.error('Initial follow fetch error:', error);
       }
-    }
-  };
+    };
 
-  fetchInitialFollows();
-}, []); // Empty dependency array = run on mount
+    fetchInitialFollows();
+  }, []);
 
   // Add this function in LiveList component
-const handleFollow = async (programId) => {
-  const accountId = getAccountId();
+  const handleFollow = async (programId) => {
+    const accountId = getAccountId();
 
-  if (!accountId) {
-    showToast('Vui lòng đăng nhập để theo dõi chương trình', 'error');
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
-
-    const response = await apiFetch('ProgramFollow/follow', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'accept': '*/*'
-      },
-      body: JSON.stringify({
-        accountID: accountId,
-        programID: programId
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to follow program');
+    if (!accountId) {
+      showToast('Vui lòng đăng nhập để theo dõi chương trình', 'error');
+      return;
     }
 
-    const data = await response.json();
+    // Check if already following
+    const existingFollow = followedPrograms.find(f => f.programID === programId);
 
-    // Update followedProgramIds
-    if (data.status === "Followed") {
-      setFollowedProgramIds(prev => [...prev, programId]);
-      showToast('Đã theo dõi chương trình thành công', 'success');
+    try {
+      const token = localStorage.getItem('token');
+
+      if (existingFollow) {
+        // Unfollow case
+        const response = await apiFetch(`ProgramFollow/${existingFollow.programFollowID}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'accept': '*/*'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to unfollow program');
+        }
+
+        setFollowedPrograms(prev => prev.filter(f => f.programID !== programId));
+        showToast('Đã hủy theo dõi chương trình', 'success');
+      } else {
+        // Follow case
+        const response = await apiFetch('ProgramFollow/follow', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'accept': '*/*'
+          },
+          body: JSON.stringify({
+            accountID: accountId,
+            programID: programId
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to follow program');
+        }
+
+        const data = await response.json();
+        setFollowedPrograms(prev => [...prev, data]);
+        showToast('Đã theo dõi chương trình thành công', 'success');
+      }
+    } catch (error) {
+      console.error('Follow/unfollow error:', error);
+      showToast(
+        existingFollow
+          ? 'Đã có lỗi trong khi xử lý yêu cầu hủy theo dõi. Vui lòng thử lại sau.'
+          : 'Không thể theo dõi chương trình',
+        'error'
+      );
     }
-  } catch (error) {
-    console.error('Follow error:', error);
-    showToast('Không thể theo dõi chương trình', 'error');
-  }
-};
+  };
 
   const showToast = (message, type = 'info') => {
     setToast({
@@ -642,14 +732,14 @@ const handleFollow = async (programId) => {
   useEffect(() => {
     const fetchFollowedPrograms = async () => {
       const accountId = getAccountId();
-  
+
       if (filters.sort === 'following') {
         if (!accountId) {
           showToast('Vui lòng đăng nhập để xem danh sách theo dõi', 'error');
           setFilters(prev => ({ ...prev, sort: 'newest' }));
           return;
         }
-  
+
         try {
           const response = await apiFetch(`ProgramFollow/account/${accountId}`, {
             headers: { 'accept': 'text/plain' }
@@ -660,7 +750,7 @@ const handleFollow = async (programId) => {
               const errorData = await response.json();
               if (errorData.message === 'No follows found for this account.') {
                 showToast('Bạn chưa theo dõi chương trình nào.', 'info');
-                setFollowedProgramIds([]);
+                setFollowedPrograms([]);
                 return;
               }
             }
@@ -668,13 +758,12 @@ const handleFollow = async (programId) => {
           }
 
           const data = await response.json();
-          const ids = data.$values.map(follow => follow.programID);
-          setFollowedProgramIds(ids);
-          showToast(`Có ${ids.length} kết quả cho mục Đang theo dõi.`, 'success');
+          setFollowedPrograms(data.$values);
+          showToast(`Có ${data.$values.length} kết quả cho mục Đang theo dõi.`, 'success');
         } catch (error) {
           console.error('Fetch error:', error);
           showToast('Đã có lỗi không xác định xảy ra.', 'error');
-          setFollowedProgramIds([]);
+          setFollowedPrograms([]);
         }
       }
     };
@@ -812,7 +901,7 @@ const handleFollow = async (programId) => {
     // Then apply sorting/following filter
     if (filters.sort === 'following') {
       filteredPrograms = filteredPrograms.filter(program =>
-        followedProgramIds.includes(program.programID)
+        followedPrograms.some(f => f.programID === program.programID)
       );
     } else {
       filteredPrograms = sortPrograms(filteredPrograms, filters.sort);
@@ -941,10 +1030,6 @@ const handleFollow = async (programId) => {
                       <span>{video.university}</span>
                     </div>
                     <div className={styles.streamStats}>
-                      <span>
-                        <FontAwesomeIcon icon={faUsers} />{' '}
-                        {`${Math.floor(video.viewers / 1000)}K lượt xem`}
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -1074,7 +1159,7 @@ const handleFollow = async (programId) => {
             key={selectedProgram.id}
             program={selectedProgram}
             onClose={() => setSelectedProgram(null)}
-            followedProgramIds={followedProgramIds}
+            followedProgramIds={followedPrograms.map(f => f.programID)}
             handleFollow={handleFollow}
           />
         )}

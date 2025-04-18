@@ -51,9 +51,6 @@ function CommunityPost() {
 
   return (
     <div className="community-post-container">
-      <div>
-        <Carousel />
-      </div>
 
       <div className="community-post-home">
         <Breadcrumb

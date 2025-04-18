@@ -1,103 +1,395 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import YouTube from 'react-youtube';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './WatchLive.css';
 import { ThemeContext } from '../../context/ThemeContext';
+import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import apiFetch from '../../config/baseAPI';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import VideoComment from '../watch-program/VideoComment';
+import { Timeline } from 'antd';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const WatchLive = () => {
   const { theme } = useContext(ThemeContext);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [lastVolume, setLastVolume] = useState(100);
-  const [activeTab, setActiveTab] = useState('live');
+  const { channelId } = useParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [currentDate, setCurrentDate] = useState(dayjs());
+  const [logicDate, setLogicDate] = useState(currentDate.format("YYYY-MM-DD") || "");
+  const [displaySchedule, setDisplaySchedule] = useState([]);
+  const [displayIframeUrl, setDisplayIframeUrl] = useState("");
+  const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
-  const [showSchedule, setShowSchedule] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [videoHistoryId, setVideoHistoryId] = useState(null);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [commentError, setCommentError] = useState(null);
   const playerRef = useRef(null);
   const chatMessagesRef = useRef(null);
+  const isToday = currentDate.isSame(dayjs(), "day");
+  const displayDate = currentDate.format("DD/MM/YYYY");
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isUserScrolledUp, setIsUserScrolledUp] = useState(false);
+  const [likes, setLikes] = useState([]);
+  const [isLoadingLike, setIsLoadingLike] = useState(false);
+  const [likeError, setLikeError] = useState(null);
+  const [channelInfo, setChannelInfo] = useState(null);
+  const [followedPrograms, setFollowedPrograms] = useState([]);
+  const [isLoadingFollow, setIsLoadingFollow] = useState(false);
+  const [followError, setFollowError] = useState(null);
+  const [currentProgram, setCurrentProgram] = useState(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareError, setShareError] = useState(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportError, setReportError] = useState(null);
 
-  const scheduleData = [
-    {
-      time: "07:25",
-      name: "Vì một tương lai xanh: Vẽ tranh bích họa môi trường",
-      description: "Chương trình về môi trường",
-      status: "past"
-    },
-    {
-      time: "07:30",
-      name: "Nèo về nguồn cội: Nhân bạc của người Chu Ru",
-      description: "Phim tài liệu",
-      status: "past"
-    },
-    {
-      time: "07:45",
-      name: "Ký sự: Tình quê trong lá",
-      description: "Phóng sự - Ký sự",
-      status: "live"
-    },
-    {
-      time: "08:00",
-      name: "Phim truyện: Mỹ nhân Sài Thành - Tập 2",
-      description: "Phim truyện",
-      status: "upcoming"
-    },
-    {
-      time: "08:50",
-      name: "Một vòng Việt Nam: Thung Nham - Bản tình ca mùa xuân",
-      description: "Du lịch - Văn hóa",
-      status: "upcoming"
-    },
-    {
-      time: "09:00",
-      name: "Thời sự",
-      description: "Tin tức - Thời sự",
-      status: "upcoming"
+  const getAccountId = () => {
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData).accountID : null;
+  };
+
+  if (!localStorage.getItem('authToken')) {
+    return (
+      <div className="main-container" style={{ background: 'var(--bg-color)' }}>
+        <div className="auth-required">
+          <h3>Bạn cần đăng nhập để xem nội dung này</h3>
+          <p>Vui lòng đăng nhập để tiếp tục xem chương trình trực tiếp và tham gia trò chuyện.</p>
+          <button onClick={() => navigate('/login')}>Đăng nhập ngay</button>
+        </div>
+      </div>
+    );
+  }
+
+  const fetchFollowedPrograms = useCallback(async () => {
+    const accountId = getAccountId();
+    if (!accountId) return;
+
+    try {
+      const response = await apiFetch(`ProgramFollow/account/${accountId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.status === 500) {
+        // This is the "no follows found" case, which is expected
+        setFollowedPrograms([]);
+        return;
+      }
+
+      if (!response.ok) throw new Error('Failed to fetch followed programs');
+
+      const data = await response.json();
+      if (data?.$values) {
+        setFollowedPrograms(data.$values);
+      } else {
+        setFollowedPrograms([]);
+      }
+    } catch (error) {
+      console.error('Error fetching followed programs:', error);
+      // Only show error if it's not the "no follows" case
+      if (!error.message.includes("No follows found")) {
+        setFollowError('Failed to load followed programs');
+      }
     }
-  ];
+  }, []);
 
   useEffect(() => {
-    if (isScheduleOpen) {
-      document.body.classList.add('scroll-lock');
-    } else {
-      document.body.classList.remove('scroll-lock');
+    fetchFollowedPrograms();
+  }, [fetchFollowedPrograms]);
+
+  const handleFollow = async (programId) => {
+    const accountId = getAccountId();
+
+    if (!accountId) {
+      toast.error('Vui lòng đăng nhập để theo dõi chương trình');
+      return;
     }
-    return () => {
-      document.body.classList.remove('scroll-lock');
+
+    setIsLoadingFollow(true);
+    setFollowError(null);
+
+    try {
+      const existingFollow = followedPrograms.find(f => f.programID === programId);
+      const token = localStorage.getItem('authToken');
+
+      if (existingFollow) {
+        // Unfollow
+        const response = await apiFetch(`ProgramFollow/${existingFollow.programFollowID}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to unfollow program');
+
+        setFollowedPrograms(prev => prev.filter(f => f.programID !== programId));
+        toast.success('Đã hủy theo dõi chương trình');
+      } else {
+        // Follow
+        const response = await apiFetch('ProgramFollow/follow', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            accountID: accountId,
+            programID: programId
+          })
+        });
+
+        if (!response.ok) throw new Error('Failed to follow program');
+
+        const data = await response.json();
+        setFollowedPrograms(prev => [...prev, data]);
+        toast.success('Đã theo dõi chương trình thành công');
+      }
+    } catch (error) {
+      console.error('Follow/unfollow error:', error);
+      // Only show error if it's not the "no follows" case
+      if (!error.message.includes("No follows found")) {
+        setFollowError(error.message || 'Có lỗi xảy ra khi xử lý theo dõi');
+        toast.error(existingFollow
+          ? 'Đã có lỗi trong khi xử lý yêu cầu hủy theo dõi. Vui lòng thử lại sau.'
+          : 'Không thể theo dõi chương trình'
+        );
+      }
+    } finally {
+      setIsLoadingFollow(false);
+    }
+  };
+
+  const isProgramFollowed = (programId) => {
+    return followedPrograms.some(f => f.programID === programId);
+  };
+
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        const response = await apiFetch('VideoLike/active', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch likes');
+
+        const data = await response.json();
+        if (data?.$values) {
+          setLikes(data.$values);
+        }
+      } catch (error) {
+        console.error('Error fetching likes:', error);
+        setLikeError('Failed to load like information');
+      }
     };
-  }, [isScheduleOpen]);
 
-  const handleScheduleClick = () => {
-    setIsScheduleOpen(!isScheduleOpen);
-    setShowSchedule(!showSchedule);
+    if (videoHistoryId && localStorage.getItem('authToken')) {
+      fetchLikes();
+    }
+  }, [videoHistoryId]);
+
+  // Add this function to handle like/unlike actions
+  const handleLike = async () => {
+    if (!videoHistoryId) return;
+
+    setIsLoadingLike(true);
+    setLikeError(null);
+
+    try {
+      const existingLike = likes.find(like => like.videoHistoryID === videoHistoryId);
+
+      if (existingLike) {
+        // Unlike
+        const response = await apiFetch(`VideoLike/${existingLike.likeID}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to unlike');
+
+        setLikes(prev => prev.filter(like => like.likeID !== existingLike.likeID));
+        toast.success('Đã bỏ thích chương trình');
+      } else {
+        // Like
+        const response = await apiFetch('VideoLike', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            videoHistoryID: videoHistoryId
+          })
+        });
+
+        if (!response.ok) throw new Error('Failed to like');
+
+        const data = await response.json();
+        setLikes(prev => [...prev, data]);
+        toast.success('Đã thích chương trình');
+      }
+    } catch (error) {
+      console.error('Error handling like:', error);
+      setLikeError(error.message || 'Có lỗi xảy ra khi xử lý thích');
+      toast.error('Có lỗi xảy ra khi xử lý thích');
+    } finally {
+      setIsLoadingLike(false);
+    }
   };
 
-  const handleScheduleClose = () => {
-    setIsScheduleOpen(false);
-    setShowSchedule(false);
+  const isLiked = likes.some(like => like.videoHistoryID === videoHistoryId);
+
+  useEffect(() => {
+    const chatContainer = chatMessagesRef.current;
+    if (!chatContainer) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = chatContainer;
+      const isNearBottom = scrollHeight - (scrollTop + clientHeight) < 50; // 50px threshold
+      setIsUserScrolledUp(!isNearBottom);
+    };
+
+    chatContainer.addEventListener('scroll', handleScroll);
+    return () => chatContainer.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!channelId) {
+      toast.error("Không tìm thấy kênh!");
+      navigate('/');
+      return;
+    }
+  }, [channelId]);
+
+  useEffect(() => {
+    // Initial fetch
+    fetchScheduleProgram(logicDate);
+
+    // Set up auto-refresh every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchScheduleProgram(logicDate);
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(refreshInterval);
+  }, [logicDate, channelId]);
+
+  useEffect(() => {
+    // Fetch comments when videoHistoryId changes
+    if (videoHistoryId) {
+      fetchComments();
+      // Set up interval to fetch comments every 5 seconds
+      const commentInterval = setInterval(fetchComments, 5000);
+      return () => clearInterval(commentInterval);
+    }
+  }, [videoHistoryId]);
+
+  const fetchComments = async () => {
+    try {
+      if (isInitialLoad) {
+        setIsLoadingComments(true);
+      }
+
+      setCommentError(null);
+      const response = await apiFetch(`Comment/video/${videoHistoryId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) throw new Error("Không thể tải bình luận!");
+
+      const data = await response.json();
+      if (data?.$values) {
+        const formattedComments = data.$values.map(comment => ({
+          id: comment.commentID,
+          text: comment.content,
+          user: {
+            name: "Người xem",
+            badge: null
+          },
+          // Explicitly parse UTC and convert to GMT+7
+          time: dayjs.utc(comment.createdAt).tz("Asia/Bangkok").format('HH:mm')
+        }));
+
+        setMessages(formattedComments);
+
+        setTimeout(() => {
+          if (!isUserScrolledUp && chatMessagesRef.current) {
+            chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+          }
+        }, 0);
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      setCommentError("Có lỗi đã xảy ra. Vui lòng thử lại sau.");
+    } finally {
+      if (isInitialLoad) {
+        setIsInitialLoad(false);
+        setIsLoadingComments(false);
+      }
+    }
   };
 
-  const mockUsers = [
-    { name: 'Minh Anh', badge: 'Mod' },
-    { name: 'Hoàng Long', badge: 'VIP' },
-    { name: 'Thu Hà', badge: null },
-    { name: 'Đức Nam', badge: 'Admin' }
-  ];
+  useEffect(() => {
+    if (videoHistoryId) {
+      setIsInitialLoad(true); // Reset loading state for new video
+      fetchComments();
+    }
+  }, [videoHistoryId]);
 
-  const emojis = ['😊', '👋', '❤️', '👏', '🎓', '🌟', '💪', '🎉', '🙌', '✨'];
+  const postComment = async (content) => {
+    try {
+      const response = await apiFetch(`Comment`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          content: content,
+          videoHistoryID: videoHistoryId
+        })
+      });
 
-  const initialMessages = [
-    'Chúc mừng các tân cử nhân! 🎓',
-    'Buổi lễ thật trang trọng và ý nghĩa 👏',
-    'Chúc các bạn thành công trên con đường sắp tới 🌟',
-    'Cảm động quá! 😊'
-  ];
+      if (!response.ok) throw new Error("Không thể đăng bình luận!");
+
+      // After posting, fetch latest comments
+      await fetchComments();
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      toast.error("Không thể đăng bình luận. Vui lòng thử lại sau.");
+    }
+  };
 
   useEffect(() => {
     AOS.init({
@@ -106,76 +398,140 @@ const WatchLive = () => {
       once: true
     });
 
-    initialMessages.forEach((text, index) => {
-      setTimeout(() => {
-        const randomUser = mockUsers[Math.floor(Math.random() * mockUsers.length)];
-        addMessage(text, randomUser);
-      }, index * 1000);
-    });
+    handleExistChannel();
   }, []);
 
-  const onPlayerReady = (event) => {
-    playerRef.current = event.target;
-    event.target.playVideo();
-    startProgressBarUpdate();
+  useEffect(() => {
+    const newLogicDate = currentDate.format("YYYY-MM-DD");
+    setLogicDate(newLogicDate);
+    fetchScheduleProgram(newLogicDate);
+  }, [currentDate]);
+
+  const handlePrevDay = () => {
+    setCurrentDate(prev => prev.subtract(1, "day"));
   };
 
-  const startProgressBarUpdate = () => {
-    setInterval(() => {
-      if (playerRef.current) {
-        const currentTime = playerRef.current.getCurrentTime();
-        const duration = playerRef.current.getDuration();
-        setProgress((currentTime / duration) * 100);
-      }
-    }, 1000);
+  const handleNextDay = () => {
+    setCurrentDate(prev => prev.add(1, "day"));
   };
 
-  const togglePlay = () => {
-    if (playerRef.current) {
-      if (isPlaying) {
-        playerRef.current.pauseVideo();
-      } else {
-        playerRef.current.playVideo();
+  const programList = displaySchedule.map((schedule) => ({
+    color: "#FF4757", // Always red since all are live
+    children: (
+      <div
+        className="schedule-item live"
+        onClick={() => {
+          setDisplayIframeUrl(schedule.iframeUrl);
+          setVideoHistoryId(schedule.videoHistoryIdFromSchedule);
+          setCurrentProgram(schedule.program);
+        }}
+      >
+        <div className="schedule-time">
+          <div className="time-indicator live" />
+          {/* Convert startTime to GMT+7 */}
+          {dayjs.utc(schedule.startTime).tz("Asia/Bangkok").format("HH:mm")}
+        </div>
+        <div className="schedule-info">
+          <div className="schedule-name">{schedule.programName}</div>
+          <div className="schedule-description">
+            <span className="live-status">LIVE</span>
+          </div>
+        </div>
+      </div>
+    ),
+  }));
+
+  const fetchScheduleProgram = async (date) => {
+    try {
+      const response = await apiFetch(
+        `Schedule/by-channel-and-date?channelId=${channelId}&date=${encodeURIComponent(date)}`,
+        { method: "GET" }
+      );
+  
+      if (!response.ok) throw new Error("Không thể lấy lịch phát sóng!");
+  
+      const data = await response.json();
+  
+      if (data?.data?.$values) {
+        const schedules = data.data.$values
+          .filter(schedule => schedule.status === "Live")
+          .map((schedule) => ({
+            // Parse as UTC first, then convert to GMT+7 when displaying
+            startTime: dayjs.utc(schedule.startTime),
+            endTime: dayjs.utc(schedule.endTime),
+            programName: schedule.program.programName,
+            title: schedule.program.title,
+            status: true,
+            iframeUrl: schedule.iframeUrl,
+            isReplay: schedule.isReplay,
+            videoHistoryIdFromSchedule: schedule.videoHistoryIdFromSchedule,
+            program: schedule.program
+          }))
+          .sort((a, b) => a.startTime.valueOf() - b.startTime.valueOf());
+  
+        setDisplaySchedule(schedules);
+  
+        if (schedules.length > 0) {
+          setDisplayIframeUrl(schedules[0].iframeUrl);
+          setVideoHistoryId(schedules[0].videoHistoryIdFromSchedule);
+          setCurrentProgram(schedules[0].program);
+        } else {
+          setDisplayIframeUrl("");
+          setVideoHistoryId(null);
+          setCurrentProgram(null);
+        }
       }
-      setIsPlaying(!isPlaying);
+    } catch (error) {
+      console.error("Error fetching schedule program:", error);
+      toast.error("Có lỗi xảy ra khi lấy lịch phát sóng!");
     }
   };
 
-  const handleVolumeChange = (e) => {
-    const newVolume = parseInt(e.target.value);
-    setVolume(newVolume);
-    if (playerRef.current) {
-      if (newVolume === 0) {
-        playerRef.current.mute();
-        setIsMuted(true);
-      } else {
-        playerRef.current.unMute();
-        playerRef.current.setVolume(newVolume);
-        setIsMuted(false);
-      }
-    }
-  };
+  useEffect(() => {
+    console.log('videoHistoryId updated:', videoHistoryId);
+  }, [videoHistoryId]);
 
-  const toggleMute = () => {
-    if (playerRef.current) {
-      if (isMuted) {
-        playerRef.current.unMute();
-        playerRef.current.setVolume(lastVolume);
-        setVolume(lastVolume);
-      } else {
-        setLastVolume(volume);
-        playerRef.current.mute();
-        setVolume(0);
+  const handleExistChannel = async () => {
+    if (!channelId) {
+      toast.error("ID kênh không hợp lệ!");
+      navigate("/channelList");
+      return;
+    }
+
+    try {
+      const response = await apiFetch(`schoolchannels/${channelId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Kênh không tồn tại!");
       }
-      setIsMuted(!isMuted);
+
+      const data = await response.json();
+      if (!data) {
+        throw new Error("Không có dữ liệu kênh!");
+      }
+
+      setChannelInfo(data); // Store channel info
+      fetchScheduleProgram(logicDate);
+    } catch (error) {
+      console.error("Error checking channel:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi kiểm tra kênh!");
+      navigate("/channelList");
     }
   };
 
   const addMessage = (text, user) => {
     const newMessage = {
+      id: Date.now(),
       text,
       user,
-      time: new Date().toLocaleTimeString()
+      // Format current time in GMT+7
+      time: dayjs().tz("Asia/Bangkok").format('HH:mm')
     };
     setMessages(prev => [...prev, newMessage]);
     if (chatMessagesRef.current) {
@@ -185,8 +541,19 @@ const WatchLive = () => {
 
   const sendMessage = () => {
     if (messageInput.trim()) {
-      addMessage(messageInput, { name: 'Bạn', badge: null });
+      if (videoHistoryId) {
+        postComment(messageInput);
+      } else {
+        addMessage(messageInput, { name: 'Bạn', badge: null });
+      }
       setMessageInput('');
+
+      // Force scroll to bottom on send (regardless of user scroll)
+      setTimeout(() => {
+        if (chatMessagesRef.current) {
+          chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+        }
+      }, 0);
     }
   };
 
@@ -195,188 +562,271 @@ const WatchLive = () => {
     setShowEmojiPicker(false);
   };
 
+  const handleShare = async () => {
+    if (!videoHistoryId) {
+      toast.error('Không có chương trình nào để chia sẻ');
+      return;
+    }
+
+    setIsSharing(true);
+    setShareError(null);
+
+    try {
+      // First try to use the Web Share API if available
+      if (navigator.share) {
+        const shareData = {
+          title: currentProgram?.programName || 'Chương trình đang phát sóng',
+          text: currentProgram?.title || 'Đang xem chương trình trực tiếp',
+          url: window.location.href,
+        };
+
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Đã sao chép liên kết vào clipboard');
+      }
+
+      // Call the API to record the share
+      const response = await apiFetch('Share', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          videoHistoryID: videoHistoryId
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to record share');
+
+      const data = await response.json();
+      console.log('Share recorded:', data);
+      toast.success('Chia sẻ thành công!');
+
+    } catch (error) {
+      console.error('Error sharing:', error);
+      setShareError(error.message || 'Có lỗi xảy ra khi chia sẻ');
+
+      if (error.name !== 'AbortError') { // Don't show error if user cancelled share
+        toast.error('Có lỗi xảy ra khi chia sẻ. Vui lòng thử lại.');
+      }
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleReportSubmit = async () => {
+    if (!videoHistoryId) {
+      toast.error('Không có chương trình nào để báo cáo');
+      return;
+    }
+
+    if (!reportReason.trim()) {
+      toast.error('Vui lòng nhập lý do báo cáo');
+      return;
+    }
+
+    setIsReporting(true);
+    setReportError(null);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        toast.error('Vui lòng đăng nhập để báo cáo');
+        setIsReportModalOpen(false);
+        return;
+      }
+
+      const response = await apiFetch('Report', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          videoHistoryID: videoHistoryId,
+          reason: reportReason
+        })
+      });
+
+      if (response.status !== 201) {
+        throw new Error('Không thể gửi báo cáo');
+      }
+
+      const data = await response.json();
+      console.log('Report submitted:', data);
+      toast.success('Báo cáo đã được gửi thành công');
+      setIsReportModalOpen(false);
+      setReportReason('');
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      setReportError(error.message || 'Có lỗi xảy ra khi gửi báo cáo');
+      toast.error('Không thể gửi báo cáo. Vui lòng thử lại sau.');
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
   return (
     <div className="main-container" style={{ background: 'var(--bg-color)' }}>
       <div className="content-section">
         <section className="stream-section">
           <div className="video-container">
-            <YouTube
-              videoId="vHOv3sJWkUs"
-              opts={{
-                playerVars: {
-                  autoplay: 1,
-                  controls: 0,
-                  enablejsapi: 1,
-                }
-              }}
-              onReady={onPlayerReady}
-              className="youtube-player"
-            />
-            <div className="video-controls">
-              <button className="control-button" onClick={togglePlay}>
-                <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`} />
-              </button>
-
-              <div className="progress-bar">
-                <div className="progress" style={{ width: `${progress}%` }} />
-              </div>
-
-              <div className="volume-control">
-                <button className="control-button" onClick={toggleMute}>
-                  <i className={`fas ${isMuted || volume === 0
-                    ? 'fa-volume-mute'
-                    : volume < 50
-                      ? 'fa-volume-down'
-                      : 'fa-volume-up'
-                    }`} />
-                </button>
-                <input
-                  type="range"
-                  className="volume-slider"
-                  min="0"
-                  max="100"
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  style={{
-                    background: `linear-gradient(to right, var(--primary-color) ${volume}%, rgba(255, 255, 255, 0.3) ${volume}%)`
-                  }}
-                />
-              </div>
-
-              <div style={{ position: 'relative' }}>
+            {showSchedule && (
+              <div className="schedule-overlay visible"
+                onClick={() => setShowSchedule(false)}
+              />
+            )}
+            {displayIframeUrl ? (
+              <>
                 <button
-                  className="schedule-button"
-                  onClick={handleScheduleClick}
+                  className={`schedule-button ${showSchedule ? 'active' : ''}`}
+                  onClick={() => setShowSchedule(!showSchedule)}
                 >
                   <i className="fas fa-calendar-alt" /> Lịch chiếu
                 </button>
-
-                {showSchedule && (
-                  <>
-                    <div className="schedule-backdrop" onClick={handleScheduleClose} />
-                    <div className="schedule-popup safe-area-bottom">
-                      <div className="schedule-header">
-                        <h3 className="schedule-title">
-                          <i className="fas fa-calendar-alt" /> Lịch phát sóng
-                        </h3>
-                        <button
-                          className="schedule-close"
-                          onClick={handleScheduleClose}
-                        >
-                          <i className="fas fa-times" />
-                        </button>
-                      </div>
-
-                      <div className="schedule-content">
-                        <div className="schedule-nav">
-                          <div className="schedule-date">
-                            <i className="fas fa-calendar" />
-                            {currentDate.toLocaleDateString('vi-VN', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </div>
-                          <div className="schedule-arrows">
-                            <button
-                              className="schedule-arrow"
-                              onClick={() => {
-                                const newDate = new Date(currentDate);
-                                newDate.setDate(newDate.getDate() - 1);
-                                setCurrentDate(newDate);
-                              }}
-                            >
-                              <i className="fas fa-chevron-left" />
-                            </button>
-                            <button
-                              className="schedule-arrow"
-                              onClick={() => {
-                                const newDate = new Date(currentDate);
-                                newDate.setDate(newDate.getDate() + 1);
-                                setCurrentDate(newDate);
-                              }}
-                            >
-                              <i className="fas fa-chevron-right" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {scheduleData.map((item, index) => (
-                          <div
-                            key={index}
-                            className={`schedule-item ${item.status}`}
-                            style={{ '--item-index': index }}
-                          >
-                            <div className="schedule-time">
-                              <div className={`time-indicator ${item.status}`} />
-                              {item.time}
-                            </div>
-                            <div className="schedule-info">
-                              <div className="schedule-name">{item.name}</div>
-                              <div className="schedule-description">{item.description}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
+                <iframe
+                  src={displayIframeUrl}
+                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  className="youtube-player"
+                />
+              </>
+            ) : (
+              <div className="no-video-placeholder">
+                <i className="fas fa-tv fa-3x" />
+                <p>Không có chương trình nào đang phát sóng</p>
               </div>
+            )}
+            {showSchedule && (
+              <div className="schedule-panel visible">
+                <div className="schedule-header">
+                  <h3 className="schedule-title">
+                    <i className="fas fa-calendar-alt" /> Lịch phát sóng
+                  </h3>
+                  <button
+                    className="schedule-close"
+                    onClick={() => setShowSchedule(false)}
+                  >
+                    <i className="fas fa-times" />
+                  </button>
+                </div>
 
-              <button
-                className="control-button"
-                onClick={() => {
-                  const iframe = document.querySelector('.youtube-player');
-                  if (iframe) {
-                    if (iframe.requestFullscreen) {
-                      iframe.requestFullscreen();
-                    } else if (iframe.webkitRequestFullscreen) {
-                      iframe.webkitRequestFullscreen();
-                    }
-                  }
-                }}
-              >
-                <i className="fas fa-expand" />
-              </button>
-            </div>
+                <div className="schedule-nav">
+                  <div className="schedule-date">
+                    <i className="fas fa-calendar" />
+                    {isToday && "Hôm nay - "}
+                    {dayjs.utc(currentDate).tz("Asia/Bangkok").format("DD/MM/YYYY")}
+                  </div>
+                  <div className="schedule-arrows">
+                    <button
+                      className="schedule-arrow"
+                      onClick={handlePrevDay}
+                    >
+                      <i className="fas fa-chevron-left" />
+                    </button>
+                    <button
+                      className="schedule-arrow"
+                      onClick={handleNextDay}
+                    >
+                      <i className="fas fa-chevron-right" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="schedule-content">
+                  {displaySchedule.length > 0 ? (
+                    <Timeline items={programList} />
+                  ) : (
+                    <div className="no-schedule">Không có lịch phát sóng</div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="stream-info">
             <div className="stream-header">
-              <h1 className="stream-title">
-                Lễ Tốt Nghiệp 2023 - ĐH Bách Khoa Hà Nội
-              </h1>
-              <div className="live-badge">LIVE</div>
+              <div className="stream-title-row">
+                <h1 className="stream-title">
+                  {displaySchedule.find(s => s.iframeUrl === displayIframeUrl)?.programName || "Chương trình đang phát sóng"}
+                </h1>
+                <div className="live-badge">LIVE</div>
+              </div>
+
+              <div className="stream-actions">
+                <button
+                  className="action-button primary-action"
+                  onClick={handleLike}
+                  disabled={isLoadingLike || !videoHistoryId}
+                >
+                  <i className="fas fa-thumbs-up" />
+                  {isLoadingLike ? 'Đang xử lý...' : isLiked ? 'Đã thích' : 'Thích'}
+                </button>
+                <button
+                  className="action-button secondary-action"
+                  onClick={handleShare}
+                  disabled={!videoHistoryId || isSharing}
+                >
+                  <i className="fas fa-share" />
+                  {isSharing ? 'Đang chia sẻ...' : 'Chia sẻ'}
+                </button>
+                {shareError && (
+                  <div className="error-message" style={{ color: 'var(--error-color)', marginTop: '0.5rem' }}>
+                    {shareError}
+                  </div>
+                )}
+                <button
+                  className="action-button secondary-action"
+                  onClick={() => {
+                    if (!localStorage.getItem('authToken')) {
+                      toast.error('Vui lòng đăng nhập để báo cáo');
+                      return;
+                    }
+                    setIsReportModalOpen(true);
+                  }}
+                >
+                  <i className="fas fa-flag" /> Báo cáo
+                </button>
+              </div>
             </div>
 
-            <div className="stream-meta">
-              <span><i className="fas fa-users" /> 1,234 người xem</span>
-              <span><i className="fas fa-clock" /> Bắt đầu 2 giờ trước</span>
-              <span><i className="fas fa-university" /> ĐH Bách Khoa Hà Nội</span>
-              <span><i className="fas fa-heart" /> 2.5K lượt thích</span>
-            </div>
-
-            <div className="stream-actions">
-              <button className="action-button primary-action">
-                <i className="fas fa-heart" /> Thích
-              </button>
-              <button className="action-button secondary-action">
-                <i className="fas fa-share" /> Chia sẻ
-              </button>
-              <button className="action-button secondary-action">
-                <i className="fas fa-bell" /> Theo dõi
+            <div className="watchlive-channel-info">
+              <div className="channel-avatar">
+                <img
+                  src="https://picsum.photos/200/200"
+                  alt={channelInfo?.name || "Channel Avatar"}
+                />
+              </div>
+              <div className="channel-details">
+                <div className="channel-name">{channelInfo?.name || "Đang tải..."}</div>
+              </div>
+              <button
+                className={`subscribe-button ${isProgramFollowed(currentProgram?.programID) ? 'subscribed' : ''}`}
+                onClick={() => handleFollow(currentProgram?.programID)}
+                disabled={isLoadingFollow}
+              >
+                <i className="fas fa-bell" />
+                {isLoadingFollow ? 'Đang xử lý...' :
+                  isProgramFollowed(currentProgram?.programID) ? 'Đang theo dõi' : 'Theo dõi'}
+                {followError && (
+                  <div className="error-message" style={{ color: 'var(--error-color)', marginTop: '0.5rem' }}>
+                    {followError}
+                  </div>
+                )}
               </button>
             </div>
 
             <div className="stream-description">
-              <p>Buổi lễ tốt nghiệp trang trọng dành cho các tân kỹ sư, cử nhân Đại học Bách Khoa Hà Nội. Chương trình bao gồm các phần:</p>
-              <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
-                <li>Phát biểu của Ban Giám hiệu</li>
-                <li>Trao bằng tốt nghiệp</li>
-                <li>Vinh danh sinh viên xuất sắc</li>
-                <li>Các tiết mục văn nghệ đặc sắc</li>
-              </ul>
+              <h3>Giới thiệu chương trình</h3>
+              <p>
+                {displaySchedule.find(s => s.iframeUrl === displayIframeUrl)?.program?.title ||
+                  "Nội dung chương trình sẽ được cập nhật sớm nhất"}
+              </p>
             </div>
           </div>
         </section>
@@ -387,31 +837,39 @@ const WatchLive = () => {
           <h2 className="chat-title">
             <i className="fas fa-comments" /> Trò chuyện trực tiếp
           </h2>
-          <div className="chat-options">
-            <button className="chat-option" title="Cài đặt chat">
-              <i className="fas fa-cog" />
-            </button>
-            <button className="chat-option" title="Mở rộng">
-              <i className="fas fa-expand" />
-            </button>
-          </div>
         </div>
 
         <div className="chat-messages" ref={chatMessagesRef}>
-          {messages.map((message, index) => (
-            <div className="message" key={index}>
-              <div className="message-header">
-                <span className="username">
-                  {message.user.name}
-                  {message.user.badge && (
-                    <span className="user-badge">{message.user.badge}</span>
-                  )}
-                </span>
-                <span className="message-time">{message.time}</span>
-              </div>
-              <div className="message-content">{message.text}</div>
+          {commentError ? (
+            <div className="message">
+              <div className="message-content">{commentError}</div>
             </div>
-          ))}
+          ) : messages.length === 0 ? (
+            isInitialLoad ? (
+              <div className="message">
+                <div className="message-content">Đang tải bình luận...</div>
+              </div>
+            ) : (
+              <div className="message">
+                <div className="message-content">Chưa có bình luận nào.</div>
+              </div>
+            )
+          ) : (
+            messages.map((message) => (
+              <div className="message" key={message.id}>
+                <div className="message-header">
+                  <span className="username">
+                    {message.user.name}
+                    {message.user.badge && (
+                      <span className="user-badge">{message.user.badge}</span>
+                    )}
+                  </span>
+                  <span className="message-time">{message.time}</span>
+                </div>
+                <div className="message-content">{message.text}</div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="chat-input">
@@ -423,39 +881,60 @@ const WatchLive = () => {
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
             />
-            <button
-              className="emoji-trigger chat-option"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            >
-              <i className="far fa-smile" />
-            </button>
-
-            {showEmojiPicker && (
-              <div className="emoji-picker">
-                <div className="emoji-grid">
-                  {emojis.map((emoji, index) => (
-                    <div
-                      key={index}
-                      className="emoji-item"
-                      onClick={() => handleEmojiClick(emoji)}
-                    >
-                      {emoji}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <button
               className="send-button"
               onClick={sendMessage}
+              disabled={!messageInput.trim()}
             >
               <i className="fas fa-paper-plane" /> Gửi
             </button>
           </div>
         </div>
       </aside>
+
+      {isReportModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsReportModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Báo cáo chương trình</h3>
+              <button
+                className="modal-close"
+                onClick={() => setIsReportModalOpen(false)}
+              >
+                <i className="fas fa-times" />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Lý do báo cáo</label>
+                <textarea
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="Nhập lý do báo cáo..."
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              {reportError && (
+                <div className="error-message">{reportError}</div>
+              )}
+              <button
+                className="submit-button"
+                onClick={handleReportSubmit}
+                disabled={isReporting}
+              >
+                {isReporting ? 'Đang gửi...' : 'Gửi báo cáo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+
   );
 };
 

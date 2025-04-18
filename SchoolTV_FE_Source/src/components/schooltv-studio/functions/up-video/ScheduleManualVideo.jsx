@@ -120,7 +120,7 @@ function ScheduleManualVideo(props) {
             rules={[{ required: true, message: "Vui lòng chọn chương trình!" }]}
           >
             <Select
-              defaultValue={{ value: null, label: "Chọn phiên live" }}
+              defaultValue={{ value: null, label: "Chọn chương trình" }}
               options={programList}
               onChange={handleChangeProgram}
             />
@@ -157,6 +157,35 @@ function ScheduleManualVideo(props) {
               disabled={!videoID}
               showTime={{
                 format: "HH:mm:ss",
+              }}
+              disabledDate={(current) => {
+                return current && current < dayjs().add(10, 'minute').startOf('day');
+              }}
+              disabledTime={(date) => {
+                if (date && date.isSame(dayjs(), 'day')) {
+                  return {
+                    disabledHours: () => {
+                      const currentHour = dayjs().hour();
+                      const hours = [];
+                      for (let i = 0; i < currentHour; i++) {
+                        hours.push(i);
+                      }
+                      return hours;
+                    },
+                    disabledMinutes: (selectedHour) => {
+                      if (selectedHour === dayjs().hour()) {
+                        const currentMinute = dayjs().minute();
+                        const minutes = [];
+                        for (let i = 0; i < currentMinute + 10; i++) {
+                          minutes.push(i);
+                        }
+                        return minutes;
+                      }
+                      return [];
+                    }
+                  };
+                }
+                return {};
               }}
             />
           </Form.Item>
