@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import YouTube from 'react-youtube';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -42,6 +42,228 @@ const WatchLive = () => {
   const displayDate = currentDate.format("DD/MM/YYYY");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isUserScrolledUp, setIsUserScrolledUp] = useState(false);
+  const [likes, setLikes] = useState([]);
+  const [isLoadingLike, setIsLoadingLike] = useState(false);
+  const [likeError, setLikeError] = useState(null);
+  const [channelInfo, setChannelInfo] = useState(null);
+  const [followedPrograms, setFollowedPrograms] = useState([]);
+  const [isLoadingFollow, setIsLoadingFollow] = useState(false);
+  const [followError, setFollowError] = useState(null);
+  const [currentProgram, setCurrentProgram] = useState(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareError, setShareError] = useState(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportError, setReportError] = useState(null);
+
+  const getAccountId = () => {
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData).accountID : null;
+  };
+
+  if (!localStorage.getItem('authToken')) {
+    return (
+      <div className="main-container" style={{ background: 'var(--bg-color)' }}>
+        <div className="auth-required">
+          <h3>Bạn cần đăng nhập để xem nội dung này</h3>
+          <p>Vui lòng đăng nhập để tiếp tục xem chương trình trực tiếp và tham gia trò chuyện.</p>
+          <button onClick={() => navigate('/login')}>Đăng nhập ngay</button>
+        </div>
+      </div>
+    );
+  }
+
+  const fetchFollowedPrograms = useCallback(async () => {
+    const accountId = getAccountId();
+    if (!accountId) return;
+
+    try {
+      const response = await apiFetch(`ProgramFollow/account/${accountId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.status === 500) {
+        // This is the "no follows found" case, which is expected
+        setFollowedPrograms([]);
+        return;
+      }
+
+      if (!response.ok) throw new Error('Failed to fetch followed programs');
+
+      const data = await response.json();
+      if (data?.$values) {
+        setFollowedPrograms(data.$values);
+      } else {
+        setFollowedPrograms([]);
+      }
+    } catch (error) {
+      console.error('Error fetching followed programs:', error);
+      // Only show error if it's not the "no follows" case
+      if (!error.message.includes("No follows found")) {
+        setFollowError('Failed to load followed programs');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFollowedPrograms();
+  }, [fetchFollowedPrograms]);
+
+  const handleFollow = async (programId) => {
+    const accountId = getAccountId();
+
+    if (!accountId) {
+      toast.error('Vui lòng đăng nhập để theo dõi chương trình');
+      return;
+    }
+
+    setIsLoadingFollow(true);
+    setFollowError(null);
+
+    try {
+      const existingFollow = followedPrograms.find(f => f.programID === programId);
+      const token = localStorage.getItem('authToken');
+
+      if (existingFollow) {
+        // Unfollow
+        const response = await apiFetch(`ProgramFollow/${existingFollow.programFollowID}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to unfollow program');
+
+        setFollowedPrograms(prev => prev.filter(f => f.programID !== programId));
+        toast.success('Đã hủy theo dõi chương trình');
+      } else {
+        // Follow
+        const response = await apiFetch('ProgramFollow/follow', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            accountID: accountId,
+            programID: programId
+          })
+        });
+
+        if (!response.ok) throw new Error('Failed to follow program');
+
+        const data = await response.json();
+        setFollowedPrograms(prev => [...prev, data]);
+        toast.success('Đã theo dõi chương trình thành công');
+      }
+    } catch (error) {
+      console.error('Follow/unfollow error:', error);
+      // Only show error if it's not the "no follows" case
+      if (!error.message.includes("No follows found")) {
+        setFollowError(error.message || 'Có lỗi xảy ra khi xử lý theo dõi');
+        toast.error(existingFollow
+          ? 'Đã có lỗi trong khi xử lý yêu cầu hủy theo dõi. Vui lòng thử lại sau.'
+          : 'Không thể theo dõi chương trình'
+        );
+      }
+    } finally {
+      setIsLoadingFollow(false);
+    }
+  };
+
+  const isProgramFollowed = (programId) => {
+    return followedPrograms.some(f => f.programID === programId);
+  };
+
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        const response = await apiFetch('VideoLike/active', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch likes');
+
+        const data = await response.json();
+        if (data?.$values) {
+          setLikes(data.$values);
+        }
+      } catch (error) {
+        console.error('Error fetching likes:', error);
+        setLikeError('Failed to load like information');
+      }
+    };
+
+    if (videoHistoryId && localStorage.getItem('authToken')) {
+      fetchLikes();
+    }
+  }, [videoHistoryId]);
+
+  // Add this function to handle like/unlike actions
+  const handleLike = async () => {
+    if (!videoHistoryId) return;
+
+    setIsLoadingLike(true);
+    setLikeError(null);
+
+    try {
+      const existingLike = likes.find(like => like.videoHistoryID === videoHistoryId);
+
+      if (existingLike) {
+        // Unlike
+        const response = await apiFetch(`VideoLike/${existingLike.likeID}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to unlike');
+
+        setLikes(prev => prev.filter(like => like.likeID !== existingLike.likeID));
+        toast.success('Đã bỏ thích chương trình');
+      } else {
+        // Like
+        const response = await apiFetch('VideoLike', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            videoHistoryID: videoHistoryId
+          })
+        });
+
+        if (!response.ok) throw new Error('Failed to like');
+
+        const data = await response.json();
+        setLikes(prev => [...prev, data]);
+        toast.success('Đã thích chương trình');
+      }
+    } catch (error) {
+      console.error('Error handling like:', error);
+      setLikeError(error.message || 'Có lỗi xảy ra khi xử lý thích');
+      toast.error('Có lỗi xảy ra khi xử lý thích');
+    } finally {
+      setIsLoadingLike(false);
+    }
+  };
+
+  const isLiked = likes.some(like => like.videoHistoryID === videoHistoryId);
 
   useEffect(() => {
     const chatContainer = chatMessagesRef.current;
@@ -93,7 +315,7 @@ const WatchLive = () => {
       if (isInitialLoad) {
         setIsLoadingComments(true);
       }
-  
+
       setCommentError(null);
       const response = await apiFetch(`Comment/video/${videoHistoryId}`, {
         method: "GET",
@@ -102,9 +324,9 @@ const WatchLive = () => {
           "Accept": "application/json"
         }
       });
-  
+
       if (!response.ok) throw new Error("Không thể tải bình luận!");
-  
+
       const data = await response.json();
       if (data?.$values) {
         const formattedComments = data.$values.map(comment => ({
@@ -117,9 +339,9 @@ const WatchLive = () => {
           // Explicitly parse UTC and convert to GMT+7
           time: dayjs.utc(comment.createdAt).tz("Asia/Bangkok").format('HH:mm')
         }));
-  
+
         setMessages(formattedComments);
-  
+
         setTimeout(() => {
           if (!isUserScrolledUp && chatMessagesRef.current) {
             chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
@@ -201,16 +423,18 @@ const WatchLive = () => {
         onClick={() => {
           setDisplayIframeUrl(schedule.iframeUrl);
           setVideoHistoryId(schedule.videoHistoryIdFromSchedule);
+          setCurrentProgram(schedule.program);
         }}
       >
         <div className="schedule-time">
           <div className="time-indicator live" />
-          {schedule.startTime.format("HH:mm")}
+          {/* Convert startTime to GMT+7 */}
+          {dayjs.utc(schedule.startTime).tz("Asia/Bangkok").format("HH:mm")}
         </div>
         <div className="schedule-info">
           <div className="schedule-name">{schedule.programName}</div>
           <div className="schedule-description">
-            <span className="live-status">Đang phát sóng</span>
+            <span className="live-status">LIVE</span>
           </div>
         </div>
       </div>
@@ -219,45 +443,42 @@ const WatchLive = () => {
 
   const fetchScheduleProgram = async (date) => {
     try {
-      console.log('Fetching schedule for date:', date); // Debug log
       const response = await apiFetch(
         `Schedule/by-channel-and-date?channelId=${channelId}&date=${encodeURIComponent(date)}`,
         { method: "GET" }
       );
-
-      console.log('API response:', response); // Debug log
-
+  
       if (!response.ok) throw new Error("Không thể lấy lịch phát sóng!");
-
+  
       const data = await response.json();
-      console.log('API data:', data); // Debug log
-
+  
       if (data?.data?.$values) {
-        // Filter and map only live schedules
         const schedules = data.data.$values
           .filter(schedule => schedule.status === "Live")
           .map((schedule) => ({
-            startTime: dayjs(schedule.startTime),
-            endTime: dayjs(schedule.endTime),
+            // Parse as UTC first, then convert to GMT+7 when displaying
+            startTime: dayjs.utc(schedule.startTime),
+            endTime: dayjs.utc(schedule.endTime),
             programName: schedule.program.programName,
+            title: schedule.program.title,
             status: true,
             iframeUrl: schedule.iframeUrl,
             isReplay: schedule.isReplay,
-            videoHistoryIdFromSchedule: schedule.videoHistoryIdFromSchedule
+            videoHistoryIdFromSchedule: schedule.videoHistoryIdFromSchedule,
+            program: schedule.program
           }))
           .sort((a, b) => a.startTime.valueOf() - b.startTime.valueOf());
-
-        console.log('Processed schedules:', schedules); // Debug log
-
+  
         setDisplaySchedule(schedules);
-
+  
         if (schedules.length > 0) {
-          console.log('Setting iframeUrl and videoHistoryId:', schedules[0].iframeUrl, schedules[0].videoHistoryIdFromSchedule); // Debug log
           setDisplayIframeUrl(schedules[0].iframeUrl);
-          setVideoHistoryId(schedules[0].videoHistoryIdFromSchedule); // This should set videoHistoryId to 1025
+          setVideoHistoryId(schedules[0].videoHistoryIdFromSchedule);
+          setCurrentProgram(schedules[0].program);
         } else {
           setDisplayIframeUrl("");
           setVideoHistoryId(null);
+          setCurrentProgram(null);
         }
       }
     } catch (error) {
@@ -295,6 +516,7 @@ const WatchLive = () => {
         throw new Error("Không có dữ liệu kênh!");
       }
 
+      setChannelInfo(data); // Store channel info
       fetchScheduleProgram(logicDate);
     } catch (error) {
       console.error("Error checking channel:", error);
@@ -340,6 +562,115 @@ const WatchLive = () => {
     setShowEmojiPicker(false);
   };
 
+  const handleShare = async () => {
+    if (!videoHistoryId) {
+      toast.error('Không có chương trình nào để chia sẻ');
+      return;
+    }
+
+    setIsSharing(true);
+    setShareError(null);
+
+    try {
+      // First try to use the Web Share API if available
+      if (navigator.share) {
+        const shareData = {
+          title: currentProgram?.programName || 'Chương trình đang phát sóng',
+          text: currentProgram?.title || 'Đang xem chương trình trực tiếp',
+          url: window.location.href,
+        };
+
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Đã sao chép liên kết vào clipboard');
+      }
+
+      // Call the API to record the share
+      const response = await apiFetch('Share', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          videoHistoryID: videoHistoryId
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to record share');
+
+      const data = await response.json();
+      console.log('Share recorded:', data);
+      toast.success('Chia sẻ thành công!');
+
+    } catch (error) {
+      console.error('Error sharing:', error);
+      setShareError(error.message || 'Có lỗi xảy ra khi chia sẻ');
+
+      if (error.name !== 'AbortError') { // Don't show error if user cancelled share
+        toast.error('Có lỗi xảy ra khi chia sẻ. Vui lòng thử lại.');
+      }
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleReportSubmit = async () => {
+    if (!videoHistoryId) {
+      toast.error('Không có chương trình nào để báo cáo');
+      return;
+    }
+
+    if (!reportReason.trim()) {
+      toast.error('Vui lòng nhập lý do báo cáo');
+      return;
+    }
+
+    setIsReporting(true);
+    setReportError(null);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        toast.error('Vui lòng đăng nhập để báo cáo');
+        setIsReportModalOpen(false);
+        return;
+      }
+
+      const response = await apiFetch('Report', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          videoHistoryID: videoHistoryId,
+          reason: reportReason
+        })
+      });
+
+      if (response.status !== 201) {
+        throw new Error('Không thể gửi báo cáo');
+      }
+
+      const data = await response.json();
+      console.log('Report submitted:', data);
+      toast.success('Báo cáo đã được gửi thành công');
+      setIsReportModalOpen(false);
+      setReportReason('');
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      setReportError(error.message || 'Có lỗi xảy ra khi gửi báo cáo');
+      toast.error('Không thể gửi báo cáo. Vui lòng thử lại sau.');
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
   return (
     <div className="main-container" style={{ background: 'var(--bg-color)' }}>
       <div className="content-section">
@@ -353,7 +684,7 @@ const WatchLive = () => {
             {displayIframeUrl ? (
               <>
                 <button
-                  className="schedule-button"
+                  className={`schedule-button ${showSchedule ? 'active' : ''}`}
                   onClick={() => setShowSchedule(!showSchedule)}
                 >
                   <i className="fas fa-calendar-alt" /> Lịch chiếu
@@ -389,7 +720,7 @@ const WatchLive = () => {
                   <div className="schedule-date">
                     <i className="fas fa-calendar" />
                     {isToday && "Hôm nay - "}
-                    {displayDate}
+                    {dayjs.utc(currentDate).tz("Asia/Bangkok").format("DD/MM/YYYY")}
                   </div>
                   <div className="schedule-arrows">
                     <button
@@ -428,40 +759,74 @@ const WatchLive = () => {
               </div>
 
               <div className="stream-actions">
-                <button className="action-button primary-action">
-                  <i className="fas fa-thumbs-up" /> Thích
+                <button
+                  className="action-button primary-action"
+                  onClick={handleLike}
+                  disabled={isLoadingLike || !videoHistoryId}
+                >
+                  <i className="fas fa-thumbs-up" />
+                  {isLoadingLike ? 'Đang xử lý...' : isLiked ? 'Đã thích' : 'Thích'}
                 </button>
-                <button className="action-button secondary-action">
-                  <i className="fas fa-share" /> Chia sẻ
+                <button
+                  className="action-button secondary-action"
+                  onClick={handleShare}
+                  disabled={!videoHistoryId || isSharing}
+                >
+                  <i className="fas fa-share" />
+                  {isSharing ? 'Đang chia sẻ...' : 'Chia sẻ'}
                 </button>
-                <button className="action-button secondary-action">
+                {shareError && (
+                  <div className="error-message" style={{ color: 'var(--error-color)', marginTop: '0.5rem' }}>
+                    {shareError}
+                  </div>
+                )}
+                <button
+                  className="action-button secondary-action"
+                  onClick={() => {
+                    if (!localStorage.getItem('authToken')) {
+                      toast.error('Vui lòng đăng nhập để báo cáo');
+                      return;
+                    }
+                    setIsReportModalOpen(true);
+                  }}
+                >
                   <i className="fas fa-flag" /> Báo cáo
                 </button>
               </div>
             </div>
 
-            <div className="channel-info">
+            <div className="watchlive-channel-info">
               <div className="channel-avatar">
                 <img
                   src="https://picsum.photos/200/200"
-                  alt="ĐH Bách Khoa Hà Nội"
+                  alt={channelInfo?.name || "Channel Avatar"}
                 />
               </div>
               <div className="channel-details">
-                <div className="channel-name">ĐH Bách Khoa Hà Nội</div>
-                <div className="channel-subscribers">
-                  1.2K người đăng ký
-                </div>
+                <div className="channel-name">{channelInfo?.name || "Đang tải..."}</div>
               </div>
-              <button className="subscribe-button">
-                <i className="fas fa-bell" /> Theo dõi
+              <button
+                className={`subscribe-button ${isProgramFollowed(currentProgram?.programID) ? 'subscribed' : ''}`}
+                onClick={() => handleFollow(currentProgram?.programID)}
+                disabled={isLoadingFollow}
+              >
+                <i className="fas fa-bell" />
+                {isLoadingFollow ? 'Đang xử lý...' :
+                  isProgramFollowed(currentProgram?.programID) ? 'Đang theo dõi' : 'Theo dõi'}
+                {followError && (
+                  <div className="error-message" style={{ color: 'var(--error-color)', marginTop: '0.5rem' }}>
+                    {followError}
+                  </div>
+                )}
               </button>
             </div>
 
-            {/* Stream description */}
             <div className="stream-description">
               <h3>Giới thiệu chương trình</h3>
-              <p>Nội dung chương trình sẽ được cập nhật sớm nhất. Đây là buổi lễ tốt nghiệp năm 2023 của trường Đại học Bách Khoa Hà Nội.</p>
+              <p>
+                {displaySchedule.find(s => s.iframeUrl === displayIframeUrl)?.program?.title ||
+                  "Nội dung chương trình sẽ được cập nhật sớm nhất"}
+              </p>
             </div>
           </div>
         </section>
@@ -472,14 +837,6 @@ const WatchLive = () => {
           <h2 className="chat-title">
             <i className="fas fa-comments" /> Trò chuyện trực tiếp
           </h2>
-          <div className="chat-options">
-            <button className="chat-option" title="Cài đặt chat">
-              <i className="fas fa-cog" />
-            </button>
-            <button className="chat-option" title="Mở rộng">
-              <i className="fas fa-expand" />
-            </button>
-          </div>
         </div>
 
         <div className="chat-messages" ref={chatMessagesRef}>
@@ -524,28 +881,6 @@ const WatchLive = () => {
               onChange={(e) => setMessageInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
             />
-            <button
-              className="emoji-trigger chat-option"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            >
-              <i className="far fa-smile" />
-            </button>
-
-            {showEmojiPicker && (
-              <div className="emoji-picker">
-                <div className="emoji-grid">
-                  {emojis.map((emoji, index) => (
-                    <div
-                      key={index}
-                      className="emoji-item"
-                      onClick={() => handleEmojiClick(emoji)}
-                    >
-                      {emoji}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             <button
               className="send-button"
@@ -557,7 +892,49 @@ const WatchLive = () => {
           </div>
         </div>
       </aside>
+
+      {isReportModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsReportModalOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Báo cáo chương trình</h3>
+              <button
+                className="modal-close"
+                onClick={() => setIsReportModalOpen(false)}
+              >
+                <i className="fas fa-times" />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Lý do báo cáo</label>
+                <textarea
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  placeholder="Nhập lý do báo cáo..."
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              {reportError && (
+                <div className="error-message">{reportError}</div>
+              )}
+              <button
+                className="submit-button"
+                onClick={handleReportSubmit}
+                disabled={isReporting}
+              >
+                {isReporting ? 'Đang gửi...' : 'Gửi báo cáo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+
   );
 };
 

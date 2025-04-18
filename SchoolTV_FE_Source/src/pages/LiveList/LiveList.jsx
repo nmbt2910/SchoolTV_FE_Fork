@@ -295,6 +295,13 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
     }
   }, []);
 
+  const handleScheduleClick = useCallback((schedule) => {
+    const status = getStatus(schedule);
+    if (status === 'LIVE' && program.schoolChannel?.schoolChannelID) {
+      navigate(`/watchLive/${program.schoolChannel.schoolChannelID}`);
+    }
+  }, [navigate, program.schoolChannel]);
+
   const getStatusColor = useCallback((status) => {
     switch (status) {
       case 'LIVE': return 'var(--live-color)';
@@ -396,6 +403,7 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
           }}>
             {filteredSchedules.map((schedule, index) => {
               const status = getStatus(schedule);
+              const isLive = status === 'LIVE';
               const statusIcon = {
                 'LIVE': faBroadcastTower,
                 'ĐÃ PHÁT': faPlay,
@@ -411,7 +419,20 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
               });
 
               return (
-                <div key={`${schedule.id}-${index}`} className={styles.streamCard}>
+                <div
+                  key={`${schedule.id}-${index}`}
+                  className={styles.streamCard}
+                  onClick={() => isLive ? handleScheduleClick(schedule) : null}
+                  style={{
+                    cursor: isLive ? 'pointer' : 'default',
+                    position: 'relative'
+                  }}
+                >
+                  {isLive && (
+                    <div className={styles.liveOverlay}>
+                      <span>Bấm để xem trực tiếp</span>
+                    </div>
+                  )}
                   <div className={styles.streamThumbnail}>
                     <img
                       src={memoizedImages.programThumbnail}
@@ -508,6 +529,7 @@ const ProgramModal = ({ program, onClose, followedProgramIds, handleFollow }) =>
 
 const LiveList = () => {
   const { theme } = useContext(ThemeContext);
+  const navigate = useNavigate();
   const [followedPrograms, setFollowedPrograms] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [videos, setVideos] = useState([]);
@@ -537,6 +559,41 @@ const LiveList = () => {
     return userData ? JSON.parse(userData).accountID : null;
   };
 
+   // LOGIN CHECK: ADD THIS BLOCK AT THE VERY TOP OF THE COMPONENT FUNCTION
+   if (!localStorage.getItem('authToken')) {
+    return (
+      <div className={styles.mainContainer} style={{ paddingTop: '150px', marginBottom: '130px', background: 'var(--bg-color)' }}>
+        <div className="auth-required" style={{
+          textAlign: 'center',
+          padding: '2rem',
+          background: 'var(--card-bg)',
+          borderRadius: '12px',
+          margin: '2rem 0'
+        }}>
+          <h3 style={{ color: 'var(--primary-text)', marginBottom: '1rem' }}>
+            Bạn cần đăng nhập để xem nội dung này
+          </h3>
+          <p style={{ color: 'var(--secondary-text)', marginBottom: '1.5rem' }}>
+            Vui lòng đăng nhập để tiếp tục xem các chương trình và tương tác.
+          </p>
+          <button
+            style={{
+              padding: '0.8rem 1.5rem',
+              borderRadius: '8px',
+              background: 'var(--primary-color)',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => navigate('/login')}
+          >
+            Đăng nhập ngay
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const fetchInitialFollows = async () => {

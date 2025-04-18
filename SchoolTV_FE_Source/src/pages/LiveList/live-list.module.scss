@@ -282,6 +282,10 @@ $modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), tr
       box-shadow: 0 8px 25px var(--shadow-hover);
       background: var(--card-hover);
     }
+
+    &[data-live="true"] {
+      box-shadow: 0 0 0 2px var(--live-color);
+    }
   }
   
   .streamThumbnail {
@@ -508,6 +512,27 @@ $modal-header-line: linear-gradient(90deg, var(--user-profile-primary-color), tr
       animation: pulse 1.5s infinite;
     }
   }
+  
+.liveOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  
+  .streamCard:hover & {
+    opacity: 1;
+  }
+}
   
   .recordedBadge {
     z-index: 2;
